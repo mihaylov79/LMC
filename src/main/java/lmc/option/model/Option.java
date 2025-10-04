@@ -14,6 +14,9 @@ public class Option {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(unique = true)
+    private String code;
+
     @Column
     private String name;
 
