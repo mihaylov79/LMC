@@ -1,7 +1,6 @@
 package lmc.configuration.repository;
 
 import lmc.configuration.model.Configuration;
-import org.springframework.data.convert.ReadingConverter;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

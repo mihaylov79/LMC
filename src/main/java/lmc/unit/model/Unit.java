@@ -1,11 +1,18 @@
 package lmc.unit.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
+@Table(name = "units")
 public class Unit {
 
     @Id
