@@ -1,8 +1,7 @@
 package lmc.configuration.model;
 
 import jakarta.persistence.*;
-import lmc.option.model.Option;
-import lmc.unit.model.Unit;
+import lmc.configredUnit.model.ConfiguredUnit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -40,10 +39,6 @@ public class Configuration {
 
     @OneToMany
     @JoinColumn(name = "configuration_id")
-    List<Unit>includedUnits = new ArrayList<>();
-
-    @OneToMany
-    @JoinColumn(name ="option_id")
-    List<Option>includedOptions = new ArrayList<>();
+    private List<ConfiguredUnit>includedUnits = new ArrayList<>();
 
 }
