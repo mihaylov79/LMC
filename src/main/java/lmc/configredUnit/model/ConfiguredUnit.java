@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lmc.option.model.Option;
 import lmc.unit.model.Unit;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "configured_units")
 public class ConfiguredUnit {

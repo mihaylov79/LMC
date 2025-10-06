@@ -3,6 +3,7 @@ import lmc.option.model.Option;
 import lmc.option.repository.OptionRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -13,6 +14,11 @@ public class OptionService {
 
     public OptionService(OptionRepository optionRepository) {
         this.optionRepository = optionRepository;
+    }
+
+    public List<Option> getOptionsByIds(List<UUID>optionIds){
+
+        return optionRepository.findAllById(optionIds);
     }
 
 }

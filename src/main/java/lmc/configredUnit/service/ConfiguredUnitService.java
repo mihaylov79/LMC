@@ -4,27 +4,45 @@ package lmc.configredUnit.service;
 import lmc.configredUnit.model.ConfiguredUnit;
 import lmc.configredUnit.repository.ConfiguredUnitRepository;
 import lmc.option.model.Option;
+import lmc.option.service.OptionService;
+import lmc.unit.model.Unit;
+import lmc.unit.service.UnitService;
+import lmc.web.dto.CreateNewConfiguredUnitRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ConfiguredUnitService {
 
     private final ConfiguredUnitRepository repository;
+    private final OptionService optionService;
+    private final UnitService unitService;
 
     @Autowired
-    public ConfiguredUnitService(ConfiguredUnitRepository repository) {
+    public ConfiguredUnitService(ConfiguredUnitRepository repository, OptionService optionService, UnitService unitService) {
         this.repository = repository;
+        this.optionService = optionService;
+        this.unitService = unitService;
     }
 
-    public ConfiguredUnit createConfiguredUnit(UUID unitId, List<Option> options, int quantity){
+    public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request){
+        Unit unit = unitService.getUnitById(request.getUnitId());
+
+        List<Option>options = optionService.getOptionsByIds(request.getOptionIds());
+
+        ConfiguredUnit newUnit = ConfiguredUnit.builder()
+                .unit(unit)
+                .options(options)
+                .quantity(request.getQuantity())
+                .build();
+
+        //TODO: трябва да се добави цена на ConfiguredUnit или да се изчислява в Configuration
 
 
-        return null;
+        return repository.save(newUnit);
     }
 
 
