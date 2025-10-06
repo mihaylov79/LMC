@@ -38,7 +38,7 @@ public class Unit {
     private BigDecimal price;
 
     @Column
-    private String currency;
+    private CurrencyType currency;
 
 
 }
