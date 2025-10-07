@@ -13,10 +13,10 @@ public class Company {
     @GeneratedValue (strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "company_name")
     private String companyName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "EIK")
     private String companyEIK;
 
     @Column
@@ -30,4 +30,11 @@ public class Company {
 
     @Column
     private String manager;
+
+    @Column(name = "contact_person")
+    private String contactPerson;
+
+    @Column
+    private String phone;
+
 }
