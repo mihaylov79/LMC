@@ -1,5 +1,6 @@
 package lmc.user.service;
 
+import lmc.user.model.RegistrationStatus;
 import lmc.user.model.User;
 import lmc.user.model.UserRole;
 import lmc.user.model.UserStatus;
@@ -49,7 +50,8 @@ public class UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .userRole(UserRole.USER)
-                .status(UserStatus.INACTIVE)
+                .status(UserStatus.ACTIVE)
+                .registrationStatus(RegistrationStatus.PENDING)
                 .build();
 
         return userRepository.save(newUser);
