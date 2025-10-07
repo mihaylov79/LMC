@@ -1,11 +1,9 @@
 package lmc.user.service;
 
-import lmc.user.model.RegistrationStatus;
 import lmc.user.model.User;
-import lmc.user.model.UserRole;
 import lmc.user.model.UserStatus;
 import lmc.user.repository.UserRepository;
-import lmc.web.dto.RegisterRequest;
+import lmc.web.dto.newUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,7 +35,7 @@ public class UserService {
                         .formatted(email)));
     }
 
-    public User registerNewUser(RegisterRequest request){
+    public User addNewUser(newUserRequest request){
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
         if (existingUser.isPresent()){
@@ -49,9 +47,8 @@ public class UserService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .userRole(UserRole.USER)
+                .userRole(request.getRole())
                 .status(UserStatus.ACTIVE)
-                .registrationStatus(RegistrationStatus.PENDING)
                 .build();
 
         return userRepository.save(newUser);

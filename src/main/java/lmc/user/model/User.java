@@ -1,7 +1,6 @@
 package lmc.user.model;
 
 import jakarta.persistence.*;
-import jakarta.servlet.Registration;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,9 +37,6 @@ public class User {
     private UserRole userRole;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "registration_status")
-    private RegistrationStatus registrationStatus;
-
     @Column
     private UserStatus status;
 

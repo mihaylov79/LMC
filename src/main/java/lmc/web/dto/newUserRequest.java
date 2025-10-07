@@ -3,12 +3,14 @@ package lmc.web.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lmc.user.model.UserRole;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 @Data
-public class RegisterRequest {
+public class newUserRequest {
 
     @Length(min = 3, max = 15 , message = "Името трябва да съдържа само букви и да бъде между 3 и 15 символа")
     @Pattern(regexp = "^[a-zA-Zа-яА-Я]+$", message = "Името трябва да съдържа само букви (кирилица и латиница)")
@@ -25,5 +27,10 @@ public class RegisterRequest {
     @NotBlank
     @Length(min = 6, max = 20, message = "Паролата трябва да бъде минимум 6 и максимум 20 символа")
     private String password;
+
+    @NotNull
+    private UserRole role;
+
+
 
 }
