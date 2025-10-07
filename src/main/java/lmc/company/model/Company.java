@@ -37,4 +37,7 @@ public class Company {
     @Column
     private String phone;
 
+    @Column
+    private String email;
+
 }

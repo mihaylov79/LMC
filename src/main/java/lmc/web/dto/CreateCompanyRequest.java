@@ -1,6 +1,7 @@
 package lmc.web.dto;
 
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
@@ -32,4 +33,7 @@ public class CreateCompanyRequest {
 
     @Pattern(regexp = "^(\\+359|0)?[0-9]{9}$", message = "Невалиден телефонен номер")
     private String phone;
+
+    @Email
+    private String email;
 }
