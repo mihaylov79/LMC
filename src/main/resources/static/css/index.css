@@ -1,6 +1,7 @@
 body {
     font-family: 'Raleway', sans-serif;
     background-color: white;
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
@@ -11,9 +12,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 1em; /* или друга стойност, например 30px, 2rem и т.н. */
-    box-sizing: border-box;
-}
+    padding: 1em; /* или друга стойност, например 30px, 2rem и т.н. */
+    }
 
 .front-container img {
     max-width: 100%;
