@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -15,12 +16,14 @@ public class CustomUserDetails implements UserDetails {
     private final String email;
     private final String password;
     private final UserStatus userStatus;
+    private final UUID id;
 
-    public CustomUserDetails(UserRole role, String email, String password, UserStatus userStatus) {
+    public CustomUserDetails(UserRole role, String email, String password, UserStatus userStatus, UUID id) {
         this.role = role;
         this.email = email;
         this.password = password;
         this.userStatus = userStatus;
+        this.id = id;
     }
 
 

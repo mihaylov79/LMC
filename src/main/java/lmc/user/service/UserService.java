@@ -1,10 +1,14 @@
 package lmc.user.service;
 
+import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.model.UserStatus;
 import lmc.user.repository.UserRepository;
 import lmc.web.dto.newUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -54,5 +58,22 @@ public class UserService {
         return userRepository.save(newUser);
 
         //TODO паролата трябва да се криптира и да се добавят още проверки!
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(username).orElseThrow(()->
+                new UsernameNotFoundException("Потребител с мейл: %s не съществува".formatted(username)));
+
+        return new CustomUserDetails (
+                                    user.getUserRole(),
+                                    user.getEmail(),
+                                    user.getPassword(),
+                                    user.getStatus(),
+                                    user.getId()
+        );
+
+
+
     }
 }
