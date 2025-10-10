@@ -34,6 +34,12 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                     .logoutSuccessUrl("/")
             );
 
+//            .logout(logout -> logout
+//            .logoutRequestMatcher(request ->
+//                    request.getMethod().equals("GET") && request.getRequestURI().equals("/logout"))
+//            .logoutSuccessUrl("/")
+//    )  - Логаут с GET заявка !
+
         return http.build();
     }
  @Bean

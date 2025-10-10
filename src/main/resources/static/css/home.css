@@ -1,0 +1,31 @@
+body {
+    font-family: 'Raleway', sans-serif;
+    background-color: white;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/*.front-container {*/
+/*    width: 100%;*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    padding-top: 5rem;*/
+/*}*/
+
+.user-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: left;
+    text-align: left;
+
+}
+
+.user-container p {
+    font-weight: bold;
+    color: #3771c8ff;
+    padding: 0.5em 1em;
+    border-radius: 0.4em;
+    box-shadow: 0 0.2em 0.5em #3771c8ff ;
+}

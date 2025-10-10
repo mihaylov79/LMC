@@ -2,6 +2,7 @@ package lmc.security;
 
 import lmc.user.model.UserRole;
 import lmc.user.model.UserStatus;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+@Data
 public class CustomUserDetails implements UserDetails {
 
     private final UserRole role;

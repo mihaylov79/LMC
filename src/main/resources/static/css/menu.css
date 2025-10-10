@@ -14,17 +14,26 @@
 }
 
 /* Линковете */
-.menu ul li a {
+.menu ul li a,
+.menu ul li button {
     color: #3771c8ff;
+    background: none;
+    border: none;
     text-decoration: none;
     font-weight: 350;
     padding: 0.3em 0.6em;
     border-radius: 4px;
     transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    display: inline-block;
 }
 
 .menu ul li a:hover,
-.menu ul li a:focus {
+.menu ul li a:focus,
+.menu ul li button:hover,
+.menu ul li button:focus{
     /*color: var(--white);*/
     /*background-color: var(--red-light);*/
     font-weight: 700;
@@ -36,4 +45,11 @@
     color: #3771c8ff;
     font-weight: 350;
     border-bottom: 2px solid royalblue;
+}
+
+.menu ul li form {
+    margin: 0;
+    padding: 0;
+    display: inline;
+    vertical-align: middle;
 }
