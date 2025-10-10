@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="bg" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6" >
 <head>
     <meta charset="UTF-8">
     <title>Продуктов конфигуратор</title>
@@ -9,14 +9,9 @@
 <body>
 
 <div class="header-container">
-    <nav class="menu">
-        <ul>
-            <li><a th:href="@{/}"> Начало</a></li>
-            <li><a th:fref="@{/home}">Профил</a></li>
-            <li>Вход</li>
-            <li>Изход</li>
-        </ul>
-    </nav>
+
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
 </div>
 
 <div class="front-container">
