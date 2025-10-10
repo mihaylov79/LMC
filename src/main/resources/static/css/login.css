@@ -1,5 +1,4 @@
 :root {
-    /*--red-main: #ff0000;        !* тъмно червено *!*/
     --red-main: #3771c8ff;        /* тъмно червено */
     --red-light: #f44336;       /* по-светло червено за hover */
     --background: #f4f7fa;
@@ -41,7 +40,6 @@ form {
     border-top-right-radius: 2em;
     border-bottom-left-radius: 2em;
     padding: 2em 2.5em;
-    /*box-shadow: 0 0 0.5em 0 rgb(0,0,0,0.1);*/
     box-shadow: 0.2em 0.2em 0.5em #3771c8ff;
 }
 
@@ -90,7 +88,6 @@ select{
     font-family: 'Raleway', sans-serif;
 
     &:focus {
-        /*border-color: #e18e09;*/
         border-color: var(--red-main);
     }
 }
@@ -116,8 +113,6 @@ input[type="submit"] {
 
 input[type="submit"]:focus,
 input[type="submit"]:hover {
-    /*background: #e18e09;*/
-    /*color: black;*/
     border-radius: 0.5rem;
     border-color: var(--red-main);
     font-weight: 700;
@@ -134,7 +129,6 @@ input[type="submit"]:hover {
 
 .field label {
     display: block;
-    /*font-weight: bold;*/
     position: absolute;
     top: 0;
     left: 0;
@@ -162,7 +156,6 @@ input[type="submit"]:hover {
 .credentials-error {
     margin: 1.5em 0;
     display: block;
-    /*font-style: italic;*/
     text-align: center;
     line-height: 1.2;
     padding: 0.3em;
@@ -195,13 +188,7 @@ input[type="submit"]:hover {
 button{
     display: block;
     width: 100%;
-    /*color: var(--red-main);*/
-    /*background-color: var(--black);*/
-    /*border: none;*/
-    /*padding: 0.2em 0.5em;*/
-    /*outline: none;*/
     font: 1em "Raleway";
-    /*font-weight: 400;*/
     color: var(--red-main);
     font-weight: 400;
     margin: 0.3em;
@@ -214,7 +201,6 @@ button{
 }
 button:hover {
     color: var(--red-main);
-    /*background-color: #e18e09;*/
     font-weight: 600;
 }
 
@@ -233,7 +219,5 @@ button:hover {
 }
 
 .forgot-password a:hover {
-    /*color: white;*/
-    /*text-decoration: underline;*/
     font-weight: 600;
 }
