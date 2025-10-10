@@ -103,20 +103,22 @@ input[type="submit"] {
     color: var(--red-main);
     font-weight: 400;
     padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    border: 2px solid #3771c8ff;
+    border-bottom: 2px solid #cccccc;
     background: transparent;
     cursor: pointer;
     font-size: 1.25em;
     transition: background 0.3s ease;
-    /*box-shadow: 0 0 1em 0.2em rgb(0,0,0,0.2);*/
     margin-top: 2.5em;
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 input[type="submit"]:focus,
 input[type="submit"]:hover {
     /*background: #e18e09;*/
     /*color: black;*/
+    border-radius: 0.5rem;
     border-color: var(--red-main);
     font-weight: 700;
     box-shadow: 0.2em 0.2em 0.5em #3771c8ff;

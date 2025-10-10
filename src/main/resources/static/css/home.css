@@ -29,3 +29,26 @@ body {
     border-radius: 0.4em;
     box-shadow: 0 0.2em 0.5em #3771c8ff ;
 }
+
+.tabs{
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding-top: 3rem;
+    padding-left: 1em;
+    padding-right: 1em;
+    gap: 1.5em;
+    /*box-shadow: 0 0.2em 0.5em #3771c8ff ;*/
+}
+
+.offers, .configurations, .units{
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-right-radius: 0.5em;
+    border-bottom-left-radius: 0.5em;
+    padding: 1em;
+    margin-bottom: 2rem;
+    box-shadow: 0 0.2em 0.5em #3771c8ff ;
+}
