@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Нова конфигурация</title>
+</head>
+<body>
+
+<div class="header-container">
+
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
+</div>
+<div class="form-container"></div>
+<h1>Създаване на нова конфигурация</h1>
+
+<form th:action="@{/configurations/create}" th:object="${configuration}" method="post">
+
+    <div>
+        <label>URL на изображение:</label>
+        <input type="text" th:field="*{imgUrl}" placeholder="URL на изображение"/>
+    </div>
+
+    <div>
+        <label>Код:</label>
+        <input type="text" th:field="*{code}" placeholder="Код" required/>
+    </div>
+
+    <div>
+        <label>Линия:</label>
+        <select th:field="*{line}" required>
+            <option value="">Изберете линия</option>
+            <option th:each="line : ${T(lmc.configuration.model.MachineLine).values()}"
+                    th:value="${line}" th:text="${line}"></option>
+        </select>
+    </div>
+
+    <div>
+        <label>Тип:</label>
+        <select th:field="*{type}" required>
+            <option value="">Изберете тип</option>
+            <option th:each="type : ${T(lmc.configuration.model.MachineType).values()}"
+                    th:value="${type}" th:text="${type}"></option>
+        </select>
+    </div>
+
+    <div>
+        <label>Описание:</label>
+        <input type="text" th:field="*{description}" placeholder="Описание"/>
+    </div>
+
+    <div>
+        <label>Модел:</label>
+        <input type="text" th:field="*{model}" placeholder="Модел"/>
+    </div>
+
+    <h3>Units</h3>
+    <div id="units-container">
+        <div th:each="unit, stat : *{units}" class="unit-row">
+            <select th:field="*{units[__${stat.index}__].unitId}" required>
+                <option value="">Изберете unit</option>
+                <option th:each="u : ${existingUnits}"
+                        th:value="${u.id}" th:text="${u.unit.code}"></option>
+            </select>
+            <input type="number" th:field="*{units[__${stat.index}__].quantity}"
+                   placeholder="Количество" min="1" required/>
+            <input type="text" th:field="*{units[__${stat.index}__].optionIds}"
+                   placeholder="Option IDs (comma separated)"/>
+            <button type="button" onclick="removeUnit(this)">Премахни</button>
+        </div>
+    </div>
+
+    <button type="button" onclick="addUnit()">Добави Unit</button>
+    <button type="submit">Запази</button>
+</form>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const existingUnits = /*[[${existingUnits}]]*/ [];
+
+    function addUnit() {
+        const container = document.getElementById('units-container');
+        const index = container.children.length;
+
+        let optionsHtml = '<option value="">Изберете unit</option>';
+        existingUnits.forEach(u => {
+            optionsHtml += `<option value="${u.id}">${u.unit.code}</option>`;
+        });
+
+        const html = `
+            <div class="unit-row">
+                <select name="units[${index}].unitId" required>${optionsHtml}</select>
+                <input type="number" name="units[${index}].quantity" placeholder="Количество" min="1" required/>
+                <input type="text" name="units[${index}].optionIds" placeholder="Option IDs (comma separated)"/>
+                <button type="button" onclick="removeUnit(this)">Премахни</button>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function removeUnit(button) {
+        button.parentElement.remove();
+    }
+    /*]]>*/
+</script>
+
+</body>
+</html>

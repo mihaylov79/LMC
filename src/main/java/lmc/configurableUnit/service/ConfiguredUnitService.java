@@ -36,6 +36,7 @@ public class ConfiguredUnitService {
         ConfiguredUnit newUnit = ConfiguredUnit.builder()
                 .unit(unit)
                 .quantity(request.getQuantity())
+                .active(true)
                 .options(options)
                 .build();
 

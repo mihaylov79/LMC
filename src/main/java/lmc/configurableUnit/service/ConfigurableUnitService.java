@@ -2,9 +2,12 @@ package lmc.configurableUnit.service;
 
 
 import lmc.configurableUnit.model.ConfigurableUnit;
+import lmc.configurableUnit.repository.ConfigurableUnitRepository;
 import lmc.web.dto.CreateNewConfiguredUnitRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @Service
@@ -12,11 +15,13 @@ public class ConfigurableUnitService {
 
     private final SimpleUnitService simpleUnitService;
     private final ConfiguredUnitService configuredUnitService;
+    private final ConfigurableUnitRepository configurableUnitRepository;
 
     @Autowired
-    public ConfigurableUnitService(SimpleUnitService simpleUnitService, ConfiguredUnitService configuredUnitService) {
+    public ConfigurableUnitService(SimpleUnitService simpleUnitService, ConfiguredUnitService configuredUnitService, ConfigurableUnitRepository configurableUnitRepository) {
         this.simpleUnitService = simpleUnitService;
         this.configuredUnitService = configuredUnitService;
+        this.configurableUnitRepository = configurableUnitRepository;
     }
 
 
@@ -31,4 +36,7 @@ public class ConfigurableUnitService {
     }
 
 
+    public List<ConfigurableUnit> getAllUnits() {
+        return configurableUnitRepository.findAll().stream().toList();
+    }
 }

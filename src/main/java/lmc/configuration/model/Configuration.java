@@ -1,8 +1,9 @@
 package lmc.configuration.model;
 
 import jakarta.persistence.*;
-import lmc.configurableUnit.model.ConfiguredUnit;
+import lmc.configurableUnit.model.ConfigurableUnit;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -19,6 +21,9 @@ public class Configuration {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "img_url")
+    private String imageUrl;
 
     @Column(unique = true)
     private String code;
@@ -37,8 +42,11 @@ public class Configuration {
     @Column
     private String model;
 
+    @Column
+    private boolean actice;
+
     @OneToMany
     @JoinColumn(name = "configuration_id")
-    private List<ConfiguredUnit>includedUnits = new ArrayList<>();
+    private List<ConfigurableUnit>includedUnits = new ArrayList<>();
 
 }

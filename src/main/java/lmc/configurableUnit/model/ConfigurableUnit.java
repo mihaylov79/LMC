@@ -29,5 +29,8 @@ public abstract class ConfigurableUnit {
     @Column(nullable = false)
     private int quantity;
 
+    @Column
+    private boolean active;
+
 
 }

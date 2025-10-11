@@ -30,6 +30,7 @@ public class SimpleUnitService {
         SimpleUnit simpleUnit = SimpleUnit.builder()
                 .unit(unit)
                 .quantity(request.getQuantity())
+                .active(true)
                 .build();
 
         return repository.save(simpleUnit);
