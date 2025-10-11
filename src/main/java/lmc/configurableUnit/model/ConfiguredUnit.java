@@ -1,33 +1,24 @@
-package lmc.configredUnit.model;
+package lmc.configurableUnit.model;
 
 
 import jakarta.persistence.*;
 import lmc.option.model.Option;
-import lmc.unit.model.Unit;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Entity
 @Table(name = "configured_units")
-public class ConfiguredUnit {
+public class ConfiguredUnit extends ConfigurableUnit {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
-
-    @ManyToOne
-    @JoinColumn(name = "unit_id")
-    private Unit unit;
 
     @ManyToMany
     @JoinTable(
@@ -37,8 +28,7 @@ public class ConfiguredUnit {
     )
         private List<Option> options = new ArrayList<>();
 
-    @Column
-    private int quantity;
+
 
 
 }

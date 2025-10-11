@@ -1,8 +1,8 @@
-package lmc.configredUnit.service;
+package lmc.configurableUnit.service;
 
 
-import lmc.configredUnit.model.ConfiguredUnit;
-import lmc.configredUnit.repository.ConfiguredUnitRepository;
+import lmc.configurableUnit.model.ConfiguredUnit;
+import lmc.configurableUnit.repository.ConfiguredUnitRepository;
 import lmc.option.model.Option;
 import lmc.option.service.OptionService;
 import lmc.unit.model.Unit;
@@ -35,8 +35,8 @@ public class ConfiguredUnitService {
 
         ConfiguredUnit newUnit = ConfiguredUnit.builder()
                 .unit(unit)
-                .options(options)
                 .quantity(request.getQuantity())
+                .options(options)
                 .build();
 
         //TODO: трябва да се добави цена на ConfiguredUnit или да се изчислява в Configuration

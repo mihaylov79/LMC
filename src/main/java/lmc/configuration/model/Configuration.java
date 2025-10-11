@@ -1,7 +1,7 @@
 package lmc.configuration.model;
 
 import jakarta.persistence.*;
-import lmc.configredUnit.model.ConfiguredUnit;
+import lmc.configurableUnit.model.ConfiguredUnit;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

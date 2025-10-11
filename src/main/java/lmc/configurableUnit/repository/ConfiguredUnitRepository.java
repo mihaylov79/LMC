@@ -1,6 +1,6 @@
-package lmc.configredUnit.repository;
+package lmc.configurableUnit.repository;
 
-import lmc.configredUnit.model.ConfiguredUnit;
+import lmc.configurableUnit.model.ConfiguredUnit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
