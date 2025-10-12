@@ -45,6 +45,7 @@ public class Configuration {
     @Column
     private boolean actice;
 
+    @Builder.Default
     @OneToMany
     @JoinColumn(name = "configuration_id")
     private List<ConfigurableUnit>includedUnits = new ArrayList<>();
