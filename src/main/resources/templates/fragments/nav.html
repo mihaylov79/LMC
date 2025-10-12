@@ -9,8 +9,8 @@
 
     <nav class="menu">
         <ul>
-            <li><a th:href="@{/}"> Начало</a></li>
-            <li sec:authorize="isAuthenticated()"><a th:fref="@{/home}">Профил</a></li>
+            <li><a th:href="@{/}">Начало</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/home}">Профил</a></li>
             <li sec:authorize="isAnonymous()"><a th:href="@{/login}">Вход</a></li>
             <li sec:authorize="isAuthenticated()">
                 <form th:action="@{/logout}" method="post" style="display: inline;">
