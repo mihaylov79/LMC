@@ -13,68 +13,71 @@
     <th:block th:insert="~{fragments/nav :: nav}"></th:block>
 
 </div>
-<div class="form-container"></div>
-<h1>Създаване на нова конфигурация</h1>
+<div class="form">
 
-<form th:action="@{/configurations/create}" th:object="${configuration}" method="post">
 
-    <div>
-        <label>URL на изображение:</label>
-        <input type="text" th:field="*{imgUrl}" placeholder="URL на изображение"/>
-    </div>
+    <form th:action="@{/configurations/create}" th:object="${configuration}" method="post">
 
-    <div>
-        <label>Код:</label>
-        <input type="text" th:field="*{code}" placeholder="Код" required/>
-    </div>
+        <h2>Създаване на нова конфигурация</h2>
 
-    <div>
-        <label>Линия:</label>
-        <select th:field="*{line}" required>
-            <option value="">Изберете линия</option>
-            <option th:each="line : ${T(lmc.configuration.model.MachineLine).values()}"
-                    th:value="${line}" th:text="${line}"></option>
-        </select>
-    </div>
-
-    <div>
-        <label>Тип:</label>
-        <select th:field="*{type}" required>
-            <option value="">Изберете тип</option>
-            <option th:each="type : ${T(lmc.configuration.model.MachineType).values()}"
-                    th:value="${type}" th:text="${type}"></option>
-        </select>
-    </div>
-
-    <div>
-        <label>Описание:</label>
-        <input type="text" th:field="*{description}" placeholder="Описание"/>
-    </div>
-
-    <div>
-        <label>Модел:</label>
-        <input type="text" th:field="*{model}" placeholder="Модел"/>
-    </div>
-
-    <h3>Units</h3>
-    <div id="units-container">
-        <div th:each="unit, stat : *{units}" class="unit-row">
-            <select th:field="*{units[__${stat.index}__].unitId}" required>
-                <option value="">Изберете unit</option>
-                <option th:each="u : ${existingUnits}"
-                        th:value="${u.id}" th:text="${u.unit.code}"></option>
-            </select>
-            <input type="number" th:field="*{units[__${stat.index}__].quantity}"
-                   placeholder="Количество" min="1" required/>
-            <input type="text" th:field="*{units[__${stat.index}__].optionIds}"
-                   placeholder="Option IDs (comma separated)"/>
-            <button type="button" onclick="removeUnit(this)">Премахни</button>
+        <div>
+            <label for="imgUrl">URL на изображение:</label>
+            <input type="text" id="imgUrl" th:field="*{imgUrl}" placeholder="URL на изображение"/>
         </div>
-    </div>
 
-    <button type="button" onclick="addUnit()">Добави Unit</button>
-    <button type="submit">Запази</button>
-</form>
+        <div>
+            <label for="code">Код:</label>
+            <input type="text" id="code" th:field="*{code}" placeholder="Код" required/>
+        </div>
+
+        <div>
+            <label for="line">Линия:</label>
+            <select id="line" th:field="*{line}" required>
+                <option value="">Изберете линия</option>
+                <option th:each="line : ${T(lmc.configuration.model.MachineLine).values()}"
+                        th:value="${line}" th:text="${line}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label for="type">Тип:</label>
+            <select id="type" th:field="*{type}" required>
+                <option value="">Изберете тип</option>
+                <option th:each="type : ${T(lmc.configuration.model.MachineType).values()}"
+                        th:value="${type}" th:text="${type}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label for="description">Описание:</label>
+            <input type="text" id="description" th:field="*{description}" placeholder="Описание"/>
+        </div>
+
+        <div>
+            <label for="model">Модел:</label>
+            <input type="text" id="model" th:field="*{model}" placeholder="Модел"/>
+        </div>
+
+        <h3>Units</h3>
+        <div id="units-container">
+            <div th:each="unit, stat : *{units}" class="unit-row">
+                <select th:field="*{units[__${stat.index}__].unitId}" required>
+                    <option value="">Изберете unit</option>
+                    <option th:each="u : ${existingUnits}"
+                            th:value="${u.id}" th:text="${u.unit.code}"></option>
+                </select>
+                <input type="number" th:field="*{units[__${stat.index}__].quantity}"
+                       placeholder="Количество" min="1" required/>
+                <input type="text" th:field="*{units[__${stat.index}__].optionIds}"
+                       placeholder="Option IDs (comma separated)"/>
+                <button type="button" onclick="removeUnit(this)">Премахни</button>
+            </div>
+        </div>
+
+        <button type="button" onclick="addUnit()">Добави Unit</button>
+        <button type="submit">Запази</button>
+    </form>
+</div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
