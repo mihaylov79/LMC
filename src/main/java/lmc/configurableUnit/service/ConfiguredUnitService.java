@@ -11,7 +11,6 @@ import lmc.web.dto.CreateNewConfiguredUnitRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -47,15 +46,15 @@ public class ConfiguredUnitService {
     }
 
 
-    public BigDecimal unitTotalPrice(ConfiguredUnit unit){
-        BigDecimal unitPrice = unit.getUnit().getPrice()
-                .multiply(new BigDecimal(unit.getQuantity()));
-
-        BigDecimal optionsPrice = unit.getOptions().stream()
-                .map(Option::getPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .multiply(new BigDecimal(unit.getQuantity()));
-
-        return unitPrice.add(optionsPrice);
-    }
+//    public BigDecimal unitTotalPrice(ConfiguredUnit unit){
+//        BigDecimal unitPrice = unit.getUnit().getPrice()
+//                .multiply(new BigDecimal(unit.getQuantity()));
+//
+//        BigDecimal optionsPrice = unit.getOptions().stream()
+//                .map(Option::getPrice)
+//                .reduce(BigDecimal.ZERO, BigDecimal::add)
+//                .multiply(new BigDecimal(unit.getQuantity()));
+//
+//        return unitPrice.add(optionsPrice);
+//    }
 }
