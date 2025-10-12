@@ -31,7 +31,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
                     .loginPage("/login")
                     .usernameParameter("email")
                     .passwordParameter("password")
-                    .defaultSuccessUrl("/home")
+                    .defaultSuccessUrl("/home", true)
                     .failureUrl("/login?error")
                     .permitAll()
             ).logout(logout -> logout.logoutUrl("/logout")
