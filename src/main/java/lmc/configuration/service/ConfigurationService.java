@@ -1,6 +1,7 @@
 package lmc.configuration.service;
 
 
+import jakarta.transaction.Transactional;
 import lmc.configurableUnit.model.ConfigurableUnit;
 import lmc.configurableUnit.service.ConfigurableUnitService;
 import lmc.configurableUnit.service.PriceCalculationService;
@@ -56,7 +57,7 @@ public class ConfigurationService {
 
         return configurationRepository.save(configurationWithPrice);
     }
-
+    @Transactional
     public Configuration updateConfigurationPrice(UUID configurationId){
         Configuration configuration = findConfigurationById(configurationId);
 
@@ -68,7 +69,7 @@ public class ConfigurationService {
                 .build();
         return configurationRepository.save(updatedConfiguration);
     }
-
+    @Transactional
     public int updateAllConfigurationsPrices(){
         List<Configuration>configurations = getAllConfigurations();
 
