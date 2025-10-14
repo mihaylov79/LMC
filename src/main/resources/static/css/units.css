@@ -1,8 +1,42 @@
 .base-units{
     display: flex;
     flex-direction: column;
+    align-items: flex-end;
 }
 
-.tabs{
-    flex-direction: row;
+.base-units .menu ul {
+    display: flex;
+    justify-content: flex-end;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 0.2em 0.5em #3771c8ff ;
 }
+
+.base-units-table {
+    align-self: center;
+    padding-top: 2em;
+}
+
+.base-units-table caption {
+    font-weight: bold;
+    font-size: large;
+    color: #3771c8ff;
+    border-bottom: 3px solid #3771c8ff;
+    padding-bottom: 0.3em;
+    text-align: right;
+}
+
+
+
+/*.tabs{*/
+/*    flex-direction: row;*/
+/*}*/
+
+/*.menu ul {*/
+/*    display: flex;*/
+/*    justify-content: flex-end;*/
+/*    list-style: none;*/
+/*    padding: 0;*/
+/*    margin: 0;*/
+/*}*/
