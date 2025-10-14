@@ -41,7 +41,7 @@ body {
     /*box-shadow: 0 0.2em 0.5em #3771c8ff ;*/
 }
 
-.offers, .configurations, .units{
+.offers, .configurations, .units, .base-units, .configured-units{
     flex: 1;
     display: flex;
     align-items: center;

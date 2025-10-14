@@ -7,6 +7,7 @@ import lmc.web.dto.CreateNewUnitRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ public class UnitService {
                 .size(request.getSize())
                 .price(request.getPrice())
                 .currency(CurrencyType.EUR)
+                .active(true)
                 .build();
 
         return unitRepository.save(newUnit);
@@ -45,6 +47,14 @@ public class UnitService {
     public Unit getUnitById(UUID unitId){
         return unitRepository.findById(unitId)
                 .orElseThrow(() -> new RuntimeException("Елементът не е открит"));
+    }
+
+    public List<Unit> getAllActiveUnits(){
+        return unitRepository.findAllByActiveIs(true);
+    }
+
+    public List<Unit> getAllUnits(){
+        return unitRepository.findAll();
     }
 
 

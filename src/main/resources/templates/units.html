@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Елементи</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/units.css">
+</head>
+<body>
+<div class="header-container">
+
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
+</div>
+<div class="front-container">
+    <div class="user-container">
+        <p th:text="'Активен потребител: ' + ${user.email}"></p>
+    </div>
+</div>
+
+<div class="tabs">
+    <div class="base-units">
+        <div class="menu">
+            <ul>
+                <li><a th:href="@{/base-products/new}">Добави продукт</a></li>
+            </ul>
+        </div>
+        <div class="base-units-table">
+            <table>
+                <caption>Базови продукти</caption>
+                <thead>
+                <tr>
+                    <th>Код</th>
+                    <th>Наименование</th>
+                    <th>Базова цена</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="unit : ${baseUnits}">
+                    <td th:text="${unit.code}"></td>
+                    <td th:text="${unit.name}"></td>
+                    <td th:text="${unit.price}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="configured-units">
+
+            <p>Configured Elements HERE!</p>
+        </div>
+
+
+</div>
+
+
+</body>
+</html>

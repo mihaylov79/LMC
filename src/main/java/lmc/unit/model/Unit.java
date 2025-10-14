@@ -42,5 +42,8 @@ public class Unit {
     @Column
     private CurrencyType currency;
 
+    @Column
+    private boolean active;
+
 
 }
