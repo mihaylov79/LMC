@@ -37,8 +37,8 @@
         </div>
 
         <div class="field">
-            <label for="description"></label>
-            <input type="text" id="description" th:field="*{description}" placeholder="">
+            <label for="description">Описание</label>
+            <textarea id="description" th:field="*{description}" placeholder=""></textarea>
             <span class="errors" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
         </div>
 
@@ -52,6 +52,8 @@
                    placeholder="0.00">
             <span class="errors" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
         </div>
+
+        <input type="submit" class="button" value="Създай">
 
 
     </form>
