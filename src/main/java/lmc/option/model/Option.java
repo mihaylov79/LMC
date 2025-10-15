@@ -34,5 +34,8 @@ public class Option {
     private SupportedBy compatibleWith;
 
     @Column
+    private boolean active;
+
+    @Column
     private BigDecimal price;
 }

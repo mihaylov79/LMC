@@ -21,4 +21,8 @@ public class OptionService {
         return optionRepository.findAllById(optionIds);
     }
 
+    public List<Option> getAllActiveOptions(){
+        return optionRepository.findAllByActiveIs(true);
+    }
+
 }
