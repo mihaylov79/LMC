@@ -60,9 +60,44 @@
         </div>
     </div>
 
-    <div class="configured-units">
+    <div class="unit-options">
+        <div class="menu">
+            <ul>
+                <li><a th:href="@{/products/unit-options/new}">Добави опция</a></li>
+            </ul>
 
-            <p>Options Here</p>
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchUnitOptions" placeholder="Търси в Опции...">
+        </div>
+        <div class="unit-options-table">
+
+            <table>
+                <caption>Опции</caption>
+                <thead>
+
+                <tr>
+                    <th>Код</th>
+                    <th>Наименование</th>
+                    <th>Базова цена</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="option : ${unitOptions}">
+                    <td th:text="${option.code}"></td>
+                    <td>
+                        <div th:text="${option.name}"></div>
+                        <div class="desc">
+                            <span th:text="${option.description}"></span>
+                            <span>,</span>
+                            <span th:text="${option.compatibleWith}"></span>
+                        </div>
+                    </td>
+                    <td th:text="${option.price} + ' лв.'"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
         </div>
 
 
@@ -88,9 +123,9 @@
     });
 
     // Търсачка за конфигурирани продукти
-    document.getElementById('searchConfiguredUnits').addEventListener('keyup', function() {
+    document.getElementById('searchUnitOptions').addEventListener('keyup', function() {
         const searchValue = this.value.toLowerCase();
-        const rows = document.querySelectorAll('.configured-units-table tbody tr'); // Използвайте правилния клас/селектор
+        const rows = document.querySelectorAll('.unit-options-table tbody tr'); // Използвайте правилния клас/селектор
 
         rows.forEach(row => {
             const code = row.cells[0].textContent.toLowerCase();
