@@ -25,11 +25,17 @@
             <ul>
                 <li><a th:href="@{/products/base-units/new}">Добави продукт</a></li>
             </ul>
+
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchBaseUnits" placeholder="Търси базов продукт...">
         </div>
         <div class="base-units-table">
+
             <table>
                 <caption>Базови продукти</caption>
                 <thead>
+
                 <tr>
                     <th>Код</th>
                     <th>Наименование</th>
@@ -39,8 +45,15 @@
                 <tbody>
                 <tr th:each="unit : ${baseUnits}">
                     <td th:text="${unit.code}"></td>
-                    <td th:text="${unit.name}"></td>
-                    <td th:text="${unit.price}"></td>
+                    <td>
+                        <div th:text="${unit.name}"></div>
+                        <div class="desc">
+                        <span th:text="${unit.description}"></span>
+                            <span>,</span>
+                        <span th:text="'размер: '+ ${unit.size}">размер:</span>
+                        </div>
+                    </td>
+                    <td th:text="${unit.price} + ' лв.'"></td>
                 </tr>
                 </tbody>
             </table>
@@ -55,6 +68,44 @@
 
 </div>
 
+<script>
+    // Търсачка за базови продукти
+    document.getElementById('searchBaseUnits').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.base-units-table tbody tr');
+
+        rows.forEach(row => {
+            const code = row.cells[0].textContent.toLowerCase();
+            const name = row.cells[1].textContent.toLowerCase();
+            const price = row.cells[2].textContent.toLowerCase();
+
+            if (code.includes(searchValue) || name.includes(searchValue) || price.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Търсачка за конфигурирани продукти
+    document.getElementById('searchConfiguredUnits').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.configured-units-table tbody tr'); // Използвайте правилния клас/селектор
+
+        rows.forEach(row => {
+            const code = row.cells[0].textContent.toLowerCase();
+            const name = row.cells[1].textContent.toLowerCase();
+            // Добавете други колони по необходимост
+
+            if (code.includes(searchValue) || name.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+</script>
 
 </body>
 </html>

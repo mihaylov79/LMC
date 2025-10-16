@@ -5,6 +5,7 @@
 }
 .base-units .menu{
     align-self: flex-end;
+    margin-bottom: 2em;
 }
 .base-units .menu ul {
     display: flex;
@@ -21,7 +22,7 @@
 
 .base-units-table {
     width: 100%;
-    padding-top: 2em;
+    padding-top: 1em;
 }
 
 .base-units-table caption {
@@ -40,10 +41,45 @@
 table{
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1em;
+    /*margin-top: 1em;*/
 }
 
 tr{
     border-bottom: 1px solid #3771c8ff;
     padding: 0.5em;
 }
+
+td{
+    padding: 0.25em;
+    text-align: center;
+}
+
+
+.desc {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 0.2em;
+    text-align: center;
+}
+
+.search-box {
+    margin: 0.5em 0;
+}
+
+.search-box input {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    /*font-size: 1em;*/
+}
+
+/*.desc span {*/
+/*    display: block;*/
+/*}*/
+
