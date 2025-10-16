@@ -15,7 +15,7 @@
 </div>
 
 <div class="form">
-    <form th:action="@{/base-products/create}" th:method="POST" th:object="${createNewUnitRequest}">
+    <form th:action="@{/products/base-units/new}" th:method="POST" th:object="${createNewUnitRequest}">
         <h3>Нов базов продукт</h3>
 
         <div class="field">
@@ -41,6 +41,13 @@
             <textarea id="description" th:field="*{description}" placeholder=""></textarea>
             <span class="errors" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
         </div>
+
+        <div class="field">
+            <label for="size">Размер</label>
+            <input type="text" id="size" th:field="*{size}" placeholder="">
+            <span class="errors" th:if="${#fields.hasErrors('size')}" th:errors="*{size}"></span>
+        </div>
+
 
         <div class="field">
             <label for="price">Цена</label>

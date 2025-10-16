@@ -1,5 +1,6 @@
 package lmc.web;
 
+import jakarta.validation.Valid;
 import lmc.option.model.Option;
 import lmc.option.service.OptionService;
 import lmc.security.CustomUserDetails;
@@ -10,7 +11,9 @@ import lmc.user.service.UserService;
 import lmc.web.dto.CreateNewUnitRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -43,11 +46,26 @@ public class UnitController {
         return modelAndView;
     }
 
-    @GetMapping("/base-unit/new")
+    @GetMapping("/base-units/new")
     public ModelAndView showCreateUnitForm(){
         ModelAndView modelAndView = new ModelAndView("new-base-unit");
         modelAndView.addObject("createNewUnitRequest", new CreateNewUnitRequest());
 
         return modelAndView;
+    }
+
+    @PostMapping("/base-units/new")
+    public ModelAndView createNewBaseUnit(@Valid CreateNewUnitRequest request, BindingResult result) {
+
+        if (result.hasErrors()){
+            ModelAndView modelAndView = new ModelAndView("new-base-unit");
+            return modelAndView;
+        }
+
+        unitService.createNewUnit(request);
+        ModelAndView modelAndView = new ModelAndView("redirect:/products");
+        return modelAndView;
+
+
     }
 }
