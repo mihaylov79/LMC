@@ -58,13 +58,11 @@ public class UnitController {
     public ModelAndView createNewBaseUnit(@Valid CreateNewUnitRequest request, BindingResult result) {
 
         if (result.hasErrors()){
-            ModelAndView modelAndView = new ModelAndView("new-base-unit");
-            return modelAndView;
+            return new ModelAndView("new-base-unit");
         }
 
         unitService.createNewUnit(request);
-        ModelAndView modelAndView = new ModelAndView("redirect:/products");
-        return modelAndView;
+        return new ModelAndView("redirect:/products");
 
 
     }
