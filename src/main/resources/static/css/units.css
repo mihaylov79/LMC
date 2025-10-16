@@ -1,59 +1,75 @@
-.base-units{
+/* Общи стилове за двата таба */
+.base-units,
+.unit-options {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start; /* Подравнява съдържанието отгоре */
+    justify-content: flex-start; /* Допълнително подравнява отгоре */
+    border-top-right-radius: 0.5em;
+    border-bottom-left-radius: 0.5em;
+    padding: 1em;
+    margin-bottom: 2rem;
+    box-shadow: 0 0.2em 0.5em #3771c8ff;
 }
-.base-units .menu{
+
+/* Меню стилове за двата таба */
+.base-units .menu,
+.unit-options .menu {
     align-self: flex-end;
     margin-bottom: 2em;
 }
-.base-units .menu ul {
+
+.base-units .menu ul,
+.unit-options .menu ul {
     display: flex;
     justify-content: flex-end;
     list-style: none;
     padding: 0;
     margin: 0;
-    box-shadow: 0 0.2em 0.5em #3771c8ff ;
+    box-shadow: 0 0.2em 0.5em #3771c8ff;
 }
 
-.base-units .menu ul li {
+.base-units .menu ul li,
+.unit-options .menu ul li {
     flex: 0 0 auto;
 }
 
-.base-units-table {
+/* Таблица стилове */
+.base-units-table,
+.unit-options-table {
     width: 100%;
     padding-top: 1em;
 }
 
-.base-units-table caption {
+.base-units-table caption,
+.unit-options-table caption {
     font-weight: lighter;
     font-style: italic;
     font-family: Impact, sans-serif;
     text-decoration: underline;
     font-size: x-large;
     color: #3771c8ff;
-    /*border-bottom: 2px solid #3771c8ff;*/
     padding-bottom: 0.3em;
     margin-bottom: 1.5em;
     text-align: right;
 }
 
-table{
+/* Останалите общи стилове */
+table {
     width: 100%;
     border-collapse: collapse;
-    /*margin-top: 1em;*/
 }
 
-tr{
+tr {
     border-bottom: 1px solid #3771c8ff;
     padding: 0.5em;
 }
 
-td{
+td {
     padding: 0.25em;
     text-align: center;
 }
-
 
 .desc {
     display: flex;
@@ -76,10 +92,4 @@ td{
     padding: 0.5em;
     border: 1px solid #ccc;
     border-radius: 4px;
-    /*font-size: 1em;*/
 }
-
-/*.desc span {*/
-/*    display: block;*/
-/*}*/
-
