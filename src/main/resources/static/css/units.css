@@ -25,12 +25,15 @@
 }
 
 .base-units-table caption {
-    font-weight: bold;
-    font-size: large;
+    font-weight: lighter;
+    font-style: italic;
+    font-family: Impact, sans-serif;
+    text-decoration: underline;
+    font-size: x-large;
     color: #3771c8ff;
-    border-bottom: 2px solid #3771c8ff;
+    /*border-bottom: 2px solid #3771c8ff;*/
     padding-bottom: 0.3em;
-    margin-bottom: 0.3em;
+    margin-bottom: 1.5em;
     text-align: right;
 }
 
