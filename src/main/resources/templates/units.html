@@ -98,7 +98,7 @@
                             <span th:text="${option.compatibleWith}"></span>
                         </div>
                     </td>
-                    <td th:text="${option.price} + ' лв.'"></td>
+                    <td th:text="${option.price} + ' ' + ${option.currency}"></td>
                 </tr>
                 </tbody>
             </table>

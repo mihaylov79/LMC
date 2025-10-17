@@ -15,14 +15,8 @@
 </div>
 
 <div class="form">
-    <form th:action="@{/products/base-units/new}" th:method="POST" th:object="${createNewUnitRequest}">
-        <h3>Нов базов продукт</h3>
-
-        <div class="field">
-            <label for="imageUrl">Снимка</label>
-            <input type="text" id="imageUrl" th:field="*{imageUrl}" placeholder="">
-            <span class="errors" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}"></span>
-        </div>
+    <form th:action="@{/products/unit-options/new}" th:method="POST" th:object="${createNewOptionRequest}">
+        <h3>Нова продуктова опция</h3>
 
         <div class="field">
             <label for="code">Код</label>
@@ -43,11 +37,15 @@
         </div>
 
         <div class="field">
-            <label for="size">Размер</label>
-            <input type="text" id="size" th:field="*{size}" placeholder="">
-            <span class="errors" th:if="${#fields.hasErrors('size')}" th:errors="*{size}"></span>
+            <label for="compatibleWith">Съвместимост:</label>
+            <select id="compatibleWith" name="compatibleWith" required>
+                <option value="">-- Изберете --</option>
+                <option th:each="option : ${T(lmc.option.model.SupportedBy).values()}"
+                        th:value="${option}"
+                        th:text="${option}">
+                </option>
+            </select>
         </div>
-
 
         <div class="field">
             <label for="price">Цена(EUR)</label>
