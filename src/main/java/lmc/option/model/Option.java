@@ -2,6 +2,7 @@ package lmc.option.model;
 
 
 import jakarta.persistence.*;
+import lmc.unit.model.CurrencyType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,4 +39,8 @@ public class Option {
 
     @Column
     private BigDecimal price;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private CurrencyType currency;
 }
