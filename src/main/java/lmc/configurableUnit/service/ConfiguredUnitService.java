@@ -28,9 +28,9 @@ public class ConfiguredUnitService {
     }
 
     public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request){
-        Unit unit = unitService.getUnitById(request.getUnitId());
+        Unit unit = unitService.getUnitByCode(request.getCode());
 
-        List<Option>options = optionService.getOptionsByIds(request.getOptionIds());
+        List<Option>options = optionService.getOptionsByCode(request.getOptionCodes());
 
         ConfiguredUnit newUnit = ConfiguredUnit.builder()
                 .unit(unit)

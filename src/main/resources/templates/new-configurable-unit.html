@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Създай Конфигурируема Единица</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            box-shadow: 0 0.2em 0.5em #3771c8ff;
+            border-top-right-radius: 0.5em;
+            border-bottom-left-radius: 0.5em;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #3771c8ff;
+        }
+
+        .form-group select,
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 0.5em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #3771c8ff;
+            box-shadow: 0 0 0.3em #3771c8ff;
+        }
+
+        .options-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .option-item input[type="checkbox"] {
+            margin-top: 0.3rem;
+        }
+
+        .option-label {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .option-label .option-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .option-label .option-details {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 0.2em;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75em 1.5em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #3771c8ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0.2em 0.5em #3771c8ff;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .form-title {
+            color: #3771c8ff;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-container">
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+</div>
+
+<div class="form-container">
+    <h2 class="form-title">Създай Конфигурируема Единица</h2>
+
+    <form th:action="@{/products/configurable-units/create}"
+          th:object="${request}"
+          th:method="POST">
+
+        <!-- Избор на базов продукт -->
+        <div class="form-group">
+            <label for="code">Изберете базов продукт: *</label>
+            <select id="code" th:field="*{code}" required>
+                <option value="">-- Изберете продукт --</option>
+                <option th:each="unit : ${allUnits}"
+                        th:value="${unit.code}"
+                        th:text="${unit.code + ' - ' + unit.name + ' (' + unit.price + ' ' + unit.currency + ')'}">
+                </option>
+            </select>
+            <span class="error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></span>
+        </div>
+
+        <!-- Избор на опции (множествен) -->
+        <div class="form-group">
+            <label>Опции (незадължително):</label>
+            <div class="options-group">
+                <div class="option-item" th:each="option : ${allOptions}">
+                    <input type="checkbox"
+                           th:id="${'opt_' + option.code}"
+                           name="optionCodes"
+                           th:value="${option.code}">
+                    <label class="option-label" th:for="${'opt_' + option.code}">
+                        <div class="option-name" th:text="${option.code + ' - ' + option.name}"></div>
+                        <div class="option-details">
+                            <span th:text="${option.price + ' ' + option.currency}"></span>
+                            <span> | </span>
+                            <span th:text="${option.compatibleWith}"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Количество -->
+        <div class="form-group">
+            <label for="quantity">Количество: *</label>
+            <input type="number"
+                   id="quantity"
+                   th:field="*{quantity}"
+                   min="1"
+                   value="1"
+                   required>
+            <span class="error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></span>
+        </div>
+
+        <!-- Бутони -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Създай</button>
+            <a th:href="@{/home}" class="btn btn-secondary">Откажи</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

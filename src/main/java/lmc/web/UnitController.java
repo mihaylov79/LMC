@@ -1,6 +1,7 @@
 package lmc.web;
 
 import jakarta.validation.Valid;
+import lmc.configurableUnit.service.ConfigurableUnitService;
 import lmc.option.model.Option;
 import lmc.option.service.OptionService;
 import lmc.security.CustomUserDetails;
@@ -8,6 +9,7 @@ import lmc.unit.model.Unit;
 import lmc.unit.service.UnitService;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
+import lmc.web.dto.CreateNewConfiguredUnitRequest;
 import lmc.web.dto.CreateNewOptionRequest;
 import lmc.web.dto.CreateNewUnitRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,11 +29,13 @@ public class UnitController {
     private final UserService userService;
     private final UnitService unitService;
     private final OptionService optionService;
+    private final ConfigurableUnitService configurableUnitService;
 
-    public UnitController(UserService userService, UnitService unitService, OptionService optionService) {
+    public UnitController(UserService userService, UnitService unitService, OptionService optionService, ConfigurableUnitService configurableUnitService) {
         this.userService = userService;
         this.unitService = unitService;
         this.optionService = optionService;
+        this.configurableUnitService = configurableUnitService;
     }
 
     @GetMapping
@@ -81,5 +85,30 @@ public class UnitController {
         optionService.createNewOption(request);
         return new ModelAndView("redirect:/products");
     }
+
+    @GetMapping("/configurable-units/create")
+    public ModelAndView showConfigurableUnitCreateForm() {
+        ModelAndView modelAndView = new ModelAndView("new-configurable-unit");
+        modelAndView.addObject("request", new CreateNewConfiguredUnitRequest());
+        modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
+        modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
+        return modelAndView;
+    }
+
+    @PostMapping("/configurable-units/create")
+    public ModelAndView createConfigurableUnit(@Valid CreateNewConfiguredUnitRequest request,
+                                               BindingResult result
+                                               ) {
+        if (result.hasErrors()) {
+            ModelAndView modelAndView = new ModelAndView("new-configurable-unit");
+            modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
+            modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
+            return modelAndView;
+        }
+
+        configurableUnitService.createUnit(request);
+        return new ModelAndView("redirect:/home");
+    }
+
 
 }

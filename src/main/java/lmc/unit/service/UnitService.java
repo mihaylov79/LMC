@@ -49,6 +49,12 @@ public class UnitService {
                 .orElseThrow(() -> new RuntimeException("Елементът не е открит"));
     }
 
+    public Unit getUnitByCode(String code){
+        return unitRepository.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Продукт с код: %s не е намерен!"
+                        .formatted(code)));
+    }
+
     public List<Unit> getAllActiveUnits(){
         return unitRepository.findAllByActiveIs(true);
     }

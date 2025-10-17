@@ -24,6 +24,10 @@ public class OptionService {
         return optionRepository.findAllById(optionIds);
     }
 
+    public List<Option> getOptionsByCode(List<String>optionCodes){
+        return optionRepository.findAllByCodeIn(optionCodes);
+    }
+
     public List<Option> getAllActiveOptions(){
         return optionRepository.findAllByActiveIs(true);
     }
