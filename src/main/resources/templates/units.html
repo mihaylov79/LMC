@@ -27,13 +27,15 @@
             </ul>
 
         </div>
-        <div class="search-box">
-            <input type="text" id="searchBaseUnits" placeholder="Търси базов продукт...">
-        </div>
-        <div class="base-units-table">
 
+        <div class="base-units-table">
+            <div class="table-header">
+                <div class="search-box">
+                    <input type="text" id="searchBaseUnits" placeholder="Търси базов продукт...">
+                </div>
+                <h3 class="table-title">Базови продукти</h3>
+            </div>
             <table>
-                <caption>Базови продукти</caption>
                 <thead>
 
                 <tr>
@@ -53,7 +55,7 @@
                         <span th:text="'размер: '+ ${unit.size}">размер:</span>
                         </div>
                     </td>
-                    <td th:text="${unit.price} + ' лв.'"></td>
+                    <td th:text="${unit.price} + ' ' + ${unit.currency}"></td>
                 </tr>
                 </tbody>
             </table>
@@ -67,13 +69,16 @@
             </ul>
 
         </div>
-        <div class="search-box">
-            <input type="text" id="searchUnitOptions" placeholder="Търси в Опции...">
-        </div>
+
         <div class="unit-options-table">
+            <div class="table-header">
+                <div class="search-box">
+                    <input type="text" id="searchUnitOptions" placeholder="Търси в Опции...">
+                </div>
+                <h3 class="table-title">Опции</h3>
+            </div>
 
             <table>
-                <caption>Опции</caption>
                 <thead>
 
                 <tr>

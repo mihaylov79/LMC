@@ -42,18 +42,18 @@
     padding-top: 1em;
 }
 
-.base-units-table caption,
-.unit-options-table caption {
-    font-weight: lighter;
-    font-style: italic;
-    font-family: Impact, sans-serif;
-    text-decoration: underline;
-    font-size: x-large;
-    color: #3771c8ff;
-    padding-bottom: 0.3em;
-    margin-bottom: 1.5em;
-    text-align: right;
-}
+/*.base-units-table caption,*/
+/*.unit-options-table caption {*/
+/*    font-weight: lighter;*/
+/*    font-style: italic;*/
+/*    font-family: Impact, sans-serif;*/
+/*    text-decoration: underline;*/
+/*    font-size: x-large;*/
+/*    color: #3771c8ff;*/
+/*    padding-bottom: 0.3em;*/
+/*    margin-bottom: 1.5em;*/
+/*    text-align: right;*/
+/*}*/
 
 /* Останалите общи стилове */
 table {
@@ -87,6 +87,37 @@ td {
 }
 
 .search-box input {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+.table-header .table-title {
+    font-weight: lighter;
+    font-style: italic;
+    font-family: Impact, sans-serif;
+    text-decoration: underline;
+    font-size: x-large;
+    color: #3771c8ff;
+    display: block;
+    text-align: right;
+}
+
+/* Search box вляво */
+.table-header .search-box {
+    margin: 0;
+}
+
+.table-header .search-box input {
     width: 100%;
     max-width: 300px;
     padding: 0.5em;
