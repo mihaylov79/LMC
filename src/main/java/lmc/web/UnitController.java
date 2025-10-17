@@ -8,6 +8,7 @@ import lmc.unit.model.Unit;
 import lmc.unit.service.UnitService;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
+import lmc.web.dto.CreateNewOptionRequest;
 import lmc.web.dto.CreateNewUnitRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -63,7 +64,22 @@ public class UnitController {
 
         unitService.createNewUnit(request);
         return new ModelAndView("redirect:/products");
-
-
     }
+
+    @GetMapping("/options/new")
+    public ModelAndView showCreateOptionForm(){
+        ModelAndView modelAndView = new ModelAndView("new-option");
+        modelAndView.addObject("createNewOptionRequest", new CreateNewOptionRequest());
+        return modelAndView;
+    }
+
+    @PostMapping("/options/new")
+    public ModelAndView createNewOption(@Valid CreateNewOptionRequest request, BindingResult result) {
+        if (result.hasErrors()){
+            return new ModelAndView("new-option");
+        }
+        optionService.createNewOption(request);
+        return new ModelAndView("redirect:/products");
+    }
+
 }
