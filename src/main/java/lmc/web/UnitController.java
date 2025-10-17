@@ -66,14 +66,14 @@ public class UnitController {
         return new ModelAndView("redirect:/products");
     }
 
-    @GetMapping("/options/new")
+    @GetMapping("/unit-options/new")
     public ModelAndView showCreateOptionForm(){
         ModelAndView modelAndView = new ModelAndView("new-option");
         modelAndView.addObject("createNewOptionRequest", new CreateNewOptionRequest());
         return modelAndView;
     }
 
-    @PostMapping("/options/new")
+    @PostMapping("/unit-options/new")
     public ModelAndView createNewOption(@Valid CreateNewOptionRequest request, BindingResult result) {
         if (result.hasErrors()){
             return new ModelAndView("new-option");
