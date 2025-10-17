@@ -1,10 +1,10 @@
 package lmc.web.dto;
 
 
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
-import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
@@ -31,7 +31,8 @@ public class CreateNewUnitRequest {
     @Pattern(regexp = "^[0-9x×X\\s.-]+$", message = "Невалиден формат на размер")
     private String size;
 
-    @Positive
+    @Positive(message = "Въведената цена трябва да бъде положително число")
+    @Digits(integer = 6, fraction = 2, message = "Цената не може да надвишава 6 цифрена стойност")
     private BigDecimal price;
 
 

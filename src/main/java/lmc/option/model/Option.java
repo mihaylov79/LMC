@@ -4,6 +4,7 @@ package lmc.option.model;
 import jakarta.persistence.*;
 import lmc.unit.model.CurrencyType;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "options")
 public class Option {
