@@ -32,15 +32,31 @@ public class ConfiguredUnitService {
 
         List<Option> options = optionService.getOptionsByIds(request.getOptionIds());
 
-        ConfiguredUnit newUnit = ConfiguredUnit.builder()
-                .unit(unit)
-                .quantity(request.getQuantity())
-                .active(true)
-                .options(options)
-                .build();
+        String code = unit.getCode();
 
-        return repository.save(newUnit);
+        return repository.findByCodeAndActiveIsTrue(code).orElseGet(()-> {
+            ConfiguredUnit newUnit = ConfiguredUnit.builder()
+                    .code(code)
+                    .unit(unit)
+                    .active(true)
+                    .options(options)
+                    .build();
+
+            return repository.save(newUnit);
+        });
+
     }
+
+    private String generateCode(Unit unit, List<Option>options ){
+        String optionCodes = options.stream()
+                .map(Option::getCode)
+                .reduce("", (acc, optionCode) -> acc + "_" + optionCode);
+
+        return unit.getCode() + (optionCodes.isEmpty() ? "" : "_" + optionCodes);
+
+    }
+
+
 
 
 

@@ -2,6 +2,8 @@
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Нова конфигурация</title>
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/login.css">
@@ -11,12 +13,21 @@
             padding: 1rem;
             border: 1px solid #ddd;
             border-radius: 4px;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
         }
 
-        .unit-row select,
-        .unit-row input {
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
+        .unit-row select {
+            flex: 2;
+        }
+
+        .unit-row input[type="number"] {
+            width: 80px;
+        }
+
+        .unit-row button {
+            white-space: nowrap;
         }
 
         #createUnitModal {
@@ -97,6 +108,8 @@
             background-color: #6c757d;
             color: white;
         }
+
+
     </style>
 </head>
 <body>
@@ -155,24 +168,26 @@
             <option value="">Изберете unit</option>
             <option th:each="u : ${existingUnits}"
                     th:value="${u.id}"
-                    th:text="${u.unit.code + ' - ' + u.unit.name + ' (qty: ' + u.quantity + ')'}">
+                    th:text="${u.unit.code + ' - ' + u.unit.name }">
             </option>
         </select>
 
         <!-- Контейнер за units -->
         <div id="units-container">
             <div th:each="unit, stat : *{units}" class="unit-row">
-                <select th:field="*{units[__${stat.index}__].unitId}" required>
+                <select th:field="*{units[__${stat.index}__].configurableUnitId}" required>
                     <option value="">Изберете unit</option>
                     <option th:each="u : ${existingUnits}"
                             th:value="${u.id}"
-                            th:text="${u.unit.code + ' - ' + u.unit.name + ' (qty: ' + u.quantity + ')'}">
+                            th:text="${u.unit.code + ' - ' + u.unit.name}">
                     </option>
                 </select>
-                <input type="number" th:field="*{units[__${stat.index}__].quantity}"
-                       placeholder="Количество" min="1" required/>
-                <input type="text" th:field="*{units[__${stat.index}__].optionIds}"
-                       placeholder="Option IDs (comma separated)"/>
+                <input type="number"
+                       th:field="*{units[__${stat.index}__].quantity}"
+                       min="1"
+                       value="1"
+                       required
+                       placeholder="Бр."/>
                 <button type="button" onclick="removeUnit(this)">Премахни</button>
             </div>
         </div>
@@ -199,10 +214,6 @@
                 </select>
             </div>
             <div>
-                <label>Количество:</label>
-                <input type="number" id="newUnitQty" min="1" value="1" required/>
-            </div>
-            <div>
                 <label>Опции (незадължително):</label>
                 <div id="newUnitOptions">
                     <div th:each="option : ${allOptions}">
@@ -223,30 +234,97 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
+
     function addUnit() {
         const container = document.getElementById('units-container');
+        const templateSelect = document.getElementById('unitOptionsTemplate');
 
-        const optionsHtml = document.getElementById('unitOptionsTemplate').innerHTML;
+        if (!container) {
+            console.error('units-container not found');
+            return;
+        }
+
+        if (!templateSelect) {
+            console.error('unitOptionsTemplate not found');
+        } else {
+            console.log('template options count:', templateSelect.options.length);
+        }
+
         const div = document.createElement('div');
         div.className = 'unit-row';
 
-        div.innerHTML = `
-            <select required></select>
-            <input type="number" placeholder="Количество" min="1" required/>
-            <input type="text" placeholder="Option IDs (comma separated)"/>
-            <button type="button" class="remove-btn">Премахни</button>
-        `;
+        // Create select and copy options
+        const select = document.createElement('select');
+        select.required = true;
+        select.style.minWidth = '200px'; // ensure visible
 
-        div.querySelector('select').innerHTML = optionsHtml;
+        // If template exists and has options, clone them, otherwise add fallback option
+        if (templateSelect && templateSelect.options && templateSelect.options.length > 0) {
+            Array.from(templateSelect.options).forEach(opt => {
+                select.appendChild(opt.cloneNode(true));
+            });
+        } else {
+            const fallback = document.createElement('option');
+            fallback.value = '';
+            fallback.textContent = 'Изберете unit';
+            select.appendChild(fallback);
+        }
 
-        div.querySelector('.remove-btn').addEventListener('click', function () {
+        // Create quantity input
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '1';
+        input.value = '1';
+        input.required = true;
+        input.placeholder = 'Бр.';
+
+        // Create remove button
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'remove-btn';
+        btn.textContent = 'Премахни';
+        btn.addEventListener('click', function () {
             div.remove();
             reindexUnits();
         });
 
+        div.appendChild(select);
+        div.appendChild(input);
+        div.appendChild(btn);
+
         container.appendChild(div);
         reindexUnits();
+
+        // debug: show what was added
+        console.log('Added unit row, select options:', Array.from(select.options).map(o => o.textContent));
     }
+
+
+
+
+    // function addUnit() {
+    //     const container = document.getElementById('units-container');
+    //     const optionsHtml = document.getElementById('unitOptionsTemplate').innerHTML;
+    //
+    //     const div = document.createElement('div');
+    //     div.className = 'unit-row';
+    //
+    //     div.innerHTML = `
+    //         <select required></select>
+    //         <input type="number" min="1" value="1" required placeholder="Бр."/>
+    //         <button type="button" class="remove-btn">Премахни</button>
+    //     `;
+    //
+    //     div.querySelector('select').innerHTML = optionsHtml;
+    //
+    //     div.querySelector('.remove-btn').addEventListener('click', function () {
+    //         div.remove();
+    //         reindexUnits();
+    //     });
+    //
+    //     container.appendChild(div);
+    //     reindexUnits();
+    // }
 
     function removeUnit(button) {
         const row = button.closest('.unit-row');
@@ -260,12 +338,10 @@
         const container = document.getElementById('units-container');
         Array.from(container.children).forEach((row, i) => {
             const select = row.querySelector('select');
-            const qty = row.querySelector('input[type="number"]');
-            const opts = Array.from(row.querySelectorAll('input[type="text"]')).find(e => e.placeholder && e.placeholder.startsWith('Option'));
+            const quantityInput = row.querySelector('input[type="number"]');
 
-            if (select) select.name = `units[${i}].unitId`;
-            if (qty) qty.name = `units[${i}].quantity`;
-            if (opts) opts.name = `units[${i}].optionIds`;
+            if (select) select.name = `units[${i}].configurableUnitId`;
+            if (quantityInput) quantityInput.name = `units[${i}].quantity`;
         });
     }
 
@@ -280,7 +356,6 @@
 
     function submitNewUnit() {
         const unitId = document.getElementById('newUnitBase').value;
-        const quantity = document.getElementById('newUnitQty').value;
         const optionCheckboxes = document.querySelectorAll('#newUnitOptions input[type="checkbox"]:checked');
         const optionIds = Array.from(optionCheckboxes).map(cb => cb.value);
 
@@ -289,24 +364,44 @@
             return;
         }
 
-        fetch('/products/configurable-units/create', {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        fetch('/products/configurable-units/create-new', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ unitId, quantity, optionIds })
+            headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+            body: JSON.stringify({
+                unitId: unitId,
+                optionIds: optionIds.length > 0 ? optionIds : null
+            })
         })
-            .then(resp => resp.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network error');
+                return response.json();
+            })
             .then(newUnit => {
                 const template = document.getElementById('unitOptionsTemplate');
                 const option = document.createElement('option');
                 option.value = newUnit.id;
-                option.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name + ' (qty: ' + newUnit.quantity + ')';
+                option.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
                 template.appendChild(option);
+
+                document.querySelectorAll('#units-container select').forEach(select => {
+                    const opt = document.createElement('option');
+                    opt.value = newUnit.id;
+                    opt.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
+                    select.appendChild(opt);
+                });
 
                 closeCreateUnitModal();
                 alert('Unit създаден успешно!');
             })
-            .catch(err => alert('Грешка при създаване: ' + err));
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Грешка при създаване: ' + error.message);
+            });
     }
+
     /*]]>*/
 </script>
 

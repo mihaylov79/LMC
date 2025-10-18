@@ -26,13 +26,23 @@ public class SimpleUnitService {
 
     public SimpleUnit createSimpleUnit(CreateNewConfiguredUnitRequest request) {
         Unit unit = unitService.getUnitById(request.getUnitId());
+        String code = unit.getCode();
 
-        SimpleUnit simpleUnit = SimpleUnit.builder()
-                .unit(unit)
-                .quantity(request.getQuantity())
-                .active(true)
-                .build();
+        return repository.findByCodeAndActiveTrue(code).orElseGet(() -> {
+            SimpleUnit simpleUnit = SimpleUnit.builder()
+                    .code(code)
+                    .unit(unit)
+                    .active(true)
+                    .build();
 
-        return repository.save(simpleUnit);
+            return repository.save(simpleUnit);
+        });
+
     }
+
+//    public SimpleUnit findSimpleUnitByCode(String code) {
+//         return repository.findByCodeAndActiveTrue(code, true)
+//                 .orElseThrow(() -> new IllegalArgumentException("Елемент с идентификация: %s не беше открит!"
+//                         .formatted(code)));
+//    }
 }

@@ -12,5 +12,5 @@ public class CreateNewConfiguredUnitRequest {
 
     private List<UUID> optionIds;
 
-    private int quantity;
+//    private int quantity;
 }

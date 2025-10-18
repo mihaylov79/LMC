@@ -22,12 +22,12 @@ public abstract class ConfigurableUnit {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(unique = true, nullable = false)
+    private String code;
+
     @ManyToOne
     @JoinColumn(name = "unit_id", nullable = false)
     private Unit unit;
-
-    @Column(nullable = false)
-    private int quantity;
 
     @Column
     private boolean active;

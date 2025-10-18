@@ -1,7 +1,7 @@
 package lmc.configuration.model;
 
 import jakarta.persistence.*;
-import lmc.configurableUnit.model.ConfigurableUnit;
+import lmc.configurationUnit.model.ConfigurationUnit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -53,9 +53,8 @@ public class Configuration {
     @Column(name = "price_update_date")
     private LocalDate priceUpdateDate;
 
-    @Builder.Default
-    @OneToMany
-    @JoinColumn(name = "configuration_id")
-    private List<ConfigurableUnit>includedUnits = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "configuration", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConfigurationUnit> includedUnits = new ArrayList<>();
 }

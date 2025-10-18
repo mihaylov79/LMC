@@ -7,6 +7,7 @@ import lmc.configurableUnit.service.ConfigurableUnitService;
 import lmc.configurableUnit.service.PriceCalculationService;
 import lmc.configuration.model.Configuration;
 import lmc.configuration.repository.ConfigurationRepository;
+import lmc.configurationUnit.model.ConfigurationUnit;
 import lmc.web.dto.CreateNewConfigurationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -33,24 +34,34 @@ public class ConfigurationService {
 
 
     public Configuration createNewConfiguration(CreateNewConfigurationRequest request){
-        List<ConfigurableUnit>units = request.getUnits().stream()
-                .map(configurableUnitService::createUnit).toList();
 
-
-        Configuration configuration = Configuration.builder()
+        final Configuration baseconfiguration = Configuration.builder()
                 .imageUrl(request.getImgUrl())
                 .code(request.getCode())
                 .line(request.getLine())
                 .type(request.getType())
                 .description(request.getDescription())
                 .model(request.getModel())
-                .includedUnits(units)
                 .active(true)
                 .build();
 
-        BigDecimal totalPrice = calculationService.calculateConfigurationTotalPrice(configuration);
+        List<ConfigurationUnit>units = request.getUnits().stream()
+                .map(dto -> {
+                    ConfigurableUnit unit = configurableUnitService.findUnitById(dto.getConfigurableUnitId());
+                    return ConfigurationUnit.builder()
+                            .configuration(baseconfiguration)
+                            .configurableUnit(unit)
+                            .quantity(dto.getQuantity())
+                            .build();
+                }).toList();
 
-        Configuration configurationWithPrice = configuration.toBuilder()
+        Configuration configurationWithUnits = baseconfiguration.toBuilder()
+                .includedUnits(units)
+                .build();
+
+        BigDecimal totalPrice = calculationService.calculateConfigurationTotalPrice(configurationWithUnits);
+
+        Configuration configurationWithPrice = configurationWithUnits.toBuilder()
                 .totalPrice(totalPrice)
                 .priceUpdateDate(LocalDate.now())
                 .build();

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -37,5 +38,10 @@ public class ConfigurableUnitService {
 
     public List<ConfigurableUnit> getAllUnits() {
         return configurableUnitRepository.findAll().stream().toList();
+    }
+
+
+    public ConfigurableUnit findUnitById(UUID unitId) {
+        return configurableUnitRepository.findById(unitId).orElseThrow(() -> new IllegalArgumentException("Елемент с идентификация : [ %s } не беше открит!".formatted(unitId)));
     }
 }

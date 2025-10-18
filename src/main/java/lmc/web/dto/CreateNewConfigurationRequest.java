@@ -24,5 +24,5 @@ public class CreateNewConfigurationRequest {
 
     private String model;
 
-    private List<CreateNewConfiguredUnitRequest> units = new ArrayList<>();
+    private List<ConfigurationUnitRequest> units = new ArrayList<>();
 }

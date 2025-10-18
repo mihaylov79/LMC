@@ -19,8 +19,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestBody;
+import lmc.configurableUnit.model.ConfigurableUnit;
+
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/products")
@@ -109,6 +114,24 @@ public class UnitController {
         configurableUnitService.createUnit(request);
         return new ModelAndView("redirect:/home");
     }
+
+    @PostMapping("/configurable-units/create-new")
+    @ResponseBody
+    public Map<String, Object> createConfigurableUnitAjax(@RequestBody CreateNewConfiguredUnitRequest request) {
+        ConfigurableUnit cu = configurableUnitService.createUnit(request);
+
+        return Map.of(
+                "id", cu.getId(),
+                "code", cu.getCode(),
+                "unit", Map.of(
+                        "code", cu.getUnit().getCode(),
+                        "name", cu.getUnit().getName()
+                )
+        );
+    }
+
+
+
 
 
 }

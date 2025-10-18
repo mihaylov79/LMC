@@ -8,7 +8,6 @@ import lmc.option.model.Option;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 public class PriceCalculationService {
@@ -24,17 +23,15 @@ public class PriceCalculationService {
     }
 
     private BigDecimal calculateSimpleUnitPrice(SimpleUnit unit){
-        return unit.getUnit().getPrice().multiply(new BigDecimal(unit.getQuantity()));
+        return unit.getUnit().getPrice();
     }
 
     private BigDecimal calculateConfiguredUnitPrice(ConfiguredUnit unit){
-        BigDecimal basePrice = unit.getUnit().getPrice()
-                    .multiply(new BigDecimal(unit.getQuantity()));
+        BigDecimal basePrice = unit.getUnit().getPrice();
 
         BigDecimal optionsPrice = unit.getOptions().stream()
                 .map(Option::getPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .multiply(new BigDecimal(unit.getQuantity()));
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return basePrice.add(optionsPrice);
 
@@ -42,13 +39,10 @@ public class PriceCalculationService {
 
     public BigDecimal calculateConfigurationTotalPrice(Configuration configuration){
         return configuration.getIncludedUnits().stream()
-                .map(this::calculateConfigurableUnitPrice)
+                .map(cu -> calculateConfigurableUnitPrice(cu.getConfigurableUnit())
+                        .multiply(new BigDecimal(cu.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal calculateConfigurationTotalPrice(List<ConfigurableUnit>units){
-        return units.stream().map(this::calculateConfigurableUnitPrice)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
 
 }
