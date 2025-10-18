@@ -27,10 +27,10 @@ public class ConfiguredUnitService {
         this.unitService = unitService;
     }
 
-    public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request){
-        Unit unit = unitService.getUnitByCode(request.getCode());
+    public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request) {
+        Unit unit = unitService.getUnitById(request.getUnitId());
 
-        List<Option>options = optionService.getOptionsByCode(request.getOptionCodes());
+        List<Option> options = optionService.getOptionsByIds(request.getOptionIds());
 
         ConfiguredUnit newUnit = ConfiguredUnit.builder()
                 .unit(unit)
@@ -39,11 +39,9 @@ public class ConfiguredUnitService {
                 .options(options)
                 .build();
 
-        //TODO: трябва да се добави цена на ConfiguredUnit или да се изчислява в Configuration
-
-
         return repository.save(newUnit);
     }
+
 
 
 //    public BigDecimal unitTotalPrice(ConfiguredUnit unit){

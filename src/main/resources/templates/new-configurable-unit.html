@@ -139,15 +139,15 @@
 
         <!-- Избор на базов продукт -->
         <div class="form-group">
-            <label for="code">Изберете базов продукт: *</label>
-            <select id="code" th:field="*{code}" required>
+            <label for="unitId">Изберете базов продукт: *</label>
+            <select id="unitId" th:field="*{unitId}" required>
                 <option value="">-- Изберете продукт --</option>
                 <option th:each="unit : ${allUnits}"
-                        th:value="${unit.code}"
+                        th:value="${unit.id}"
                         th:text="${unit.code + ' - ' + unit.name + ' (' + unit.price + ' ' + unit.currency + ')'}">
                 </option>
             </select>
-            <span class="error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></span>
+            <span class="error" th:if="${#fields.hasErrors('unitId')}" th:errors="*{unitId}"></span>
         </div>
 
         <!-- Избор на опции (множествен) -->
@@ -156,10 +156,10 @@
             <div class="options-group">
                 <div class="option-item" th:each="option : ${allOptions}">
                     <input type="checkbox"
-                           th:id="${'opt_' + option.code}"
-                           name="optionCodes"
-                           th:value="${option.code}">
-                    <label class="option-label" th:for="${'opt_' + option.code}">
+                           th:id="${'opt_' + option.id}"
+                           name="optionIds"
+                           th:value="${option.id}">
+                    <label class="option-label" th:for="${'opt_' + option.id}">
                         <div class="option-name" th:text="${option.code + ' - ' + option.name}"></div>
                         <div class="option-details">
                             <span th:text="${option.price + ' ' + option.currency}"></span>

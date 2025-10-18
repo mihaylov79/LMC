@@ -25,7 +25,7 @@ public class SimpleUnitService {
 
 
     public SimpleUnit createSimpleUnit(CreateNewConfiguredUnitRequest request) {
-        Unit unit = unitService.getUnitByCode(request.getCode());
+        Unit unit = unitService.getUnitById(request.getUnitId());
 
         SimpleUnit simpleUnit = SimpleUnit.builder()
                 .unit(unit)

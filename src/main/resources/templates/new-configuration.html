@@ -5,18 +5,108 @@
     <title>Нова конфигурация</title>
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/login.css">
+    <style>
+        .unit-row {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .unit-row select,
+        .unit-row input {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #createUnitModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            max-width: 600px;
+            border-radius: 8px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: #3771c8ff;
+        }
+
+        .modal-content label {
+            display: block;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .modal-content select,
+        .modal-content input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.25rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #newUnitOptions {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        #newUnitOptions div {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-buttons {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-create {
+            background-color: #3771c8ff;
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
 <div class="header-container">
-
     <th:block th:insert="~{fragments/nav :: nav}"></th:block>
-
 </div>
+
 <div class="form">
-
-
-    <form th:action="@{/configurations/create}" th:object="${configuration}" method="post">
+    <form th:action="@{/configurations/create/new}" th:object="${configuration}" method="post">
 
         <h2>Създаване на нова конфигурация</h2>
 
@@ -59,12 +149,25 @@
         </div>
 
         <h3>Units</h3>
+
+        <!-- Скрит шаблон за options -->
+        <select id="unitOptionsTemplate" style="display:none">
+            <option value="">Изберете unit</option>
+            <option th:each="u : ${existingUnits}"
+                    th:value="${u.id}"
+                    th:text="${u.unit.code + ' - ' + u.unit.name + ' (qty: ' + u.quantity + ')'}">
+            </option>
+        </select>
+
+        <!-- Контейнер за units -->
         <div id="units-container">
             <div th:each="unit, stat : *{units}" class="unit-row">
                 <select th:field="*{units[__${stat.index}__].unitId}" required>
                     <option value="">Изберете unit</option>
                     <option th:each="u : ${existingUnits}"
-                            th:value="${u.id}" th:text="${u.unit.code}"></option>
+                            th:value="${u.id}"
+                            th:text="${u.unit.code + ' - ' + u.unit.name + ' (qty: ' + u.quantity + ')'}">
+                    </option>
                 </select>
                 <input type="number" th:field="*{units[__${stat.index}__].quantity}"
                        placeholder="Количество" min="1" required/>
@@ -75,36 +178,134 @@
         </div>
 
         <button type="button" onclick="addUnit()">Добави Unit</button>
+        <button type="button" onclick="openCreateUnitModal()">Създай нов Unit</button>
         <button type="submit">Запази</button>
     </form>
 </div>
 
+<!-- Модален прозорец за създаване на нов unit -->
+<div id="createUnitModal">
+    <div class="modal-content">
+        <h3>Създай нов Configurable Unit</h3>
+        <form id="createUnitForm">
+            <div>
+                <label>Базов продукт:</label>
+                <select id="newUnitBase" required>
+                    <option value="">-- Изберете --</option>
+                    <option th:each="unit : ${allUnits}"
+                            th:value="${unit.id}"
+                            th:text="${unit.code + ' - ' + unit.name}">
+                    </option>
+                </select>
+            </div>
+            <div>
+                <label>Количество:</label>
+                <input type="number" id="newUnitQty" min="1" value="1" required/>
+            </div>
+            <div>
+                <label>Опции (незадължително):</label>
+                <div id="newUnitOptions">
+                    <div th:each="option : ${allOptions}">
+                        <input type="checkbox" th:id="'newOpt_' + ${option.id}" th:value="${option.id}"/>
+                        <label th:for="'newOpt_' + ${option.id}"
+                               th:text="${option.code + ' - ' + option.name}">
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-create" onclick="submitNewUnit()">Създай и добави</button>
+                <button type="button" class="btn-cancel" onclick="closeCreateUnitModal()">Откажи</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const existingUnits = /*[[${existingUnits}]]*/ [];
-
     function addUnit() {
         const container = document.getElementById('units-container');
-        const index = container.children.length;
 
-        let optionsHtml = '<option value="">Изберете unit</option>';
-        existingUnits.forEach(u => {
-            optionsHtml += `<option value="${u.id}">${u.unit.code}</option>`;
+        const optionsHtml = document.getElementById('unitOptionsTemplate').innerHTML;
+        const div = document.createElement('div');
+        div.className = 'unit-row';
+
+        div.innerHTML = `
+            <select required></select>
+            <input type="number" placeholder="Количество" min="1" required/>
+            <input type="text" placeholder="Option IDs (comma separated)"/>
+            <button type="button" class="remove-btn">Премахни</button>
+        `;
+
+        div.querySelector('select').innerHTML = optionsHtml;
+
+        div.querySelector('.remove-btn').addEventListener('click', function () {
+            div.remove();
+            reindexUnits();
         });
 
-        const html = `
-            <div class="unit-row">
-                <select name="units[${index}].unitId" required>${optionsHtml}</select>
-                <input type="number" name="units[${index}].quantity" placeholder="Количество" min="1" required/>
-                <input type="text" name="units[${index}].optionIds" placeholder="Option IDs (comma separated)"/>
-                <button type="button" onclick="removeUnit(this)">Премахни</button>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', html);
+        container.appendChild(div);
+        reindexUnits();
     }
 
     function removeUnit(button) {
-        button.parentElement.remove();
+        const row = button.closest('.unit-row');
+        if (row) {
+            row.remove();
+            reindexUnits();
+        }
+    }
+
+    function reindexUnits() {
+        const container = document.getElementById('units-container');
+        Array.from(container.children).forEach((row, i) => {
+            const select = row.querySelector('select');
+            const qty = row.querySelector('input[type="number"]');
+            const opts = Array.from(row.querySelectorAll('input[type="text"]')).find(e => e.placeholder && e.placeholder.startsWith('Option'));
+
+            if (select) select.name = `units[${i}].unitId`;
+            if (qty) qty.name = `units[${i}].quantity`;
+            if (opts) opts.name = `units[${i}].optionIds`;
+        });
+    }
+
+    function openCreateUnitModal() {
+        document.getElementById('createUnitModal').style.display = 'block';
+    }
+
+    function closeCreateUnitModal() {
+        document.getElementById('createUnitModal').style.display = 'none';
+        document.getElementById('createUnitForm').reset();
+    }
+
+    function submitNewUnit() {
+        const unitId = document.getElementById('newUnitBase').value;
+        const quantity = document.getElementById('newUnitQty').value;
+        const optionCheckboxes = document.querySelectorAll('#newUnitOptions input[type="checkbox"]:checked');
+        const optionIds = Array.from(optionCheckboxes).map(cb => cb.value);
+
+        if (!unitId) {
+            alert('Моля изберете базов продукт');
+            return;
+        }
+
+        fetch('/products/configurable-units/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ unitId, quantity, optionIds })
+        })
+            .then(resp => resp.json())
+            .then(newUnit => {
+                const template = document.getElementById('unitOptionsTemplate');
+                const option = document.createElement('option');
+                option.value = newUnit.id;
+                option.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name + ' (qty: ' + newUnit.quantity + ')';
+                template.appendChild(option);
+
+                closeCreateUnitModal();
+                alert('Unit създаден успешно!');
+            })
+            .catch(err => alert('Грешка при създаване: ' + err));
     }
     /*]]>*/
 </script>
