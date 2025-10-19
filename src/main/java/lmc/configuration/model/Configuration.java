@@ -57,4 +57,26 @@ public class Configuration {
     @Builder.Default
     @OneToMany(mappedBy = "configuration", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ConfigurationUnit> includedUnits = new ArrayList<>();
+
+    // helper to maintain bidirectional association
+    public void addIncludedUnit(ConfigurationUnit unit) {
+        if (unit == null) return;
+        unit.setConfiguration(this);
+        this.includedUnits.add(unit);
+    }
+
+    public void removeIncludedUnit(ConfigurationUnit unit) {
+        if (unit == null) return;
+        this.includedUnits.remove(unit);
+        unit.setConfiguration(null);
+    }
+
+    // simple mutators to avoid creating a new Configuration instance with toBuilder()
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public void setPriceUpdateDate(LocalDate priceUpdateDate) {
+        this.priceUpdateDate = priceUpdateDate;
+    }
 }

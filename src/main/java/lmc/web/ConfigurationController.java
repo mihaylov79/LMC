@@ -55,7 +55,7 @@ public class ConfigurationController {
             modelAndView.addObject("existingUnits", configurableUnitService.getAllUnits());
         }
         configurationService.createNewConfiguration(request);
-        return new ModelAndView("redirect:/configurations");
+        return new ModelAndView("redirect:/home");
     }
 
 

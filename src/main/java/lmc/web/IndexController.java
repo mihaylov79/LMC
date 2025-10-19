@@ -1,5 +1,6 @@
 package lmc.web;
 
+import lmc.configuration.service.ConfigurationService;
 import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
@@ -14,9 +15,11 @@ import org.springframework.web.servlet.ModelAndView;
 public class IndexController {
 
     private final UserService userService;
+    private final ConfigurationService configurationService;
 
-    public IndexController(UserService userService) {
+    public IndexController(UserService userService, ConfigurationService configurationService) {
         this.userService = userService;
+        this.configurationService = configurationService;
     }
 
 
@@ -45,6 +48,7 @@ public class IndexController {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("home");
         modelAndView.addObject("user", user);
+        modelAndView.addObject("configurations", configurationService.getAllConfigurations());
 
         return modelAndView;
 

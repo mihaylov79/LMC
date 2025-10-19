@@ -33,4 +33,7 @@ public class ConfigurationUnit {
     @Column(nullable = false)
     private int quantity;
 
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
 }

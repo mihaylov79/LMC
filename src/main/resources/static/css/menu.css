@@ -13,6 +13,38 @@
     gap: 1.5em;
 }
 
+/*.menu ul li form.logout-form {*/
+/*    !* undo asymmetric radii from global form rules *!*/
+/*    border-top-right-radius: 0;*/
+/*    border-bottom-left-radius: 0;*/
+/*    border-radius: 4px; !* optional: set desired nav form radius *!*/
+/*    padding: 0; !* keep nav compact *!*/
+/*    display: inline;*/
+/*    vertical-align: middle;*/
+/*}*/
+
+.menu ul li form .logout-btn {
+    color: #3771c8ff;
+    background: none;
+    border: none;
+    text-decoration: none;
+    font-weight: 350;
+    padding: 0.3em 0.6em;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    display: inline-block;
+}
+
+.menu ul li form .logout-btn:hover,
+.menu ul li form .logout-btn:focus {
+    font-weight: 700;
+    box-shadow: 0 0.2em 0.5em #3771c8ff;
+}
+
+
 /* Линковете */
 .menu ul li a,
 .menu ul li button {

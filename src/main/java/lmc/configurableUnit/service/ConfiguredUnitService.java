@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ConfiguredUnitService {
@@ -32,11 +33,11 @@ public class ConfiguredUnitService {
 
         List<Option> options = optionService.getOptionsByIds(request.getOptionIds());
 
-        String code = unit.getCode();
+        String generatedCode = generateCode(unit, options);
 
-        return repository.findByCodeAndActiveIsTrue(code).orElseGet(()-> {
+        return repository.findByCodeAndActiveIsTrue(generatedCode).orElseGet(()-> {
             ConfiguredUnit newUnit = ConfiguredUnit.builder()
-                    .code(code)
+                    .code(generatedCode)
                     .unit(unit)
                     .active(true)
                     .options(options)
@@ -47,14 +48,34 @@ public class ConfiguredUnitService {
 
     }
 
-    private String generateCode(Unit unit, List<Option>options ){
+    private String generateCode(Unit unit, List<Option> options) {
+        if (unit == null) {
+            throw new IllegalArgumentException("unit must not be null");
+        }
+
+        if (options == null || options.isEmpty()) {
+            return unit.getCode();
+        }
+
         String optionCodes = options.stream()
                 .map(Option::getCode)
-                .reduce("", (acc, optionCode) -> acc + "_" + optionCode);
+                .filter(code -> code != null && !code.trim().isEmpty())
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .sorted()
+                .collect(Collectors.joining("_"));
 
-        return unit.getCode() + (optionCodes.isEmpty() ? "" : "_" + optionCodes);
-
+        return optionCodes.isEmpty() ? unit.getCode() : unit.getCode() + "_" + optionCodes;
     }
+
+//    private String generateCode(Unit unit, List<Option>options ){
+//        String optionCodes = options.stream()
+//                .map(Option::getCode)
+//                .reduce((acc, optionCode) -> acc + "_" + optionCode).orElse("");
+//
+//        return unit.getCode() + (optionCodes.isEmpty() ? "" : "_" + optionCodes);
+//
+//    }
 
 
 

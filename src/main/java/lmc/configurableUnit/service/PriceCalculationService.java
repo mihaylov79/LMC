@@ -1,17 +1,20 @@
 package lmc.configurableUnit.service;
 
+
 import lmc.configurableUnit.model.ConfigurableUnit;
 import lmc.configurableUnit.model.ConfiguredUnit;
 import lmc.configurableUnit.model.SimpleUnit;
 import lmc.configuration.model.Configuration;
 import lmc.option.model.Option;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
+@Transactional(readOnly = true)
 @Service
 public class PriceCalculationService {
-
+    @Transactional
     public BigDecimal calculateConfigurableUnitPrice(ConfigurableUnit unit){
 
         if (unit instanceof SimpleUnit){

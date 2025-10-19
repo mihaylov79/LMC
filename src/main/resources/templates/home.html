@@ -5,6 +5,7 @@
     <title>Product Configurator - Welcome</title>
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/units.css">
 </head>
 <body>
 <div class="header-container">
@@ -24,14 +25,93 @@
     </div>
 
     <div class="configurations">
-        <p>Configurations HERE!</p>
+
+            <div class="menu">
+                <ul>
+                    <li><a th:href="@{/configurations/create/new}">Добави Конфигурация</a></li>
+                </ul>
+
+            </div>
+
+            <div class="configurations-table">
+                <div class="table-header">
+                    <div class="search-box">
+                        <input type="text" id="searchConfigurations" placeholder="Търси конфигурация...">
+                    </div>
+                    <h3 class="table-title">Конфигурации</h3>
+                </div>
+                <table>
+                    <thead>
+
+                    <tr>
+                        <th>Снимка</th>
+                        <th>Код</th>
+                        <th>Наименование</th>
+                        <th>Базова цена</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="configuration : ${configurations}">
+                        <td>
+                            <img th:src="${configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:150px;"/>
+                        </td>
+                        <td th:text="${configuration.code}"></td>
+                        <td>
+                            <div class="desc">
+                                    <div th:text="${configuration.description}"></div>
+                                    <span th:text="${configuration.model}"></span>
+                                    <span>,</span>
+                                    <span th:text="${configuration.line}">размер:</span>
+                            </div>
+                        </td>
+                        <td th:text="${configuration.totalPrice} + ' ' + 'EUR'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
     </div>
 
-    <div class="units">
-        <p>Units HERE!</p>
-    </div>
+
 </div>
 
+<script>
+    // Търсачка за конфигурации
+    document.getElementById('searchConfigurations').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.configurations-table tbody tr');
+
+        rows.forEach(row => {
+            const code = row.cells[1].textContent.toLowerCase();
+            const description = row.cells[2].textContent.toLowerCase();
+            const totalPrice = row.cells[3].textContent.toLowerCase();
+
+            if (code.includes(searchValue) || description.includes(searchValue) || totalPrice.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Търсачка за конфигурирани продукти
+    document.getElementById('searchUnitOptions').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.unit-options-table tbody tr'); // Използвайте правилния клас/селектор
+
+        rows.forEach(row => {
+            const code = row.cells[0].textContent.toLowerCase();
+            const name = row.cells[1].textContent.toLowerCase();
+            // Добавете други колони по необходимост
+
+            if (code.includes(searchValue) || name.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+</script>
 
 </body>
 </html>

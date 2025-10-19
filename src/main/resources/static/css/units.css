@@ -1,6 +1,7 @@
 /* Общи стилове за двата таба */
 .base-units,
-.unit-options {
+.unit-options,
+.configurations {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -15,13 +16,15 @@
 
 /* Меню стилове за двата таба */
 .base-units .menu,
-.unit-options .menu {
+.unit-options .menu,
+.configurations .menu{
     align-self: flex-end;
     margin-bottom: 2em;
 }
 
 .base-units .menu ul,
-.unit-options .menu ul {
+.unit-options .menu ul,
+.configurations .menu ul{
     display: flex;
     justify-content: flex-end;
     list-style: none;
@@ -31,13 +34,15 @@
 }
 
 .base-units .menu ul li,
-.unit-options .menu ul li {
+.unit-options .menu ul li,
+.configurations .menu ul li {
     flex: 0 0 auto;
 }
 
 /* Таблица стилове */
 .base-units-table,
-.unit-options-table {
+.unit-options-table,
+.configurations-table {
     width: 100%;
     padding-top: 1em;
 }
