@@ -10,7 +10,6 @@ import lmc.configurationUnit.model.ConfigurationUnit;
 import lmc.web.dto.CreateNewConfigurationRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -137,15 +136,26 @@ public class ConfigurationService {
         return updatedConfigurations.size();
     }
 
-    public Configuration findConfigurationById(UUID id){
-        return configurationRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("Конфигурация с идентификация: [ %s ] не беще открита"
-                .formatted(id)));
+//    public Configuration findConfigurationById(UUID id){
+//        return configurationRepository.findById(id)
+//                .orElseThrow(()-> new IllegalArgumentException("Конфигурация с идентификация: [ %s ] не беще открита"
+//                .formatted(id)));
+//    }
+//
+//    public List<Configuration> getAllConfigurations(){
+//        return  configurationRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+//
+//    }
+
+    @Transactional(readOnly = true)
+    public List<Configuration> getAllConfigurations(){
+        return configurationRepository.findAllWithUnits();
     }
 
-    public List<Configuration> getAllConfigurations(){
-        return  configurationRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-
+    @Transactional(readOnly = true)
+    public Configuration findConfigurationById(UUID id){
+        return configurationRepository.findByIdWithUnits(id)
+                .orElseThrow(() -> new IllegalArgumentException("Конфигурация с идентификация: [ %s ] не беше открита".formatted(id)));
     }
 
 }

@@ -129,3 +129,55 @@ td {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+/*===== Included-Modules====*/
+:root {
+    --modules-header-color: #3771c8ff; /* tweak color */
+    --modules-item-color: #3b4345;
+    --modules-gap: 6px;
+    --modules-font-size: 0.95rem;
+}
+
+.included-modules {
+    display: flex;
+    flex-direction: column;
+    gap: var(--modules-gap);
+    margin-top: 3px;
+}
+
+/* Header style */
+.included-modules-header {
+    font-weight: 600;
+    color: var(--modules-header-color);
+    font-size: calc(var(--modules-font-size) + 0.03rem);
+    padding: 2px 0;
+}
+
+/* alignment utilities: use either `align-start` or `align-end` on the header */
+.included-modules-header.align-start {
+    align-self: flex-start;
+    text-align: left;
+}
+/*.included-modules-header.align-end {*/
+/*    align-self: flex-end;*/
+/*    text-align: right;*/
+/*}*/
+
+/* List styling */
+.modules-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Each module line (keeps compact look inside the table cell) */
+.modules-list li {
+    color: var(--modules-item-color);
+    font-size: var(--modules-font-size);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+}
