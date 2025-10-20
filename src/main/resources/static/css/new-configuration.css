@@ -98,3 +98,59 @@
     background-color: #6c757d;
     color: white;
 }
+
+/* make each unit row responsive and prevent button overflow */
+.unit-row {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;           /* allow items to wrap on small widths */
+    gap: 0.5rem;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* select should take remaining space but not shrink too small */
+.unit-row select {
+    flex: 1 1 220px;           /* grow, can shrink, preferred basis */
+    min-width: 160px;
+    max-width: 70%;
+    box-sizing: border-box;
+}
+
+/* number input fixed-ish width so it doesn't push layout */
+.unit-row input[type="number"] {
+    flex: 0 0 80px;            /* don't grow, fixed basis */
+    min-width: 60px;
+    box-sizing: border-box;
+}
+
+/* remove button stays its intrinsic size and won't overflow */
+.unit-row .remove-btn,
+.unit-row button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* improve spacing when items wrap onto new line */
+.unit-row > * {
+    margin-top: 0;             /* rely on gap, avoid extra top margins */
+}
+
+/* small-screen adjustments */
+@media (max-width: 600px) {
+    .unit-row select,
+    .unit-row input[type="number"] {
+        flex-basis: 100%;      /* each control on its own line for narrow screens */
+        max-width: 100%;
+    }
+    .unit-row .remove-btn {
+        align-self: flex-end;  /* keep button on the right */
+    }
+}

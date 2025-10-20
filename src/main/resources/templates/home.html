@@ -53,15 +53,15 @@
                     <tbody>
                     <tr th:each="configuration : ${configurations}">
                         <td>
-                            <img th:src="${configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:200px;"/>
+                            <img th:src="${#strings.isEmpty(configuration.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:200px;"/>
                         </td>
                         <td th:text="${configuration.code}"></td>
                         <td>
                             <div th:text="${configuration.description}"></div>
                             <div class="desc" >
-                                    <span th:text="${configuration.model}"></span>
+                                    <span th:text="'модел: ' + ${configuration.model}"></span>
                                     <span>,</span>
-                                    <span th:text="${configuration.line}">размер:</span>
+                                    <span th:text="'линия: ' + ${configuration.line}">размер:</span>
                             </div>
 
 <!--                            <div th:each="unit : ${configuration.includedUnits}">-->

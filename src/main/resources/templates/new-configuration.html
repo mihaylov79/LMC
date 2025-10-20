@@ -21,17 +21,17 @@
 
         <h2>Създаване на нова конфигурация</h2>
 
-        <div>
+        <div class="field">
             <label for="imgUrl">URL на изображение:</label>
             <input type="text" id="imgUrl" th:field="*{imgUrl}" placeholder="URL на изображение"/>
         </div>
 
-        <div>
+        <div class="field">
             <label for="code">Код:</label>
             <input type="text" id="code" th:field="*{code}" placeholder="Код" required/>
         </div>
 
-        <div>
+        <div class="field">
             <label for="line">Линия:</label>
             <select id="line" th:field="*{line}" required>
                 <option value="">Изберете линия</option>
@@ -40,7 +40,7 @@
             </select>
         </div>
 
-        <div>
+        <div class="field">
             <label for="type">Тип:</label>
             <select id="type" th:field="*{type}" required>
                 <option value="">Изберете тип</option>
@@ -49,12 +49,12 @@
             </select>
         </div>
 
-        <div>
+        <div class="field">
             <label for="description">Описание:</label>
             <input type="text" id="description" th:field="*{description}" placeholder="Описание"/>
         </div>
 
-        <div>
+        <div class="field">
             <label for="model">Модел:</label>
             <input type="text" id="model" th:field="*{model}" placeholder="Модел"/>
         </div>
