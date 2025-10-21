@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${configuration.description}"></title>
+    <link rel="stylesheet" href="/css/menu.css">
+</head>
+<body>
+
+<div class="header-container">
+
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
+</div>
+
+<div class="front-container">
+    <div class="user-container">
+        <p th:text="'Активен потребител: ' + ${user.email}"></p>
+    </div>
+
+    <div class="configuration-details">
+        <div class="menu">
+            <ul>
+                <li><a th:hrer="@{/configuration/edit/{configurationId}(configuratonId=${configuration.id})}">Редактирай</a></li>
+                <li><a th:hrer="@{/configuration/deactivate/{configurationId}(configuratonId=${configuration.id})}">Деактивирай</a></li>
+                <li><a th:hrer="@{/configuration/deactivate/{configurationId}(configuratonId=${configuration.id})}">Преизчисли</a></li>
+            </ul>
+        </div>
+        <div class="configuration-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>Снимка</th>
+                    <th>Код</th>
+                    <th>Модел</th>
+                    <th>Линия</th>
+                    <th>Описание</th>
+                    <th>Използвани модули</th>
+                    <th>Цена</th>
+                    <th>Създадена</th>
+                    <th>Последно обновяване на цената</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <img th:src="${#strings.isEmpty(configuration.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:200px;"/>
+                    </td>
+                    <td th:text="${configuration.code}"></td>
+                    <td th:text="${configuration.model}"></td>
+                    <td th:text="${configuration.line}"></td>
+                    <td th:text="${configuration.description}"></td>
+                    <td><div class="included-modules">
+                        <div class="included-modules-header align-start">Включени модули:</div>
+
+                        <ul class="modules-list">
+                            <li th:each="unit : ${configuration.includedUnits}"
+                                th:text="${unit.configurableUnit != null ? (unit.configurableUnit.code + ' - ' + (unit.configurableUnit.unit != null ? unit.configurableUnit.unit.name : '—')) : '—'}">
+                            </li>
+                        </ul>
+                    </div></td>
+
+                    <td th:text="${configuration.totalPrice} + ' ' + 'EUR'"></td>
+                    <td th:text="${configuration.created}"></td>
+                    <td th:text="${configuration.updated}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
