@@ -37,7 +37,7 @@
                     <th>Описание</th>
                     <th>Използвани модули</th>
                     <th>Цена</th>
-                    <th>Създадена</th>
+<!--                    <th>Създадена</th>-->
                     <th>Последно обновяване на цената</th>
                 </tr>
                 </thead>
@@ -61,8 +61,8 @@
                     </div></td>
 
                     <td th:text="${configuration.totalPrice} + ' ' + 'EUR'"></td>
-                    <td th:text="${configuration.created}"></td>
-                    <td th:text="${configuration.updated}"></td>
+<!--                    <td th:text="${configuration.created}"></td>-->
+                    <td th:text="${configuration.priceUpdateDate}"></td>
                 </tr>
                 </tbody>
             </table>

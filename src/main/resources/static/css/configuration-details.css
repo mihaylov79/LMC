@@ -1,0 +1,113 @@
+/* ... existing code ... */
+.configuration-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1em;
+    margin: 0 1em 2rem 1em;
+    border-top-right-radius: 0.5em;
+    border-bottom-left-radius: 0.5em;
+    box-shadow: 0 0.2em 0.5em #3771c8ff;
+    background: #fff;
+}
+
+/* локално меню (бутоните горе вдясно) – същата логика като другите страници */
+.configuration-details .menu {
+    align-self: flex-end;
+    margin-bottom: 0.5em;
+}
+.configuration-details .menu ul {
+    display: flex;
+    justify-content: flex-end;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 1rem;
+    box-shadow: 0 0.2em 0.5em #3771c8ff;
+}
+.configuration-details .menu ul li a {
+    color: #3771c8ff;
+    text-decoration: none;
+    padding: 0.3em 0.6em;
+    border-radius: 4px;
+    transition: box-shadow 0.3s;
+}
+.configuration-details .menu ul li a:hover {
+    font-weight: 700;
+    box-shadow: 0 0.2em 0.5em #3771c8ff;
+}
+
+/* таблица с детайли – визуално съвместима с останалите */
+.configuration-table {
+    width: 100%;
+    overflow-x: auto;
+}
+.configuration-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.configuration-table thead tr {
+    border-bottom: 1px solid #3771c8ff;
+}
+.configuration-table th,
+.configuration-table td {
+    padding: 0.5em;
+    text-align: center;
+    vertical-align: middle;
+}
+.configuration-table tbody tr {
+    border-bottom: 1px solid #3771c8ff;
+}
+
+/* снимка в детайли – консистентен максимум */
+.configuration-table img {
+    max-width: 220px;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 0.15em 0.35em rgba(0,0,0,0.12);
+}
+
+/* блок “Включени модули” – използва същите класове, за да изглежда еднакво */
+.configuration-table .included-modules {
+    display: flex;
+    flex-direction: column;
+    gap: var(--modules-gap, 6px);
+    margin-top: 3px;
+}
+.configuration-table .included-modules-header {
+    font-weight: 600;
+    color: var(--modules-header-color, #3771c8ff);
+    font-size: calc(var(--modules-font-size, 0.95rem) + 0.03rem);
+    padding: 2px 0;
+}
+.configuration-table .modules-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.configuration-table .modules-list li {
+    color: var(--modules-item-color, #3b4345);
+    font-size: var(--modules-font-size, 0.95rem);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+/* responsive */
+@media (max-width: 900px) {
+    .configuration-details {
+        margin: 0 0.5em 1.5rem 0.5em;
+        padding: 0.75em;
+    }
+    .configuration-table th, .configuration-table td {
+        padding: 0.4em;
+        font-size: 0.95rem;
+    }
+    .configuration-table img {
+        max-width: 160px;
+    }
+}

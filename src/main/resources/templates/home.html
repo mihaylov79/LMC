@@ -53,7 +53,9 @@
                     <tbody>
                     <tr th:each="configuration : ${configurations}">
                         <td>
-                            <img th:src="${#strings.isEmpty(configuration.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:200px;"/>
+                            <a th:href="@{/configurations/{id}/details(id=${configuration.id})}">
+                                <img th:src="${#strings.isEmpty(configuration.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:200px;"/>
+                            </a>
                         </td>
                         <td th:text="${configuration.code}"></td>
                         <td>
