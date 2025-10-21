@@ -11,6 +11,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 1.5em;
+    align-items: center;
 }
 
 /*.menu ul li form.logout-form {*/
