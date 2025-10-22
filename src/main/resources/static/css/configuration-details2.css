@@ -1,0 +1,236 @@
+/* css
+   File: src/main/resources/static/css/configuration-details2.css
+*/
+
+:root{
+    --accent: #3771c8ff;
+    --muted: #666;
+    --bg: #fff;
+    --shadow: 0 0.2em 0.5em var(--accent);
+    --radius: 0.5em;
+    --modules-table-font: 0.98rem;
+    --image-max: 3000px;        /* allow large image */
+    --side-padding: 3rem;       /* wider page padding */
+    --price-col-min: 160px;     /* ensure currency fits */
+    --total-col-min: 160px;
+}
+
+/* base reset */
+html,body{
+    height:100%;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Raleway',sans-serif;
+    background:var(--bg);
+    color:#222;
+}
+
+/* full width details area with generous side padding */
+.configuration-details{
+    display:flex;
+    flex-direction:column;
+    gap:1rem;
+    padding:1.25rem var(--side-padding);
+    margin:0;
+    width:100%;
+    max-width:none;
+    border-top-right-radius:var(--radius);
+    border-bottom-left-radius:var(--radius);
+    box-shadow:var(--shadow);
+    background:var(--bg);
+    box-sizing:border-box;
+}
+
+/* image: allow to fill container and grow when large screens available */
+.image-wrapper{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    padding:0.75rem 0;
+    box-sizing:border-box;
+}
+.image-wrapper img{
+    width:100%;
+    max-width:var(--image-max);
+    height:auto;
+    object-fit:contain;
+    border-radius:8px;
+    box-shadow:0 0.15em 0.35em rgba(0,0,0,0.12);
+    display:block;
+}
+
+/* info row */
+.info-row{
+    display:flex;
+    justify-content:center;
+    gap:2rem;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    width:100%;
+    padding:0.25rem 0;
+    box-sizing:border-box;
+}
+.info-item{
+    min-width:140px;
+    max-width:480px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+}
+.info-item dt{font-weight:700;color:var(--accent);font-size:0.95rem;margin-bottom:0.12rem}
+.info-item dd{margin:0;color:#333;word-break:break-word}
+
+/* modules: stretch to full available width */
+.modules-section{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:0.75rem;
+    width:100%;
+    box-sizing:border-box;
+    padding-top:0.5rem;
+}
+.modules-right-wrapper{
+    width:100%;
+    max-width:none;
+    margin:0 auto;
+    box-sizing:border-box;
+    padding:0 var(--side-padding);
+    overflow-x:visible; /* allow table and image to expand */
+}
+
+/* table: let the browser size columns naturally so they can expand */
+.modules-mini-table{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:auto; /* use natural widths to let columns grow */
+    font-size:var(--modules-table-font);
+    background:transparent;
+    color:#333;
+}
+
+
+/* header cells */
+.modules-mini-table thead th{
+    text-align:left;
+    font-weight:600;
+    color:#3b4345;
+    padding:0.55rem 0.8rem;
+    border-bottom:1px solid rgba(55,113,200,0.08);
+}
+
+/* body cells */
+.modules-mini-table tbody td,
+.modules-mini-table tbody th{
+    padding:0.55rem 0.8rem;
+    border-bottom:1px solid rgba(55,113,200,0.06);
+    vertical-align:middle;
+    box-sizing:border-box;
+    white-space:normal; /* allow content to determine width */
+    word-break:break-word;
+}
+
+/* let Код and Име use natural widths and wrap if needed; remove forced ellipsis */
+.modules-mini-table th:nth-child(1), .modules-mini-table td:nth-child(1){
+    color:var(--accent);
+    font-weight:600;
+    white-space:normal;
+    min-width:120px; /* reasonable starting width */
+}
+.modules-mini-table th:nth-child(2), .modules-mini-table td:nth-child(2){
+    color:#3b4345;
+    white-space:normal;
+    min-width:300px; /* encourage wider name column */
+}
+
+/* quantity */
+.modules-mini-table th:nth-child(3), .modules-mini-table td:nth-child(3){
+    text-align:center;
+    min-width:64px;
+}
+
+/* ensure price and total have minimum width so currency never clips */
+.modules-mini-table th:nth-child(4), .modules-mini-table td:nth-child(4){
+    text-align:right;
+    min-width:var(--price-col-min);
+    white-space:nowrap;
+}
+.modules-mini-table th:nth-child(5), .modules-mini-table td:nth-child(5){
+    text-align:right;
+    min-width:var(--total-col-min);
+    white-space:nowrap;
+}
+
+/* numeric column common */
+.modules-mini-table td.numeric,
+.modules-mini-table th.numeric{
+    text-align:right;
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+    color:#333;
+    padding-right:0.75rem;
+}
+
+/* allow table to grow; fallback scroll on very small viewports */
+.modules-right-wrapper { -webkit-overflow-scrolling:touch; }
+
+/* total block aligned with numeric columns */
+.bottom-right{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:0.25rem;
+    padding:0.5rem 0;
+    width:100%;
+    box-sizing:border-box;
+    margin:0 auto;
+    padding-right:var(--side-padding);
+}
+.bottom-right .price{font-weight:700;font-size:1.05rem;color:#111;text-align:right}
+.bottom-right .price-date{color:var(--muted);font-size:0.92rem;text-align:right}
+
+/* responsive: keep generous widths but reduce where necessary */
+@media (max-width:1600px){
+    :root{--image-max:2000px}
+    .configuration-details{padding:1rem 2.5rem}
+    .modules-right-wrapper{padding:0 2.5rem}
+}
+@media (max-width:1200px){
+    :root{--image-max:1400px}
+    .configuration-details{padding:1rem 1.5rem}
+    .modules-right-wrapper{padding:0 1.5rem}
+    .modules-mini-table th:nth-child(2), .modules-mini-table td:nth-child(2){
+        min-width:220px;
+    }
+    .modules-mini-table th:nth-child(4), .modules-mini-table td:nth-child(4),
+    .modules-mini-table th:nth-child(5), .modules-mini-table td:nth-child(5){
+        min-width:120px;
+    }
+}
+@media (max-width:900px){
+    :root{--image-max:1000px}
+    .configuration-details{padding:0.75rem 1rem}
+    .modules-right-wrapper{padding:0 0.75rem}
+    .modules-mini-table th:nth-child(1), .modules-mini-table td:nth-child(1){
+        min-width:100px;
+    }
+    .modules-mini-table th:nth-child(2), .modules-mini-table td:nth-child(2){
+        min-width:160px;
+    }
+}
+@media (max-width:760px){
+    :root{--image-max:720px}
+    .configuration-details{padding:0.5rem 0.5rem}
+    .info-row{gap:1rem}
+    .info-item{min-width:140px;max-width:100%}
+    .modules-right-wrapper{padding:0 0.25rem; overflow-x:auto}
+    .modules-mini-table thead th, .modules-mini-table tbody td{font-size:0.95rem;padding:0.35rem 0.5rem}
+    .modules-mini-table td.numeric{white-space:nowrap}
+    .bottom-right{padding:0.4rem 0;align-items:flex-end;padding-right:0.25rem}
+}
+
+/* minor polish */
+.configuration-details dt{margin:0}
+.configuration-details dd{margin:0 0 0.6rem 0}

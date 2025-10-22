@@ -1,16 +1,122 @@
+<!-- html -->
 <!DOCTYPE html>
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${configuration.description}"></title>
+    <title th:text="${configuration.description}">Configuration</title>
     <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/configuration-details2.css">
+    <style>
+        /* Quick layout for centered horizontal info + centered modules */
+        .configuration-details { box-sizing: border-box; }
+
+        .image-wrapper { width:100%; display:flex; justify-content:center; padding:0.6rem 0; }
+        .image-wrapper img { width:100%; max-width:900px; max-height:420px; object-fit:contain; border-radius:8px; }
+
+        /* info row under image: centered horizontal items */
+        .info-row {
+            display: flex;
+            justify-content: center;
+            gap: 2.25rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            padding: 0.6rem 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .info-item {
+            min-width: 160px;
+            max-width: 320px;
+            text-align: left;
+        }
+        .info-item dt {
+            font-weight: 700;
+            color: #3771c8ff;
+            font-size: 0.95rem;
+            margin-bottom: 0.15rem;
+        }
+        .info-item dd {
+            margin: 0;
+            color: #333;
+            word-break: break-word;
+        }
+
+        /* modules & price section centered under info row */
+        .modules-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding-top: 0.75rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .modules-right-wrapper {
+            width: 100%;
+            max-width: 760px; /* table container width */
+            box-sizing: border-box;
+            padding: 0 0.5rem;
+        }
+
+        .modules-right {
+            width: 100%;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        .modules-right dt {
+            font-weight:700;
+            color: #3771c8ff;
+            margin: 0 0 0.5rem 0;
+            text-align: left;
+        }
+
+        .modules-mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 0.95rem;
+            background: transparent;
+        }
+        .modules-mini-table td, .modules-mini-table th {
+            padding: 0.45rem 0.6rem;
+            border-bottom: 1px solid rgba(55,113,200,0.06);
+            vertical-align: middle;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .modules-mini-table th { text-align:left; font-weight:600; color:#3b4345; }
+        .modules-mini-table td:nth-child(1) { width: 22%; color: #3771c8ff; font-weight: 600; }
+        .modules-mini-table td:nth-child(2) { width: 40%; color: #3b4345; }
+        .modules-mini-table td:nth-child(3) { width: 10%; text-align: center; }
+        .modules-mini-table td.numeric { width: 14%; text-align: right; font-variant-numeric: tabular-nums; color: #333; }
+
+        /* price centered under modules */
+        .bottom-right {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:0.25rem;
+            padding:0.5rem 0;
+        }
+        .bottom-right .price { font-weight:700; font-size:1.05rem; }
+        .bottom-right .price-date { color:#666; font-size:0.92rem; }
+
+        /* small screens: stack and allow table to wrap text */
+        @media (max-width: 760px) {
+            .info-row { gap:1rem; padding:0.5rem 0; }
+            .info-item { min-width: 140px; max-width: 100%; text-align: left; }
+            .modules-mini-table td, .modules-mini-table th { white-space: normal; display: table-cell; }
+            .modules-right-wrapper { padding: 0 0.25rem; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="header-container">
-
     <th:block th:insert="~{fragments/nav :: nav}"></th:block>
-
 </div>
 
 <div class="front-container">
@@ -21,53 +127,73 @@
     <div class="configuration-details">
         <div class="menu">
             <ul>
-                <li><a th:hrer="@{/configuration/edit/{configurationId}(configuratonId=${configuration.id})}">Редактирай</a></li>
-                <li><a th:hrer="@{/configuration/deactivate/{configurationId}(configuratonId=${configuration.id})}">Деактивирай</a></li>
-                <li><a th:hrer="@{/configuration/deactivate/{configurationId}(configuratonId=${configuration.id})}">Преизчисли</a></li>
+                <li><a th:href="@{/configurations/edit/{configurationId}(configurationId=${configuration.id})}">Редактирай</a></li>
+                <li><a th:href="@{/configurations/deactivate/{configurationId}(configurationId=${configuration.id})}">Деактивирай</a></li>
+                <li><a th:href="@{/configurations/update-price/{configurationId}(configurationId=${configuration.id})}">Преизчисли</a></li>
             </ul>
         </div>
-        <div class="configuration-table">
-            <table>
-                <thead>
-                <tr>
-                    <th>Снимка</th>
-                    <th>Код</th>
-                    <th>Модел</th>
-                    <th>Линия</th>
-                    <th>Описание</th>
-                    <th>Използвани модули</th>
-                    <th>Цена</th>
-<!--                    <th>Създадена</th>-->
-                    <th>Последно обновяване на цената</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>
-                        <img th:src="${#strings.isEmpty(configuration.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:200px;"/>
-                    </td>
-                    <td th:text="${configuration.code}"></td>
-                    <td th:text="${configuration.model}"></td>
-                    <td th:text="${configuration.line}"></td>
-                    <td th:text="${configuration.description}"></td>
-                    <td><div class="included-modules">
-                        <div class="included-modules-header align-start">Включени модули:</div>
 
-                        <ul class="modules-list">
-                            <li th:each="unit : ${configuration.includedUnits}"
-                                th:text="${unit.configurableUnit != null ? (unit.configurableUnit.code + ' - ' + (unit.configurableUnit.unit != null ? unit.configurableUnit.unit.name : '—')) : '—'}">
-                            </li>
-                        </ul>
-                    </div></td>
-
-                    <td th:text="${configuration.totalPrice} + ' ' + 'EUR'"></td>
-<!--                    <td th:text="${configuration.created}"></td>-->
-                    <td th:text="${configuration.priceUpdateDate}"></td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="image-wrapper">
+            <img th:src="${#strings.isEmpty(configuration.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configuration.imageUrl}"
+                 th:alt="${configuration.code}" />
         </div>
+
+        <!-- centered horizontal info row -->
+        <div class="info-row" role="group" aria-label="configuration basic info">
+            <dl class="info-item">
+                <dt>Код</dt>
+                <dd th:text="${configuration.code}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Модел</dt>
+                <dd th:text="${configuration.model}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Линия</dt>
+                <dd th:text="${configuration.line}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Описание</dt>
+                <dd th:text="${configuration.description}">-</dd>
+            </dl>
+        </div>
+
+        <!-- modules + price centered below -->
+        <div class="modules-section">
+            <div class="modules-right-wrapper">
+                <div class="modules-right">
+                    <dt>Включени модули</dt>
+                    <table class="modules-mini-table" role="presentation">
+                        <thead>
+                        <tr>
+                            <th>Код</th>
+                            <th>Име</th>
+                            <th>бр</th>
+                            <th style="text-align:right">цена</th>
+                            <th style="text-align:right">общо</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="unit : ${configuration.includedUnits}">
+                            <td th:text="${unit.configurableUnitCode}">CODE</td>
+                            <td th:text="${unit.baseUnitName}">Name</td>
+                            <td th:text="${unit.quantity}">1</td>
+                            <td class="numeric" th:text="${unit.unitPrice} + ' EUR'">0.00 EUR</td>
+                            <td class="numeric" th:text="${unit.totalPrice} + ' EUR'">0.00 EUR</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bottom-right">
+                <div class="price" th:text="${configuration.totalPrice} != null ? ${configuration.totalPrice} + ' EUR' : '- EUR'">- EUR</div>
+                <div class="price-date" th:text="${configuration.priceUpdateDate} != null ? 'Последно обновено: ' + ${configuration.priceUpdateDate} : ''">-</div>
+            </div>
+        </div>
+
     </div>
+
 </div>
 
 </body>

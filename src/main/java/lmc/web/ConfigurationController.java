@@ -11,6 +11,7 @@ import lmc.user.model.User;
 import lmc.user.service.UserService;
 import lmc.web.dto.CreateNewConfigurationRequest;
 
+import lmc.web.dto.mapper.ConfigurationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -32,14 +33,16 @@ public class ConfigurationController {
     private final UnitService unitService;
     private final OptionService optionService;
     private final UserService userService;
+    private final ConfigurationMapper configurationMapper;
 
     @Autowired
-    public ConfigurationController(ConfigurationService configurationService, ConfigurableUnitService configurableUnitService, UnitService unitService, OptionService optionService, UserService userService) {
+    public ConfigurationController(ConfigurationService configurationService, ConfigurableUnitService configurableUnitService, UnitService unitService, OptionService optionService, UserService userService, ConfigurationMapper configurationMapper) {
         this.configurationService = configurationService;
         this.configurableUnitService = configurableUnitService;
         this.unitService = unitService;
         this.optionService = optionService;
         this.userService = userService;
+        this.configurationMapper = configurationMapper;
     }
 
 
@@ -74,7 +77,7 @@ public class ConfigurationController {
         User user = userService.getUserById(details.getId());
 
         ModelAndView modelAndView = new ModelAndView("configuration-details");
-        modelAndView.addObject("configuration", configuration);
+        modelAndView.addObject("configuration", configurationMapper.toDto(configuration));
         modelAndView.addObject("user", user);
         return modelAndView;
     }

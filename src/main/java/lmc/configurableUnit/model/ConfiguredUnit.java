@@ -28,6 +28,7 @@ public class ConfiguredUnit extends ConfigurableUnit {
         joinColumns = @JoinColumn(name = "configured_unit_id"),
         inverseJoinColumns = @JoinColumn(name = "option_id")
     )
+        @OrderColumn(name = "option_order")
         private List<Option> options = new ArrayList<>();
 
 
