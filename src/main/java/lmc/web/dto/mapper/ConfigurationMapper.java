@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -37,8 +36,8 @@ public class ConfigurationMapper {
                 .line(configuration.getLine())
                 .type(configuration.getType())
                 .active(configuration.isActive())
-                .totalPrice(calculationService.calculateConfigurationTotalPrice(configuration))
-                .priceUpdateDate(LocalDate.now())
+                .totalPrice(configuration.getTotalPrice())
+                .priceUpdateDate(configuration.getPriceUpdateDate())
                 .currency(CurrencyType.EUR)
                 .includedUnits(includedUnits)
                 .build();

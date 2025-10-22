@@ -22,9 +22,10 @@
     <div class="configuration-details">
         <div class="menu">
             <ul>
+                <li><a th:href="@{/home}">Назад</a></li>
                 <li><a th:href="@{/configurations/edit/{configurationId}(configurationId=${configuration.id})}">Редактирай</a></li>
                 <li><a th:href="@{/configurations/deactivate/{configurationId}(configurationId=${configuration.id})}">Деактивирай</a></li>
-                <li><a th:href="@{/configurations/update-price/{configurationId}(configurationId=${configuration.id})}">Преизчисли</a></li>
+                <li><a th:href="@{${currentUrl}}">Опресни</a></li>
             </ul>
         </div>
 

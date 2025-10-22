@@ -1,5 +1,6 @@
 package lmc.web;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lmc.configurableUnit.service.ConfigurableUnitService;
 import lmc.configuration.model.Configuration;
@@ -72,13 +73,16 @@ public class ConfigurationController {
     }
 
     @GetMapping("/{configurationId}/details")
-    public ModelAndView showConfigurationDetails (@PathVariable UUID configurationId, @AuthenticationPrincipal CustomUserDetails details ){
+    public ModelAndView showConfigurationDetails (@PathVariable UUID configurationId, @AuthenticationPrincipal CustomUserDetails details, HttpServletRequest request ){
         Configuration configuration = configurationService.findConfigurationById(configurationId);
         User user = userService.getUserById(details.getId());
+
+        configurationService.updateConfigurationPrice(configurationId);
 
         ModelAndView modelAndView = new ModelAndView("configuration-details");
         modelAndView.addObject("configuration", configurationMapper.toDto(configuration));
         modelAndView.addObject("user", user);
+        modelAndView.addObject("currentUrl", request.getRequestURI());
         return modelAndView;
     }
 
