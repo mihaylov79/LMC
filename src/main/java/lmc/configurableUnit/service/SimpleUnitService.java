@@ -3,6 +3,7 @@ package lmc.configurableUnit.service;
 
 import lmc.configurableUnit.model.SimpleUnit;
 import lmc.configurableUnit.repository.SimpleUnitRepository;
+import lmc.unit.model.CurrencyType;
 import lmc.unit.model.Unit;
 import lmc.unit.service.UnitService;
 import lmc.web.dto.CreateNewConfiguredUnitRequest;
@@ -33,6 +34,7 @@ public class SimpleUnitService {
                     .code(code)
                     .unit(unit)
                     .active(true)
+                    .currency(CurrencyType.EUR)
                     .build();
 
             return repository.save(simpleUnit);

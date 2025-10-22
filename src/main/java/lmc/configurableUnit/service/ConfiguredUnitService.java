@@ -5,6 +5,7 @@ import lmc.configurableUnit.model.ConfiguredUnit;
 import lmc.configurableUnit.repository.ConfiguredUnitRepository;
 import lmc.option.model.Option;
 import lmc.option.service.OptionService;
+import lmc.unit.model.CurrencyType;
 import lmc.unit.model.Unit;
 import lmc.unit.service.UnitService;
 import lmc.web.dto.CreateNewConfiguredUnitRequest;
@@ -40,6 +41,7 @@ public class ConfiguredUnitService {
                     .code(generatedCode)
                     .unit(unit)
                     .active(true)
+                    .currency(CurrencyType.EUR)
                     .options(options)
                     .build();
 

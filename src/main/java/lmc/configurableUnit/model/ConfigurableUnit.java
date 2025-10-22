@@ -2,6 +2,7 @@ package lmc.configurableUnit.model;
 
 
 import jakarta.persistence.*;
+import lmc.unit.model.CurrencyType;
 import lmc.unit.model.Unit;
 import lombok.AllArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -31,6 +32,10 @@ public abstract class ConfigurableUnit {
 
     @Column
     private boolean active;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private CurrencyType currency;
 
 
 }

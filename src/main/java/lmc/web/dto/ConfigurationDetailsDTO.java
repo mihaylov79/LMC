@@ -2,6 +2,7 @@ package lmc.web.dto;
 
 import lmc.configuration.model.MachineLine;
 import lmc.configuration.model.MachineType;
+import lmc.unit.model.CurrencyType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -24,5 +25,6 @@ public class ConfigurationDetailsDTO {
     private boolean active;
     private BigDecimal totalPrice;
     private LocalDate priceUpdateDate;
+    private CurrencyType currency;
     private List<ConfigurationIncludedUnitsDTO>includedUnits;
 }

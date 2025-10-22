@@ -4,6 +4,7 @@ import lmc.configurableUnit.model.ConfigurableUnit;
 import lmc.configurableUnit.service.PriceCalculationService;
 import lmc.configuration.model.Configuration;
 import lmc.configurationUnit.model.ConfigurationUnit;
+import lmc.unit.model.CurrencyType;
 import lmc.web.dto.ConfigurationDetailsDTO;
 import lmc.web.dto.ConfigurationIncludedUnitsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class ConfigurationMapper {
                 .active(configuration.isActive())
                 .totalPrice(calculationService.calculateConfigurationTotalPrice(configuration))
                 .priceUpdateDate(LocalDate.now())
+                .currency(CurrencyType.EUR)
                 .includedUnits(includedUnits)
                 .build();
 

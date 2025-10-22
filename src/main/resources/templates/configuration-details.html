@@ -73,8 +73,8 @@
                             <td th:text="${unit.configurableUnitCode}">CODE</td>
                             <td th:text="${unit.baseUnitName}">Name</td>
                             <td th:text="${unit.quantity}">1</td>
-                            <td class="numeric" th:text="${unit.unitPrice} + ' EUR'">0.00 EUR</td>
-                            <td class="numeric" th:text="${unit.totalPrice} + ' EUR'">0.00 EUR</td>
+                            <td class="numeric" th:text="${unit.unitPrice} + ${configuration.currency}">0.00 EUR</td>
+                            <td class="numeric" th:text="${unit.totalPrice} + ${configuration.currency}">0.00 EUR</td>
                         </tr>
                         </tbody>
                     </table>
@@ -82,8 +82,8 @@
             </div>
 
             <div class="bottom-right">
-                <div class="price" th:text="${configuration.totalPrice} != null ? ${configuration.totalPrice} + ' EUR' : '- EUR'">- EUR</div>
-                <div class="price-date" th:text="${configuration.priceUpdateDate} != null ? 'Преизчислено: ' + ${configuration.priceUpdateDate} : ''">-</div>
+                <div class="price" th:text="${configuration.totalPrice} != null ? ${configuration.totalPrice} + ${configuration.currency} : '- EUR'">- EUR</div>
+                <div class="price-date" th:text="${configuration.priceUpdateDate} != null ? 'Преизчислено: ' + ${#temporals.format(configuration.priceUpdateDate, 'dd.MM.yyyy')} : ''">-</div>
             </div>
         </div>
 
