@@ -36,4 +36,8 @@ public class ConfigurationUnit {
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 }

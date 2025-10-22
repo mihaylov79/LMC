@@ -7,6 +7,7 @@ import lmc.configurableUnit.service.PriceCalculationService;
 import lmc.configuration.model.Configuration;
 import lmc.configuration.repository.ConfigurationRepository;
 import lmc.configurationUnit.model.ConfigurationUnit;
+import lmc.configurationUnit.service.ConfigurationUnitService;
 import lmc.web.dto.CreateNewConfigurationRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -25,12 +27,14 @@ public class ConfigurationService {
     private final ConfigurationRepository configurationRepository;
     private final ConfigurableUnitService configurableUnitService;
     private final PriceCalculationService calculationService;
+    private final ConfigurationUnitService configurationUnitService;
 
     @Autowired
-    public ConfigurationService(ConfigurationRepository configurationRepository, ConfigurableUnitService configurableUnitService, PriceCalculationService calculationService) {
+    public ConfigurationService(ConfigurationRepository configurationRepository, ConfigurableUnitService configurableUnitService, PriceCalculationService calculationService, ConfigurationUnitService configurationUnitService) {
         this.configurationRepository = configurationRepository;
         this.configurableUnitService = configurableUnitService;
         this.calculationService = calculationService;
+        this.configurationUnitService = configurationUnitService;
     }
 
     @Transactional
@@ -156,6 +160,52 @@ public class ConfigurationService {
     public Configuration findConfigurationById(UUID id){
         return configurationRepository.findByIdWithUnits(id)
                 .orElseThrow(() -> new IllegalArgumentException("Конфигурация с идентификация: [ %s ] не беше открита".formatted(id)));
+    }
+
+    @Transactional
+    public Configuration addConfigurableUnit(UUID configurationId, UUID configurableUnitId, int quantity) {
+        if (quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
+        Configuration configuration = findConfigurationById(configurationId);
+
+        Optional<ConfigurationUnit> existingOpt = configurationUnitService
+                .findConfigurationUnitByConfigurationIdAndConfigurableUnitId(configurationId, configurableUnitId);
+
+        if (existingOpt.isPresent()) {
+            ConfigurationUnit existing = existingOpt.get();
+            existing.setQuantity(existing.getQuantity() + quantity);
+        } else {
+            ConfigurableUnit cu = configurableUnitService.findUnitById(configurableUnitId);
+            ConfigurationUnit newUnit = ConfigurationUnit.builder()
+                    .configurableUnit(cu)
+                    .quantity(quantity)
+                    .build();
+            configuration.addIncludedUnit(newUnit);
+        }
+
+        BigDecimal totalPrice = calculationService.calculateConfigurationTotalPrice(configuration);
+        configuration.setTotalPrice(totalPrice);
+        configuration.setPriceUpdateDate(LocalDate.now());
+        return configurationRepository.save(configuration);
+    }
+
+    @Transactional
+    public Configuration removeConfigurableUnit(UUID configurationId, UUID configurableUnitId, int quantity) {
+        Configuration configuration = findConfigurationById(configurationId);
+
+        configurationUnitService
+                .findConfigurationUnitByConfigurationIdAndConfigurableUnitId(configurationId, configurableUnitId)
+                .ifPresent(existing -> {
+                    if (existing.getQuantity() <= quantity) {
+                        configuration.removeIncludedUnit(existing);
+                    } else {
+                        existing.setQuantity(existing.getQuantity() - quantity);
+                    }
+                });
+
+        BigDecimal totalPrice = calculationService.calculateConfigurationTotalPrice(configuration);
+        configuration.setTotalPrice(totalPrice);
+        configuration.setPriceUpdateDate(LocalDate.now());
+        return configurationRepository.save(configuration);
     }
 
 }
