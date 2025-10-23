@@ -7,6 +7,8 @@ import lmc.configurationUnit.model.ConfigurationUnit;
 import lmc.unit.model.CurrencyType;
 import lmc.web.dto.ConfigurationDetailsDTO;
 import lmc.web.dto.ConfigurationIncludedUnitsDTO;
+import lmc.web.dto.ConfigurationUnitRequest;
+import lmc.web.dto.CreateNewConfigurationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +60,29 @@ public class ConfigurationMapper {
                 .quantity(unit.getQuantity())
                 .totalPrice(totalUnitPrice)
                 .build();
+    }
+
+    public CreateNewConfigurationRequest toEditRequest(Configuration configuration){
+
+        List<ConfigurationUnitRequest> units = configuration.getIncludedUnits().stream().map(u -> {
+            ConfigurationUnitRequest cu = new ConfigurationUnitRequest();
+            cu.setConfigurableUnitId(u.getConfigurableUnit().getId());
+            cu.setQuantity(u.getQuantity());
+            return cu;
+        }).toList();
+
+
+        return CreateNewConfigurationRequest.builder()
+                .imgUrl(configuration.getImageUrl())
+                .code(configuration.getCode())
+                .line(configuration.getLine())
+                .type(configuration.getType())
+                .model(configuration.getModel())
+                .description(configuration.getDescription())
+                .units(units)
+                .build();
+
+
     }
 
 

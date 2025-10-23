@@ -164,7 +164,7 @@ public class ConfigurationService {
 
     @Transactional
     public Configuration addConfigurableUnit(UUID configurationId, UUID configurableUnitId, int quantity) {
-        if (quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
+        if (quantity <= 0) throw new IllegalArgumentException("Количеството трябва да бъде положителна стойност!");
         Configuration configuration = findConfigurationById(configurationId);
 
         Optional<ConfigurationUnit> existingOpt = configurationUnitService
@@ -206,6 +206,28 @@ public class ConfigurationService {
         configuration.setTotalPrice(totalPrice);
         configuration.setPriceUpdateDate(LocalDate.now());
         return configurationRepository.save(configuration);
+    }
+
+    @Transactional
+    public Configuration updateConfiguration(UUID configurationId, CreateNewConfigurationRequest request){
+        Configuration configuration = findConfigurationById(configurationId);
+
+        configuration = configuration.toBuilder()
+                .imageUrl(request.getImgUrl())
+                .code(request.getCode())
+                .line(request.getLine())
+                .type(request.getType())
+                .model(request.getModel())
+                .description(request.getDescription())
+                .build();
+
+        BigDecimal newPrice = calculationService.calculateConfigurationTotalPrice(configuration);
+        configuration = configuration.toBuilder()
+                .totalPrice(newPrice)
+                .priceUpdateDate(LocalDate.now())
+                .build();
+        return configurationRepository.save(configuration);
+
     }
 
 }

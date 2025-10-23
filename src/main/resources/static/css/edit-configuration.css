@@ -1,0 +1,182 @@
+/* src/main/resources/static/css/edit-configuration.css */
+/* Base form layout */
+body {
+    font-family: 'Raleway', sans-serif;
+    background-color: white;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #3771c8ff;
+    margin: 1rem 0;
+    font-weight: 700;
+}
+
+/* Centered form container similar to other pages */
+form[th\:action], .form {
+    margin: 1.5rem auto;
+    width: 95%;
+    max-width: 900px;
+    background: #ffffff;
+    padding: 1.25rem;
+    border-radius: 8px;
+    box-shadow: 0.2em 0.2em 0.5em #3771c8ff;
+}
+
+/* Basic field styles (compatible with login.css) */
+label {
+    display: block;
+    font-weight: 600;
+    color: #3771c8ff;
+    margin-bottom: 0.35rem;
+}
+
+input[type="text"],
+textarea,
+select,
+input[type="number"] {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: none;
+    border-bottom: 2px solid #cccccc;
+    background: transparent;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+    outline: none;
+    font-family: 'Raleway', sans-serif;
+}
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus,
+input[type="number"]:focus {
+    border-color: #3771c8ff;
+}
+
+/* Units list container */
+#units-list {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Each unit row in the edit page (there are plain divs with spans/buttons) */
+#units-list > div,
+.unit-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fafafa;
+    flex-wrap: wrap;
+}
+
+/* Left part (identifier and meta) */
+#units-list > div span {
+    display: inline-block;
+    min-width: 200px;
+    color: #333;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+/* Quantity display */
+#units-list > div span + span {
+    color: #555;
+}
+
+/* Buttons in rows */
+#units-list button,
+button.remove-btn,
+button {
+    background: #3771c8ff;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+#units-list button:hover,
+button.remove-btn:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+}
+
+/* Add / Create buttons area (below units) */
+form > button[type="button"],
+form > button[type="submit"] {
+    margin: 0.4rem 0.25rem 0 0;
+    padding: 0.55rem 0.8rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+button[onclick="addUnit()"] {
+    background: #28a745;
+    color: #fff;
+}
+
+button[onclick="openCreateUnitModal()"] {
+    background: #3771c8ff;
+    color: #fff;
+}
+
+button[type="submit"] {
+    background: transparent;
+    color: #3771c8ff;
+    border: 2px solid #3771c8ff;
+}
+
+/* Small helper for inline selects used by JS (if any) */
+#add-unit-select, #add-qty, select[id^="add-"] {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Responsive: make controls stack on narrow screens */
+@media (max-width: 600px) {
+    #units-list > div,
+    .unit-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #units-list > div span {
+        min-width: 0;
+    }
+
+    form[th\:action], .form {
+    padding: 1rem;
+    width: 96%;
+}
+
+    button[onclick="addUnit()"],
+    button[onclick="openCreateUnitModal()"],
+    button[type="submit"] {
+        width: 100%;
+    }
+}
+
+/* Small visual polish */
+.unit-row .remove-btn {
+    background: #dc3545;
+}
+
+.unit-row .remove-btn:hover {
+    filter: brightness(0.95);
+}
+
+/* Ensure the units list fallback (edit template) looks consistent */
+#units-list .placeholder {
+    color: #777;
+    padding: 0.5rem;
+}

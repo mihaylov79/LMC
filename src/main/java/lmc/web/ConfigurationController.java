@@ -17,12 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -84,6 +82,57 @@ public class ConfigurationController {
         modelAndView.addObject("user", user);
         modelAndView.addObject("currentUrl", request.getRequestURI());
         return modelAndView;
+    }
+
+    @GetMapping("/edit/{configurationId}")
+    public ModelAndView showEditConfigurationForm(@PathVariable UUID configurationId, @AuthenticationPrincipal CustomUserDetails details){
+        Configuration configuration = configurationService.findConfigurationById(configurationId);
+        User user = userService.getUserById(details.getId());
+
+        ModelAndView modelAndView = new ModelAndView("edit-configuration");
+        modelAndView.addObject("configuration", configurationMapper.toEditRequest(configuration));
+        modelAndView.addObject("existingUnits", configurableUnitService.getAllUnits());
+        modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
+        modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
+        modelAndView.addObject("user", user);
+        return modelAndView;
+    }
+
+    @PostMapping("/edit/{configurationId}")
+    public ModelAndView editConfigurationData(@PathVariable UUID configurationId, @Valid CreateNewConfigurationRequest request, BindingResult result){
+        if (result.hasErrors()){
+            ModelAndView modelAndView = new ModelAndView("edit-configuration");
+            modelAndView.addObject("configuration", request);
+            modelAndView.addObject("existingUnits", configurableUnitService.getAllUnits());
+            modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
+            modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
+            modelAndView.addObject("configurationId", configurationId);
+            return modelAndView;
+        }
+        configurationService.updateConfiguration(configurationId, request);
+        return new ModelAndView("redirect:/configurations/{configurationId}/details");
+    }
+
+    @PostMapping("/{configurationId}/units/add")
+    @ResponseBody
+    public Map<String, Object> addNewConfigurationUnit(@PathVariable UUID configurationId,@RequestBody Map<String,Object> body){
+        UUID cuId = UUID.fromString((String) body.get("configurableUnitId"));
+        int qty = ((Number) body.getOrDefault("quantity",1)).intValue();
+        Configuration updated = configurationService.addConfigurableUnit(configurationId,cuId,qty);
+
+        return Map.of("totalPrice", updated.getTotalPrice(),
+                      "priceUpdateDate", updated.getPriceUpdateDate());
+    }
+    @PostMapping("/{configurationId}/units/remove")
+    @ResponseBody
+    public Map<String, Object> removeConfigurationUnit(@PathVariable UUID configurationId,@RequestBody Map<String,Object> body){
+        UUID cuId = UUID.fromString((String) body.get("configurableUnitId"));
+        int qty = ((Number) body.getOrDefault("quantity",1)).intValue();
+
+        Configuration updated = configurationService.removeConfigurableUnit(configurationId,cuId,qty);
+
+        return Map.of("totalPrice", updated.getTotalPrice(),
+                      "priceUpdateDate", updated.getPriceUpdateDate());
     }
 
 
