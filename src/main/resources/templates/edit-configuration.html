@@ -10,14 +10,17 @@
     <link rel="stylesheet" href="/css/edit-configuration.css">
 </head>
 <body>
-<h1>Edit configuration</h1>
+<div class="header-container">
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+</div>
+<h1>Редактирай конфигурация</h1>
 
 <form th:action="@{|/configurations/edit/${configurationId}|}" th:object="${configuration}" th:attr="data-id=${configurationId}" method="post">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-    <label>Image URL: <input type="text" th:field="*{imgUrl}"/></label><br/>
-    <label>Code: <input type="text" th:field="*{code}"/></label><br/>
-    <label>Line: <select th:field="*{line}">
+    <label>Линк на изображението: <input type="text" th:field="*{imgUrl}"/></label><br/>
+    <label>Код: <input type="text" th:field="*{code}"/></label><br/>
+    <label>Линия: <select th:field="*{line}">
         <option th:each="l : ${T(lmc.configuration.model.MachineLine).values()}"
                 th:value="${l}" th:text="${l}"></option>
     </select></label><br/>
@@ -25,29 +28,29 @@
         <option th:each="t : ${T(lmc.configuration.model.MachineType).values()}"
                 th:value="${t}" th:text="${t}"></option>
     </select></label><br/>
-    <label>Description:<br/>
+    <label>Описание:<br/>
         <textarea th:field="*{description}"></textarea>
     </label><br/>
-    <label>Model: <input type="text" th:field="*{model}"/></label><br/>
+    <label>Модел: <input type="text" th:field="*{model}"/></label><br/>
 
-    <h3>Included units</h3>
+    <h3>Елементи на конфигурацията</h3>
     <div id="units-list">
         <div th:each="u,iterStat : *{units}">
-            <span th:text="${u.configurableUnitId}">unit-id</span>
+            <span th:text="${u.displayLabel != null && u.displayLabel != '' ? u.displayLabel : u.configurableUnitId}">unit-label</span>
             <span> qty: <span th:text="${u.quantity}">1</span></span>
             <button type="button" th:attr="data-id=${u.configurableUnitId}" onclick="removeUnit(this)">Remove 1</button>
         </div>
     </div>
 
-    <h4>Add unit</h4>
+    <h4>Добави елемент</h4>
     <select id="add-unit-select">
         <option th:each="cu : ${existingUnits}" th:value="${cu.id}" th:text="${cu.code + ' - ' + (cu.unit != null ? cu.unit.name : '')}"></option>
     </select>
     <input id="add-qty" type="number" value="1" min="1"/>
-    <button type="button" onclick="addUnit()">Add</button>
+    <button type="button" onclick="addUnit()">Добави</button>
 
     <br/><br/>
-    <button type="submit">Save</button>
+    <button type="submit">Запази</button>
 </form>
 
 <script th:inline="javascript">
@@ -72,7 +75,26 @@
         return headers;
     }
 
+    // capture initial serialized form state
+    const form = document.querySelector('form[th\\:action], form');
+    let initialSerialized = new URLSearchParams(new FormData(form)).toString();
+
+    function isFormDirty() {
+        return new URLSearchParams(new FormData(form)).toString() !== initialSerialized;
+    }
+
+    // helper to show a consistent message (Bulgarian)
+    function requireSaveBeforeChange() {
+        alert('Моля запазете първо детайлите на конфигурацията преди да промените елементите.');
+    }
+
+    // patched addUnit: check form dirty before sending
     function addUnit() {
+        if (isFormDirty()) {
+            requireSaveBeforeChange();
+            return;
+        }
+
         const cuId = document.getElementById('add-unit-select').value;
         const qty = parseInt(document.getElementById('add-qty').value || '1', 10);
         fetch('/configurations/' + configurationId + '/units/add', {
@@ -90,7 +112,13 @@
         });
     }
 
+    // patched removeUnit: check form dirty before sending
     function removeUnit(btn) {
+        if (isFormDirty()) {
+            requireSaveBeforeChange();
+            return;
+        }
+
         const cuId = btn.getAttribute('data-id');
         fetch('/configurations/' + configurationId + '/units/remove', {
             method: 'POST',
@@ -106,6 +134,14 @@
             alert('Error removing unit: ' + (e.message || 'unknown'));
         });
     }
+
+    // optional: if user submits the details form successfully in-page (e.g. AJAX),
+    // update initialSerialized so edits are allowed without reload.
+    // If using normal POST submit (page reload), this is not necessary.
+    form.addEventListener('submit', () => {
+        // update snapshot so subsequent JS actions don't block (only useful for AJAX saves)
+        initialSerialized = new URLSearchParams(new FormData(form)).toString();
+    });
     /*]]>*/
 </script>
 </body>

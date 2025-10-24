@@ -68,6 +68,10 @@ public class ConfigurationMapper {
             ConfigurationUnitRequest cu = new ConfigurationUnitRequest();
             cu.setConfigurableUnitId(u.getConfigurableUnit().getId());
             cu.setQuantity(u.getQuantity());
+
+            ConfigurableUnit confUnit = u.getConfigurableUnit();
+            String label = confUnit.getCode() + (confUnit.getUnit() != null ? " - " + confUnit.getUnit().getName() : "");
+            cu.setDisplayLabel(label);
             return cu;
         }).toList();
 
