@@ -30,7 +30,7 @@
     <input type="hidden" th:field="*{model}" id="hidden-model"/>
 
     <!-- Section title for Details -->
-    <h2 class="section-title">Детайли</h2>
+    <h2 class="section-title">Детайли:</h2>
 
     <div class="details-grid">
 
@@ -74,7 +74,7 @@
         </div>
 
         <div class="detail-field">
-            <label>Type:</label>
+            <label>Тип:</label>
             <div class="detail-row">
                 <span class="detail-value" th:text="${configuration.type}">-</span>
                 <button type="button" class="edit-field-btn" onclick="toggleInlineField(this)">Редактирай</button>
@@ -115,15 +115,16 @@
     </div> <!-- /.details-grid -->
 
     <!-- Units section title: blue and spaced down only before the heading -->
-    <h3 class="section-title section-spaced">Елементи на конфигурацията</h3>
+    <h3 class="section-title section-spaced">Елементи на конфигурацията:</h3>
 
     <div id="units-list">
         <div th:each="u,iterStat : *{units}" class="unit-row">
             <div class="unit-content">
                 <span th:text="${u.displayLabel != null && u.displayLabel != '' ? u.displayLabel : u.configurableUnitId}">unit-label</span>
-                <span> qty: <span th:text="${u.quantity}">1</span></span>
+                <span> - </span>
+                <span> к-во: <span th:text="${u.quantity}">1</span></span>
             </div>
-            <button type="button" th:attr="data-id=${u.configurableUnitId}" onclick="removeUnit(this)">Remove 1</button>
+            <button type="button" th:attr="data-id=${u.configurableUnitId}" onclick="removeUnit(this)">Премахни 1бр.</button>
         </div>
     </div>
 
