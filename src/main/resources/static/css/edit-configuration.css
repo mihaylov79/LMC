@@ -1,6 +1,6 @@
 /* css
-   File: src/main/resources/static/css/edit-configuration.css
-   Edited: label color, add-controls sizes, unit-row alignment (grid column for consistent Remove button column)
+   File: `src/main/resources/static/css/edit-configuration.css`
+   Regenerated: unified styles, fixed add-controls sizing, forced label color, aligned buttons
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap');
@@ -14,6 +14,8 @@
     --radius: 8px;
     --max-width: 980px;
     --shadow: 0.15em 0.15em 0.45em rgba(55,113,200,0.12);
+    --control-height: 40px;
+    --control-padding: 0.36rem 0.6rem;
 }
 
 /* Reset / base */
@@ -67,10 +69,10 @@ form#details-form h4 {
     min-width: 0;
 }
 
-/* Label styles - made blue so they don't blend with content */
+/* Label styles - forced blue so they don't blend with content */
 .detail-field > label {
     font-weight: 700;
-    color: var(--primary); /* changed to blue */
+    color: var(--primary) !important;
     font-size: 0.95rem;
     margin-bottom: 0.15rem;
     display: inline-block;
@@ -107,6 +109,8 @@ form#details-form h4 {
     cursor: pointer;
     font-weight: 600;
     white-space: nowrap;
+    height: calc(var(--control-height) - 6px);
+    align-items: center;
 }
 
 /* Inline form hidden by default; shown when .open class present */
@@ -125,7 +129,7 @@ form#details-form h4 {
 .inline-field-form .inline-input,
 .inline-field-form .inline-select,
 .inline-field-form .inline-textarea {
-    padding: 0.36rem 0.5rem;
+    padding: var(--control-padding);
     border: 1px solid #e6eef8;
     border-radius: 6px;
     min-width: 180px;
@@ -133,6 +137,8 @@ form#details-form h4 {
     background: #fff;
     color: #111827;
     font-size: 0.95rem;
+    height: var(--control-height);
+    line-height: 1.1;
 }
 
 /* textarea sizing */
@@ -140,6 +146,7 @@ form#details-form h4 {
     min-height: 84px;
     max-height: 240px;
     resize: vertical;
+    height: auto;
 }
 
 /* primary change button */
@@ -151,6 +158,8 @@ form#details-form h4 {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 700;
+    height: calc(var(--control-height) - 6px);
+    align-items: center;
 }
 
 /* Ensure buttons are not forced full width by global rules */
@@ -166,6 +175,7 @@ form#details-form button[type="button"],
     justify-content: center;
     padding: 0.35rem 0.6rem;
     box-sizing: border-box;
+    height: calc(var(--control-height) - 6px);
 }
 
 /* Units list: below details */
@@ -190,57 +200,88 @@ form#details-form button[type="button"],
     box-sizing: border-box;
 }
 
+/* new wrapper occupying the large left column */
+.unit-content {
+    display: flex;
+    flex-direction: row;
+    gap: 0.6rem;
+    align-items: center;
+    min-width: 0; /* allow text truncation inside grid */
+}
+
 /* unit text spans */
 .unit-row span { min-width: 0; font-weight: 600; color: #111827; }
 
-/* make sure remove button sits centered in its column and has consistent size */
+/* Make Remove buttons look like the inline edit button and sit to the right */
 .unit-row button {
-    background: var(--danger);
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 0.35rem 0.6rem;
-    cursor: pointer;
+    background: transparent !important;
+    border: 1px solid var(--primary) !important;
+    color: var(--primary) !important;
+    padding: 0.32rem 0.55rem !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
     white-space: nowrap;
-    justify-self: center; /* center within the second column */
-    width: 88px; /* consistent width so buttons line up */
+    justify-self: end; /* align to the right within the narrow column */
+    width: 88px;
     box-sizing: border-box;
+    height: calc(var(--control-height) - 6px);
+    align-items: center;
 }
 
-/* Add controls area */
+/* Add controls area - stretch to full width and keep consistent heights */
 .add-controls {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 96px minmax(96px, 140px); /* select | qty | add button */
     gap: 0.5rem;
     align-items: center;
     margin-top: 0.5rem;
-    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* Increase the add-unit select, reduce qty field width */
+/* Increase the add-unit select, reduce qty field width, unify control height */
 .add-controls select#add-unit-select {
-    padding: 0.4rem;
+    padding: var(--control-padding);
     border-radius: 6px;
     border: 1px solid #e6ecf8;
     background: #fff;
-    min-width: 260px;
-    max-width: 560px; /* increased max width */
-    width: 380px; /* larger select for choosing module */
+    width: 100%;
+    min-width: 0;
+    height: var(--control-height);
+    line-height: 1.1;
     box-sizing: border-box;
 }
 
 .add-controls input[type="number"]#add-qty {
-    padding: 0.4rem;
+    padding: var(--control-padding);
     border-radius: 6px;
     border: 1px solid #e6ecf8;
     background: #fff;
-    width: 82px; /* reduced qty width */
+    width: 100%;
+    min-width: 0;
+    height: var(--control-height);
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* add button column - ensure it doesn't overlap qty */
+.add-controls button {
+    padding: 0.36rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+    width: 100%;
+    min-width: 80px;
+    height: var(--control-height);
     box-sizing: border-box;
 }
 
 /* Fallback generic add-controls selectors kept for compatibility */
 .add-controls select,
 .add-controls input[type="number"] {
-    padding: 0.4rem;
+    padding: var(--control-padding);
     border-radius: 6px;
     border: 1px solid #e6ecf8;
     background: #fff;
@@ -248,26 +289,29 @@ form#details-form button[type="button"],
 }
 
 /* constraining the large select behavior (kept smaller than explicit #add-unit-select) */
-.add-controls select { width: auto; max-width: 60%; box-sizing: border-box; }
+.add-controls select { width: auto; max-width: 100%; box-sizing: border-box; }
 
-/* Action row at bottom of form */
+/* Action row at bottom of form -- center finish button */
 form#details-form > div:last-child {
     margin-top: 1rem;
     display: flex;
     gap: 0.6rem;
     align-items: center;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
-/* finish button */
+/* style finish button like edit */
 .finish-btn {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 0.45rem 0.8rem;
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 0.32rem 0.55rem;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
+    height: calc(var(--control-height) - 6px);
+    box-sizing: border-box;
 }
 
 /* small hover polish */
@@ -297,7 +341,6 @@ form#details-form > div:last-child {
 /* Strong overrides for elements that might be styled by login.css/menu.css */
 body form#details-form,
 body form#details-form * {
-    color: inherit !important;
     background: transparent !important;
     border-radius: inherit !important;
 }
@@ -369,10 +412,21 @@ body form#details-form * {
     .inline-field-form .inline-input,
     .inline-field-form .inline-select,
     .inline-field-form .inline-textarea { width: 100%; min-width: 0; max-width: 100%; }
+
+    .add-controls {
+        grid-template-columns: 1fr;
+    }
+    .add-controls input[type="number"]#add-qty,
+    .add-controls button,
+    .add-controls select#add-unit-select {
+        width: 100%;
+        height: var(--control-height);
+    }
+
     form#details-form button,
     form#details-form input[type="submit"],
     .add-controls button { width: 100% !important; }
-    .add-controls { flex-direction: column; align-items: stretch; }
+
     .unit-row { gap: 0.5rem; }
     .unit-row select, .unit-row input[type="number"] { flex-basis: 100%; max-width: 100%; }
 }
@@ -388,4 +442,4 @@ body form#details-form * {
 /* Defensive rule: ensure selects/options inside templates don't expand the page */
 select option { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* End of stylesheet */
+/* End of regenerated stylesheet */
