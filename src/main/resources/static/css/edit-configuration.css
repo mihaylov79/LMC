@@ -1,10 +1,4 @@
-/* css
-   File: `src/main/resources/static/css/edit-configuration.css`
-   Regenerated: unified styles, fixed add-controls sizing, forced label color, aligned buttons
-*/
-
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap'); /* File: `src/main/resources/static/css/edit-configuration.css` */
 :root {
     --primary: #3771c8;
     --accent: #28a745;
@@ -16,11 +10,12 @@
     --shadow: 0.15em 0.15em 0.45em rgba(55,113,200,0.12);
     --control-height: 40px;
     --control-padding: 0.36rem 0.6rem;
+    --heading-bottom: 0.35rem;
 }
 
-/* Reset / base */
-html, body { height: 100%; }
+/* Base reset */
 *, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
 body {
     margin: 0;
     padding: 0;
@@ -44,16 +39,54 @@ form#details-form {
     border: 1px solid rgba(20,40,80,0.03);
 }
 
-/* Headings inside form */
+/* Default heading spacing inside form — base baseline */
 form#details-form h1,
 form#details-form h2,
 form#details-form h3,
 form#details-form h4 {
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 var(--heading-bottom) 0;
     color: #1f2937;
 }
 
-/* Details grid: two-column on wide screens, single-column on small */
+/* Make section headings inside the form consistent and spaced before each section */
+form#details-form h2,
+form#details-form h3,
+form#details-form h4 {
+    font-size: 1.05rem;         /* same size for all section headings */
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 2em;           /* clear space before each heading (prevents overlap) */
+    margin-bottom: var(--heading-bottom);
+}
+form#details-form h2{
+    margin-top: 1em;
+    margin-bottom: 2em;
+}
+
+/* Page title */
+.page-title {
+    margin-left: 1.2rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Section title base class (kept for semantic use) */
+.section-title {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-top: 0; /* controlled by the global rules above */
+    margin-bottom: var(--heading-bottom);
+}
+
+/* .section-spaced no longer uses top shifting to avoid overlap */
+.section-spaced {
+    position: static;
+}
+
+/* Details grid */
 .details-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(260px, 1fr));
@@ -69,16 +102,16 @@ form#details-form h4 {
     min-width: 0;
 }
 
-/* Label styles - forced blue so they don't blend with content */
+/* Labels */
 .detail-field > label {
     font-weight: 700;
     color: var(--primary) !important;
-    font-size: 0.95rem;
+    font-size: 1.02rem;
     margin-bottom: 0.15rem;
     display: inline-block;
 }
 
-/* Row that shows value + edit button */
+/* detail row layout */
 .detail-row {
     display: flex;
     gap: 0.6rem;
@@ -99,7 +132,7 @@ form#details-form h4 {
     padding-right: 0.5rem;
 }
 
-/* Edit button (non-fullwidth) */
+/* edit buttons */
 .edit-field-btn {
     background: transparent;
     border: 1px solid var(--primary);
@@ -113,7 +146,7 @@ form#details-form h4 {
     align-items: center;
 }
 
-/* Inline form hidden by default; shown when .open class present */
+/* inline form hidden by default */
 .inline-field-form {
     display: none;
     gap: 0.5rem;
@@ -121,11 +154,9 @@ form#details-form h4 {
     margin-top: 0.25rem;
     width: 100%;
 }
-
-/* explicit open state */
 .inline-field-form.open { display: flex; }
 
-/* inputs inside inline forms */
+/* inline inputs */
 .inline-field-form .inline-input,
 .inline-field-form .inline-select,
 .inline-field-form .inline-textarea {
@@ -140,20 +171,13 @@ form#details-form h4 {
     height: var(--control-height);
     line-height: 1.1;
 }
+.inline-field-form .inline-textarea { min-height: 84px; max-height: 240px; resize: vertical; height: auto; }
 
-/* textarea sizing */
-.inline-field-form .inline-textarea {
-    min-height: 84px;
-    max-height: 240px;
-    resize: vertical;
-    height: auto;
-}
-
-/* primary change button */
+/* change button: white background, blue text and blue border */
 .change-btn {
-    background: var(--primary);
-    color: #fff;
-    border: none;
+    background: #fff;
+    color: var(--primary);
+    border: 1px solid var(--primary);
     padding: 0.36rem 0.6rem;
     border-radius: 6px;
     cursor: pointer;
@@ -162,7 +186,7 @@ form#details-form h4 {
     align-items: center;
 }
 
-/* Ensure buttons are not forced full width by global rules */
+/* Ensure buttons are not forced full width by other styles */
 form#details-form button,
 form#details-form input[type="submit"],
 form#details-form button[type="button"],
@@ -178,18 +202,18 @@ form#details-form button[type="button"],
     height: calc(var(--control-height) - 6px);
 }
 
-/* Units list: below details */
+/* Units list: use container gap for spacing between rows; remove extra margin-top */
 #units-list {
-    margin-top: 1rem;
+    margin-top: 0; /* spacing comes from heading margin-top above */
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.6rem; /* spacing between rows only */
 }
 
-/* Each unit row: use grid with two columns so Remove buttons form a vertical column */
+/* Each unit row */
 .unit-row {
     display: grid;
-    grid-template-columns: 1fr 96px; /* left: content, right: remove button column */
+    grid-template-columns: 1fr 96px;
     gap: 0.6rem;
     align-items: center;
     padding: 0.6rem;
@@ -200,19 +224,18 @@ form#details-form button[type="button"],
     box-sizing: border-box;
 }
 
-/* new wrapper occupying the large left column */
+/* wrapper inside left column */
 .unit-content {
     display: flex;
     flex-direction: row;
     gap: 0.6rem;
     align-items: center;
-    min-width: 0; /* allow text truncation inside grid */
+    min-width: 0;
 }
 
-/* unit text spans */
 .unit-row span { min-width: 0; font-weight: 600; color: #111827; }
 
-/* Make Remove buttons look like the inline edit button and sit to the right */
+/* Remove button in unit row */
 .unit-row button {
     background: transparent !important;
     border: 1px solid var(--primary) !important;
@@ -222,50 +245,33 @@ form#details-form button[type="button"],
     cursor: pointer !important;
     font-weight: 600 !important;
     white-space: nowrap;
-    justify-self: end; /* align to the right within the narrow column */
+    justify-self: end;
     width: 88px;
     box-sizing: border-box;
     height: calc(var(--control-height) - 6px);
     align-items: center;
 }
 
-/* Add controls area - stretch to full width and keep consistent heights */
+/* Add controls area */
 .add-controls {
     display: grid;
-    grid-template-columns: 1fr 96px minmax(96px, 140px); /* select | qty | add button */
+    grid-template-columns: 1fr 96px minmax(96px, 140px);
     gap: 0.5rem;
     align-items: center;
     margin-top: 0.5rem;
     width: 100%;
     box-sizing: border-box;
 }
-
-/* Increase the add-unit select, reduce qty field width, unify control height */
-.add-controls select#add-unit-select {
-    padding: var(--control-padding);
-    border-radius: 6px;
-    border: 1px solid #e6ecf8;
-    background: #fff;
-    width: 100%;
-    min-width: 0;
-    height: var(--control-height);
-    line-height: 1.1;
-    box-sizing: border-box;
-}
-
+.add-controls select#add-unit-select,
 .add-controls input[type="number"]#add-qty {
     padding: var(--control-padding);
     border-radius: 6px;
     border: 1px solid #e6ecf8;
     background: #fff;
-    width: 100%;
-    min-width: 0;
     height: var(--control-height);
     box-sizing: border-box;
-    text-align: center;
 }
-
-/* add button column - ensure it doesn't overlap qty */
+.add-controls input[type="number"]#add-qty { text-align: center; }
 .add-controls button {
     padding: 0.36rem 0.6rem;
     border-radius: 6px;
@@ -278,20 +284,7 @@ form#details-form button[type="button"],
     box-sizing: border-box;
 }
 
-/* Fallback generic add-controls selectors kept for compatibility */
-.add-controls select,
-.add-controls input[type="number"] {
-    padding: var(--control-padding);
-    border-radius: 6px;
-    border: 1px solid #e6ecf8;
-    background: #fff;
-    min-width: 160px;
-}
-
-/* constraining the large select behavior (kept smaller than explicit #add-unit-select) */
-.add-controls select { width: auto; max-width: 100%; box-sizing: border-box; }
-
-/* Action row at bottom of form -- center finish button */
+/* Action row */
 form#details-form > div:last-child {
     margin-top: 1rem;
     display: flex;
@@ -300,8 +293,6 @@ form#details-form > div:last-child {
     flex-wrap: wrap;
     justify-content: center;
 }
-
-/* style finish button like edit */
 .finish-btn {
     background: transparent;
     border: 1px solid var(--primary);
@@ -324,7 +315,7 @@ form#details-form > div:last-child {
     transition: all 120ms ease;
 }
 
-/* Focus styles for accessibility */
+/* Focus styles */
 .inline-field-form .inline-input:focus,
 .inline-field-form .inline-select:focus,
 .inline-field-form .inline-textarea:focus,
@@ -332,21 +323,13 @@ form#details-form > div:last-child {
 .add-controls input[type="number"]:focus,
 .edit-field-btn:focus,
 .change-btn:focus,
-.finish-btn:focus,
+finish-btn:focus,
 .unit-row button:focus {
     outline: 3px solid rgba(55,113,200,0.12);
     outline-offset: 2px;
 }
 
-/* Strong overrides for elements that might be styled by login.css/menu.css */
-body form#details-form,
-body form#details-form * {
-    background: transparent !important;
-    border-radius: inherit !important;
-}
-
-/* Specific input reset to avoid duplicate visible form fields show/hide issues:
-   hidden binding inputs (th:field) present in template should remain visually hidden */
+/* Hide specific hidden binding inputs */
 #hidden-imgUrl,
 #hidden-code,
 #hidden-line,
@@ -362,7 +345,7 @@ body form#details-form * {
     border: 0 !important;
 }
 
-/* ADJUSTMENTS FOR NEW-CONFIGURATION-style unit rows compatibility (same look) */
+/* NEW-CONFIGURATION compatibility for unit rows */
 .unit-row select {
     min-width: 160px;
     max-width: 60%;
@@ -373,8 +356,7 @@ body form#details-form * {
     min-width: 60px;
 }
 
-/* modal and helper classes (if used by other templates) */
-#createUnitModal,
+/* Modal content */
 #createUnitModal {
     display: none;
     position: fixed;
@@ -392,46 +374,25 @@ body form#details-form * {
     box-shadow: var(--shadow);
 }
 
-/* Responsive: single column on narrower viewports */
+/* Responsive */
 @media (max-width: 900px) {
     .details-grid { grid-template-columns: 1fr; }
-
-    /* unit rows switch to single column layout on small screens to avoid cramped grid */
-    .unit-row {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        align-items: stretch;
-    }
-    .unit-row button {
-        width: 100%;
-        justify-self: stretch;
-    }
-
+    .unit-row { display: flex; flex-direction: column; gap: 0.5rem; align-items: stretch; }
+    .unit-row button { width: 100%; justify-self: stretch; }
     .inline-field-form { flex-direction: column; align-items: stretch; }
     .inline-field-form .inline-input,
     .inline-field-form .inline-select,
     .inline-field-form .inline-textarea { width: 100%; min-width: 0; max-width: 100%; }
-
-    .add-controls {
-        grid-template-columns: 1fr;
-    }
+    .add-controls { grid-template-columns: 1fr; }
     .add-controls input[type="number"]#add-qty,
     .add-controls button,
-    .add-controls select#add-unit-select {
-        width: 100%;
-        height: var(--control-height);
-    }
-
+    .add-controls select#add-unit-select { width: 100%; height: var(--control-height); }
     form#details-form button,
     form#details-form input[type="submit"],
     .add-controls button { width: 100% !important; }
-
-    .unit-row { gap: 0.5rem; }
-    .unit-row select, .unit-row input[type="number"] { flex-basis: 100%; max-width: 100%; }
 }
 
-/* Small screens further polish */
+/* Small screens polish */
 @media (max-width: 600px) {
     form#details-form { padding: 0.75rem; }
     .detail-field > label { font-size: 0.92rem; }
@@ -439,7 +400,5 @@ body form#details-form * {
     .change-btn, .edit-field-btn, .finish-btn { padding: 0.45rem; font-size: 0.95rem; }
 }
 
-/* Defensive rule: ensure selects/options inside templates don't expand the page */
+/* Defensive: ensure options don't expand page */
 select option { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* End of regenerated stylesheet */

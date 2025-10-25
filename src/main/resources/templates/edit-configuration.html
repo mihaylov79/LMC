@@ -1,5 +1,6 @@
+<!-- File: src/main/resources/templates/edit-configuration.html -->
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="bg">
 <head>
     <meta charset="UTF-8"/>
     <meta name="_csrf" th:content="${_csrf.token}"/>
@@ -7,24 +8,29 @@
     <title>Edit Configuration</title>
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/login.css">
-    <link rel="stylesheet" href="/css/edit-configuration.css">
+    <link rel="stylesheet" href="/css/edit-configuration.css?v=1.0">
 </head>
 <body>
 <div class="header-container">
     <th:block th:insert="~{fragments/nav :: nav}"></th:block>
 </div>
-<h1>Редактирай конфигурация</h1>
+
+<h1 class="page-title"
+    th:text="|Редактиране на ${configuration.model} ${configuration.description}|">Редактиране на конфигурация</h1>
 
 <form id="details-form" th:action="@{|/configurations/edit/${configurationId}|}" th:object="${configuration}" th:attr="data-id=${configurationId}" method="post">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-    <!-- Hidden bind inputs so full "Запази" submit работи без видими th:field дублиране -->
+    <!-- Hidden bind inputs so full "Запази" submit works without visible th:field duplicates -->
     <input type="hidden" th:field="*{imgUrl}" id="hidden-imgUrl"/>
     <input type="hidden" th:field="*{code}" id="hidden-code"/>
     <input type="hidden" th:field="*{line}" id="hidden-line"/>
     <input type="hidden" th:field="*{type}" id="hidden-type"/>
     <input type="hidden" th:field="*{description}" id="hidden-description"/>
     <input type="hidden" th:field="*{model}" id="hidden-model"/>
+
+    <!-- Section title for Details -->
+    <h2 class="section-title">Детайли</h2>
 
     <div class="details-grid">
 
@@ -108,11 +114,15 @@
 
     </div> <!-- /.details-grid -->
 
-    <h3 style="margin-top:1.25rem;">Елементи на конфигурацията</h3>
+    <!-- Units section title: blue and spaced down only before the heading -->
+    <h3 class="section-title section-spaced">Елементи на конфигурацията</h3>
+
     <div id="units-list">
         <div th:each="u,iterStat : *{units}" class="unit-row">
-            <span th:text="${u.displayLabel != null && u.displayLabel != '' ? u.displayLabel : u.configurableUnitId}">unit-label</span>
-            <span> qty: <span th:text="${u.quantity}">1</span></span>
+            <div class="unit-content">
+                <span th:text="${u.displayLabel != null && u.displayLabel != '' ? u.displayLabel : u.configurableUnitId}">unit-label</span>
+                <span> qty: <span th:text="${u.quantity}">1</span></span>
+            </div>
             <button type="button" th:attr="data-id=${u.configurableUnitId}" onclick="removeUnit(this)">Remove 1</button>
         </div>
     </div>
@@ -127,7 +137,6 @@
     </div>
 
     <div style="margin-top:1rem;">
-<!--        <button type="submit">Запази</button>-->
         <a th:href="@{|/configurations/${configurationId}/details|}">
             <button type="button" class="finish-btn">Край</button>
         </a>
@@ -166,16 +175,14 @@
         const form = document.getElementById('details-form');
         if (!form) return;
 
-        const fieldName = block.dataset.field; // e.g. "imgUrl", "code"
+        const fieldName = block.dataset.field;
         const input = block.querySelector('input[name], select[name], textarea[name]');
         const newValue = input ? input.value : '';
 
-        // copy edited value into the corresponding hidden th:field input
         const hidden = document.getElementById('hidden-' + fieldName);
         if (hidden) {
             hidden.value = newValue;
         } else {
-            // fallback: create a hidden input so binding receives the value
             const created = document.createElement('input');
             created.type = 'hidden';
             created.name = fieldName;
@@ -184,15 +191,9 @@
             form.appendChild(created);
         }
 
-        // remove names from all inline inputs temporarily to avoid duplicate params (hidden + inline)
         const inlineNamed = form.querySelectorAll('.inline-field-form [name]');
-        inlineNamed.forEach(el => {
-            // store original name so it could be restored if needed (not necessary if page reloads)
-            el.dataset._origName = el.name;
-            el.removeAttribute('name');
-        });
+        inlineNamed.forEach(el => { el.dataset._origName = el.name; el.removeAttribute('name'); });
 
-        // update visible span immediately for better UX and close the inline form
         const detailBlock = block.closest('.detail-field');
         if (detailBlock) {
             const span = detailBlock.querySelector('.detail-value');
@@ -200,7 +201,6 @@
             block.classList.remove('open');
         }
 
-        // build full form body so server receives a complete CreateNewConfigurationRequest
         const fm = new FormData(form);
         const bodyStr = new URLSearchParams(fm).toString();
 
@@ -213,7 +213,6 @@
             if (resp.ok) {
                 location.reload();
             } else {
-                // restore inline input names if not reloading so user can continue
                 inlineNamed.forEach(el => {
                     if (el.dataset._origName) el.name = el.dataset._origName;
                     delete el.dataset._origName;
@@ -222,7 +221,6 @@
             }
         }).catch(err => {
             console.error('inline update error', err);
-            // restore inline input names on network error
             inlineNamed.forEach(el => {
                 if (el.dataset._origName) el.name = el.dataset._origName;
                 delete el.dataset._origName;
