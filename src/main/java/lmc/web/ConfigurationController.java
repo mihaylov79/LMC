@@ -95,6 +95,7 @@ public class ConfigurationController {
         modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
         modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
         modelAndView.addObject("user", user);
+        modelAndView.addObject("configurationId", configurationId);
         return modelAndView;
     }
 
@@ -110,7 +111,7 @@ public class ConfigurationController {
             return modelAndView;
         }
         configurationService.updateConfiguration(configurationId, request);
-        return new ModelAndView("redirect:/configurations/{configurationId}/details");
+        return new ModelAndView("redirect:/configurations/edit/{configurationId}");
     }
 
     @PostMapping("/{configurationId}/units/add")

@@ -1,182 +1,391 @@
-/* src/main/resources/static/css/edit-configuration.css */
-/* Base form layout */
+/* css
+   File: src/main/resources/static/css/edit-configuration.css
+   Edited: label color, add-controls sizes, unit-row alignment (grid column for consistent Remove button column)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap');
+
+:root {
+    --primary: #3771c8;
+    --accent: #28a745;
+    --danger: #dc3545;
+    --panel-bg: #ffffff;
+    --muted: #6b7280;
+    --radius: 8px;
+    --max-width: 980px;
+    --shadow: 0.15em 0.15em 0.45em rgba(55,113,200,0.12);
+}
+
+/* Reset / base */
+html, body { height: 100%; }
+*, *::before, *::after { box-sizing: border-box; }
 body {
-    font-family: 'Raleway', sans-serif;
-    background-color: white;
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: 'Raleway', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: #fff;
+    color: #222;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.35;
 }
 
-h1 {
-    color: #3771c8ff;
-    margin: 1rem 0;
-    font-weight: 700;
-}
-
-/* Centered form container similar to other pages */
-form[th\:action], .form {
+/* Form container */
+form#details-form {
     margin: 1.5rem auto;
     width: 95%;
-    max-width: 900px;
-    background: #ffffff;
+    max-width: var(--max-width);
+    background: var(--panel-bg);
     padding: 1.25rem;
-    border-radius: 8px;
-    box-shadow: 0.2em 0.2em 0.5em #3771c8ff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(20,40,80,0.03);
 }
 
-/* Basic field styles (compatible with login.css) */
-label {
-    display: block;
-    font-weight: 600;
-    color: #3771c8ff;
-    margin-bottom: 0.35rem;
+/* Headings inside form */
+form#details-form h1,
+form#details-form h2,
+form#details-form h3,
+form#details-form h4 {
+    margin: 0 0 0.75rem 0;
+    color: #1f2937;
 }
 
-input[type="text"],
-textarea,
-select,
-input[type="number"] {
-    width: 100%;
-    padding: 0.4rem 0.5rem;
-    border: none;
-    border-bottom: 2px solid #cccccc;
-    background: transparent;
-    line-height: 1.4;
-    margin-bottom: 0.75rem;
-    outline: none;
-    font-family: 'Raleway', sans-serif;
+/* Details grid: two-column on wide screens, single-column on small */
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    gap: 1rem;
+    align-items: start;
 }
 
-input[type="text"]:focus,
-textarea:focus,
-select:focus,
-input[type="number"]:focus {
-    border-color: #3771c8ff;
-}
-
-/* Units list container */
-#units-list {
-    margin: 1rem 0;
+/* Each detail item */
+.detail-field {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.35rem;
+    min-width: 0;
 }
 
-/* Each unit row in the edit page (there are plain divs with spans/buttons) */
-#units-list > div,
-.unit-row {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.65rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    background: #fafafa;
-    flex-wrap: wrap;
-}
-
-/* Left part (identifier and meta) */
-#units-list > div span {
+/* Label styles - made blue so they don't blend with content */
+.detail-field > label {
+    font-weight: 700;
+    color: var(--primary); /* changed to blue */
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
     display: inline-block;
-    min-width: 200px;
-    color: #333;
-    font-weight: 500;
-    word-break: break-word;
 }
 
-/* Quantity display */
-#units-list > div span + span {
-    color: #555;
+/* Row that shows value + edit button */
+.detail-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
-/* Buttons in rows */
-#units-list button,
-button.remove-btn,
-button {
-    background: #3771c8ff;
-    color: #fff;
-    border: none;
-    padding: 0.4rem 0.6rem;
+/* visible value */
+.detail-value {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: #111827;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 0.5rem;
+}
+
+/* Edit button (non-fullwidth) */
+.edit-field-btn {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 0.32rem 0.55rem;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
     white-space: nowrap;
 }
 
-#units-list button:hover,
-button.remove-btn:hover {
+/* Inline form hidden by default; shown when .open class present */
+.inline-field-form {
+    display: none;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.25rem;
+    width: 100%;
+}
+
+/* explicit open state */
+.inline-field-form.open { display: flex; }
+
+/* inputs inside inline forms */
+.inline-field-form .inline-input,
+.inline-field-form .inline-select,
+.inline-field-form .inline-textarea {
+    padding: 0.36rem 0.5rem;
+    border: 1px solid #e6eef8;
+    border-radius: 6px;
+    min-width: 180px;
+    max-width: 420px;
+    background: #fff;
+    color: #111827;
+    font-size: 0.95rem;
+}
+
+/* textarea sizing */
+.inline-field-form .inline-textarea {
+    min-height: 84px;
+    max-height: 240px;
+    resize: vertical;
+}
+
+/* primary change button */
+.change-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.36rem 0.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+/* Ensure buttons are not forced full width by global rules */
+form#details-form button,
+form#details-form input[type="submit"],
+form#details-form button[type="button"],
+#units-list button,
+.inline-field-form .change-btn,
+.add-controls button {
+    width: auto !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.6rem;
+    box-sizing: border-box;
+}
+
+/* Units list: below details */
+#units-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+/* Each unit row: use grid with two columns so Remove buttons form a vertical column */
+.unit-row {
+    display: grid;
+    grid-template-columns: 1fr 96px; /* left: content, right: remove button column */
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.6rem;
+    border: 1px solid #eef3fb;
+    border-radius: 6px;
+    background: #fbfdff;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* unit text spans */
+.unit-row span { min-width: 0; font-weight: 600; color: #111827; }
+
+/* make sure remove button sits centered in its column and has consistent size */
+.unit-row button {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    cursor: pointer;
+    white-space: nowrap;
+    justify-self: center; /* center within the second column */
+    width: 88px; /* consistent width so buttons line up */
+    box-sizing: border-box;
+}
+
+/* Add controls area */
+.add-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Increase the add-unit select, reduce qty field width */
+.add-controls select#add-unit-select {
+    padding: 0.4rem;
+    border-radius: 6px;
+    border: 1px solid #e6ecf8;
+    background: #fff;
+    min-width: 260px;
+    max-width: 560px; /* increased max width */
+    width: 380px; /* larger select for choosing module */
+    box-sizing: border-box;
+}
+
+.add-controls input[type="number"]#add-qty {
+    padding: 0.4rem;
+    border-radius: 6px;
+    border: 1px solid #e6ecf8;
+    background: #fff;
+    width: 82px; /* reduced qty width */
+    box-sizing: border-box;
+}
+
+/* Fallback generic add-controls selectors kept for compatibility */
+.add-controls select,
+.add-controls input[type="number"] {
+    padding: 0.4rem;
+    border-radius: 6px;
+    border: 1px solid #e6ecf8;
+    background: #fff;
+    min-width: 160px;
+}
+
+/* constraining the large select behavior (kept smaller than explicit #add-unit-select) */
+.add-controls select { width: auto; max-width: 60%; box-sizing: border-box; }
+
+/* Action row at bottom of form */
+form#details-form > div:last-child {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* finish button */
+.finish-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 0.45rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+/* small hover polish */
+.change-btn:hover,
+.finish-btn:hover,
+.unit-row button:hover,
+.edit-field-btn:hover {
     opacity: 0.95;
     transform: translateY(-1px);
+    transition: all 120ms ease;
 }
 
-/* Add / Create buttons area (below units) */
-form > button[type="button"],
-form > button[type="submit"] {
-    margin: 0.4rem 0.25rem 0 0;
-    padding: 0.55rem 0.8rem;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
+/* Focus styles for accessibility */
+.inline-field-form .inline-input:focus,
+.inline-field-form .inline-select:focus,
+.inline-field-form .inline-textarea:focus,
+.add-controls select:focus,
+.add-controls input[type="number"]:focus,
+.edit-field-btn:focus,
+.change-btn:focus,
+.finish-btn:focus,
+.unit-row button:focus {
+    outline: 3px solid rgba(55,113,200,0.12);
+    outline-offset: 2px;
 }
 
-button[onclick="addUnit()"] {
-    background: #28a745;
-    color: #fff;
+/* Strong overrides for elements that might be styled by login.css/menu.css */
+body form#details-form,
+body form#details-form * {
+    color: inherit !important;
+    background: transparent !important;
+    border-radius: inherit !important;
 }
 
-button[onclick="openCreateUnitModal()"] {
-    background: #3771c8ff;
-    color: #fff;
+/* Specific input reset to avoid duplicate visible form fields show/hide issues:
+   hidden binding inputs (th:field) present in template should remain visually hidden */
+#hidden-imgUrl,
+#hidden-code,
+#hidden-line,
+#hidden-type,
+#hidden-description,
+#hidden-model {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
 }
 
-button[type="submit"] {
-    background: transparent;
-    color: #3771c8ff;
-    border: 2px solid #3771c8ff;
+/* ADJUSTMENTS FOR NEW-CONFIGURATION-style unit rows compatibility (same look) */
+.unit-row select {
+    min-width: 160px;
+    max-width: 60%;
+    box-sizing: border-box;
+}
+.unit-row input[type="number"] {
+    flex: 0 0 80px;
+    min-width: 60px;
 }
 
-/* Small helper for inline selects used by JS (if any) */
-#add-unit-select, #add-qty, select[id^="add-"] {
-    display: inline-block;
-    vertical-align: middle;
+/* modal and helper classes (if used by other templates) */
+#createUnitModal,
+#createUnitModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1200;
+}
+.create-modal-content,
+.modal-content {
+    background: #fff;
+    margin: 4% auto;
+    padding: 1.25rem;
+    max-width: 720px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
 }
 
-/* Responsive: make controls stack on narrow screens */
-@media (max-width: 600px) {
-    #units-list > div,
+/* Responsive: single column on narrower viewports */
+@media (max-width: 900px) {
+    .details-grid { grid-template-columns: 1fr; }
+
+    /* unit rows switch to single column layout on small screens to avoid cramped grid */
     .unit-row {
+        display: flex;
         flex-direction: column;
+        gap: 0.5rem;
         align-items: stretch;
     }
-
-    #units-list > div span {
-        min-width: 0;
-    }
-
-    form[th\:action], .form {
-    padding: 1rem;
-    width: 96%;
-}
-
-    button[onclick="addUnit()"],
-    button[onclick="openCreateUnitModal()"],
-    button[type="submit"] {
+    .unit-row button {
         width: 100%;
+        justify-self: stretch;
     }
+
+    .inline-field-form { flex-direction: column; align-items: stretch; }
+    .inline-field-form .inline-input,
+    .inline-field-form .inline-select,
+    .inline-field-form .inline-textarea { width: 100%; min-width: 0; max-width: 100%; }
+    form#details-form button,
+    form#details-form input[type="submit"],
+    .add-controls button { width: 100% !important; }
+    .add-controls { flex-direction: column; align-items: stretch; }
+    .unit-row { gap: 0.5rem; }
+    .unit-row select, .unit-row input[type="number"] { flex-basis: 100%; max-width: 100%; }
 }
 
-/* Small visual polish */
-.unit-row .remove-btn {
-    background: #dc3545;
+/* Small screens further polish */
+@media (max-width: 600px) {
+    form#details-form { padding: 0.75rem; }
+    .detail-field > label { font-size: 0.92rem; }
+    .detail-value { font-size: 0.95rem; }
+    .change-btn, .edit-field-btn, .finish-btn { padding: 0.45rem; font-size: 0.95rem; }
 }
 
-.unit-row .remove-btn:hover {
-    filter: brightness(0.95);
-}
+/* Defensive rule: ensure selects/options inside templates don't expand the page */
+select option { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Ensure the units list fallback (edit template) looks consistent */
-#units-list .placeholder {
-    color: #777;
-    padding: 0.5rem;
-}
+/* End of stylesheet */
