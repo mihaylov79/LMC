@@ -24,6 +24,7 @@
             <ul>
                 <li><a th:href="@{/home}">Назад</a></li>
                 <li><a th:href="@{/configurations/edit/{configurationId}(configurationId=${configuration.id})}">Редактирай</a></li>
+                <li><a th:href="@{/configurations/create-from/{configurationId}(configurationId=${configuration.id})}">Създай нова от тази</a></li>
                 <li><a th:href="@{/configurations/deactivate/{configurationId}(configurationId=${configuration.id})}">Деактивирай</a></li>
                 <li><a th:href="@{${currentUrl}}">Опресни</a></li>
             </ul>

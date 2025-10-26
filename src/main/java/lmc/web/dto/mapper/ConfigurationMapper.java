@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
@@ -87,6 +89,17 @@ public class ConfigurationMapper {
                 .build();
 
 
+    }
+
+    public CreateNewConfigurationRequest newFromExisting(Configuration configuration){
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        String time = LocalDateTime.now().format(formatter);
+
+        CreateNewConfigurationRequest newConfig = toEditRequest(configuration);
+        newConfig.setCode(configuration.getCode() + "-" + time);
+
+        return newConfig;
     }
 
 

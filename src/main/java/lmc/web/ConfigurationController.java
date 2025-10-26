@@ -136,6 +136,17 @@ public class ConfigurationController {
                       "priceUpdateDate", updated.getPriceUpdateDate());
     }
 
+    @GetMapping("/create-from/{configurationId}")
+    public ModelAndView createNewConfigurationFromExisting(@PathVariable UUID configurationId){
+
+        Configuration configuration = configurationService.findConfigurationById(configurationId);
+
+        CreateNewConfigurationRequest request = configurationMapper.newFromExisting(configuration);
+
+        Configuration created = configurationService.createNewConfiguration(request);
+
+        return new ModelAndView("redirect:/configurations/edit/" + created.getId());
+    }
 
 
 }
