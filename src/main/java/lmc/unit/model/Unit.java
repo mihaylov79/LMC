@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -41,6 +42,9 @@ public class Unit {
 
     @Column
     private CurrencyType currency;
+
+    @Column
+    private LocalDate priceUpdatedAt;
 
     @Column
     private boolean active;
