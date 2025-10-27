@@ -13,10 +13,9 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateNewUnitRequest {
@@ -35,14 +34,13 @@ public class CreateNewUnitRequest {
 
 
     @Length(max = 15, message = "Размерът не може да надвишава 15 символа")
-    @Pattern(regexp = "^[0-9x×X\\s.-]+$", message = "Невалиден формат на размер")
+    @Pattern(regexp = "^[0-9x×X\\s.\\-]*$", message = "Невалиден формат на размер")
     private String size;
 
     @Positive(message = "Въведената цена трябва да бъде положително число")
     @Digits(integer = 6, fraction = 2, message = "Цената не може да надвишава 6 цифрена стойност")
     private BigDecimal price;
 
-    private LocalDate priceUpdatedAt;
 
 
 

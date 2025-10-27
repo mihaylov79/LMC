@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Елементи</title>
@@ -46,13 +46,18 @@
                 </thead>
                 <tbody>
                 <tr th:each="unit : ${baseUnits}">
-                    <td th:text="${unit.code}"></td>
+                    <td>
+                        <a th:href="@{/products/base-units/details/{unitId}(unitId=${unit.id})}"
+                           th:text="${unit.code}">CODE</a>
+                    </td>
                     <td>
                         <div th:text="${unit.name}"></div>
                         <div class="desc">
                         <span th:text="${unit.description}"></span>
                             <span>,</span>
-                        <span th:text="'размер: '+ ${unit.size}">размер:</span>
+                            <th:block th:if="${unit.size != null and #strings.trim(unit.size) != ''}">
+                                <span th:text="'размер: ' + ${unit.size}">размер:</span>
+                            </th:block>
                         </div>
                     </td>
                     <td th:text="${unit.price} + ' ' + ${unit.currency}"></td>

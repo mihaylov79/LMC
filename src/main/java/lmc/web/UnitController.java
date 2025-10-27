@@ -12,20 +12,18 @@ import lmc.user.service.UserService;
 import lmc.web.dto.CreateNewConfiguredUnitRequest;
 import lmc.web.dto.CreateNewOptionRequest;
 import lmc.web.dto.CreateNewUnitRequest;
+import lmc.web.dto.mapper.CustomMapper;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RequestBody;
 import lmc.configurableUnit.model.ConfigurableUnit;
 
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/products")
@@ -35,12 +33,14 @@ public class UnitController {
     private final UnitService unitService;
     private final OptionService optionService;
     private final ConfigurableUnitService configurableUnitService;
+    private final CustomMapper customMapper;
 
-    public UnitController(UserService userService, UnitService unitService, OptionService optionService, ConfigurableUnitService configurableUnitService) {
+    public UnitController(UserService userService, UnitService unitService, OptionService optionService, ConfigurableUnitService configurableUnitService, CustomMapper customMapper) {
         this.userService = userService;
         this.unitService = unitService;
         this.optionService = optionService;
         this.configurableUnitService = configurableUnitService;
+        this.customMapper = customMapper;
     }
 
     @GetMapping
@@ -73,6 +73,44 @@ public class UnitController {
 
         unitService.createNewUnit(request);
         return new ModelAndView("redirect:/products");
+    }
+
+    @GetMapping("/base-units/edit/{unitId}")
+    public ModelAndView getEditUnitForm(@PathVariable UUID unitId){
+
+        Unit unit = unitService.getUnitById(unitId);
+
+        ModelAndView modelAndView = new ModelAndView("edit-unit");
+        modelAndView.addObject("unitId", unitId);
+        modelAndView.addObject("createNewUnitRequest", customMapper.fromUnit(unit));
+
+        return modelAndView;
+
+    }
+
+    @PutMapping("/base-units/edit/{unitId}")
+    public ModelAndView editExistingUnit(@PathVariable UUID unitId,@Valid CreateNewUnitRequest request, BindingResult result){
+
+        if (result.hasErrors()){
+            return new ModelAndView("edit-unit");
+        }
+
+        unitService.editUnit(unitId, request);
+        ModelAndView modelAndView = new ModelAndView("redirect:/products");
+//        modelAndView.addObject("unitId", unitId);
+        return modelAndView;
+
+    }
+
+    @GetMapping("/base-units/details/{unitId}")
+    public ModelAndView getBaseUnitDetails(@PathVariable UUID unitId, @AuthenticationPrincipal CustomUserDetails details){
+        User user = userService.getUserById(details.getId());
+        Unit unit = unitService.getUnitById(unitId);
+
+        ModelAndView modelAndView = new ModelAndView("unit-details");
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("unit", unit);
+        return modelAndView;
     }
 
     @GetMapping("/unit-options/new")

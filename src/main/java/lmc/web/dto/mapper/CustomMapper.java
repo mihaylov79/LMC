@@ -16,7 +16,6 @@ public class CustomMapper {
                 .description(unit.getDescription())
                 .size(unit.getSize())
                 .price(unit.getPrice())
-                .priceUpdatedAt(unit.getPriceUpdatedAt())
                 .build();
     }
 

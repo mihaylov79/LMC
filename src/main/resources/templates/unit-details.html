@@ -1,0 +1,79 @@
+<!-- html -->
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${unit.name} ?: ${unit.code}">Unit details</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/configuration-details2.css">
+</head>
+<body>
+
+<div class="header-container">
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+</div>
+
+<div class="front-container">
+    <div class="user-container">
+        <p th:text="'Активен потребител: ' + ${user.email}"></p>
+    </div>
+
+    <div class="configuration-details">
+        <div class="menu">
+            <ul>
+                <li><a th:href="@{/products}">Назад</a></li>
+                <li><a th:href="@{/products/base-units/edit/{unitId}(unitId=${unit.id})}">Редактирай</a></li>
+                <li><a th:href="@{/products/base-units/deactivate/{unitId}(unitId=${unit.id})}">Деактивирай</a></li>
+                <li><a th:href="@{${currentUrl}}">Опресни</a></li>
+            </ul>
+        </div>
+
+        <div class="image-wrapper">
+            <img th:src="${#strings.isEmpty(unit.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : unit.imageUrl}"
+                 th:alt="${unit.code}" />
+        </div>
+
+        <div class="info-row" role="group" aria-label="unit basic info">
+            <dl class="info-item">
+                <dt>Код</dt>
+                <dd th:text="${unit.code}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Име</dt>
+                <dd th:text="${unit.name}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Размер</dt>
+                <dd th:text="${unit.size}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Описание</dt>
+                <dd th:text="${unit.description}">-</dd>
+            </dl>
+        </div>
+
+        <div class="modules-section">
+<!--            <div class="modules-right-wrapper">-->
+<!--                <div class="modules-right">-->
+<!--                    <div class="price-row">-->
+<!--                        <dt>Цена</dt>-->
+<!--                        <dd class="numeric"-->
+<!--                            th:text="${unit.price} != null ? ${unit.price} + ' ' + ${unit.currency} : '- ' + ${unit.currency}">-</dd>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+            <div class="bottom-right">
+                <dt>Цена</dt>
+                <div class="price" th:text="${unit.price} != null ? ${unit.price} + ' ' + ${unit.currency} : '- ' + ${unit.currency}">-</div>
+                <div class="price-date" th:text="${unit.priceUpdatedAt} != null ? 'Актуализирано: ' + ${#temporals.format(unit.priceUpdatedAt, 'dd.MM.yyyy')} : ''"></div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

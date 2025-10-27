@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактиране на продукт</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<div class="header-container">
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+</div>
+
+<div class="form">
+    <form class="edit-profile"
+          th:action="@{'/products/base-units/edit/' + ${unitId}}"
+          th:method="post"
+          th:object="${createNewUnitRequest}">
+        <input type="hidden" name="_method" value="PUT"/>
+        <h2>Редактиране</h2>
+
+        <div class="field">
+            <label for="imageUrl">Снимка (URL)</label>
+            <input type="url" id="imageUrl" th:field="*{imageUrl}" placeholder="">
+            <span th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}" class="errors"></span>
+        </div>
+
+        <div class="field">
+            <label for="code">Код</label>
+            <input type="text" id="code" th:field="*{code}" placeholder="">
+            <span th:if="${#fields.hasErrors('code')}" th:errors="*{code}" class="errors"></span>
+        </div>
+
+        <div class="field">
+            <label for="name">Име</label>
+            <input type="text" id="name" th:field="*{name}" placeholder="">
+            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="errors"></span>
+        </div>
+
+        <div class="field">
+            <label for="description">Описание</label>
+            <textarea id="description" th:field="*{description}" placeholder=""></textarea>
+            <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}" class="errors"></span>
+        </div>
+
+        <div class="field">
+            <label for="size">Размер</label>
+            <input type="text" id="size" th:field="*{size}" placeholder="">
+            <span th:if="${#fields.hasErrors('size')}" th:errors="*{size}" class="errors"></span>
+        </div>
+
+        <div class="field">
+            <label for="price">Цена</label>
+            <input type="number" id="price" th:field="*{price}" placeholder="" step="0.01" min="0">
+            <span th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="errors"></span>
+        </div>
+
+        <input type="submit" class="button save" value="Запази">
+    </form>
+</div>
+
+</body>
+</html>

@@ -7,6 +7,7 @@ import lmc.web.dto.CreateNewUnitRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +44,28 @@ public class UnitService {
                 .build();
 
         return unitRepository.save(newUnit);
+    }
+
+    public Unit editUnit(UUID unitId, CreateNewUnitRequest request){
+
+        Unit unit = getUnitById(unitId);
+        BigDecimal oldPrice = unit.getPrice();
+
+        boolean isDifferent = oldPrice.compareTo(request.getPrice()) != 0;
+
+        unit = unit.toBuilder()
+                .imageUrl(request.getImageUrl())
+                .code(request.getCode())
+                .name(request.getName())
+                .description(request.getDescription())
+                .size(request.getSize())
+                .price(request.getPrice())
+                .priceUpdatedAt(isDifferent ? LocalDate.now() : unit.getPriceUpdatedAt())
+                .build();
+
+        return unitRepository.save(unit);
+
+
     }
 
 
