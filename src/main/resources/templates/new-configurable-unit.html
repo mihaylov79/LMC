@@ -1,3 +1,4 @@
+<!-- language: html -->
 <!DOCTYPE html>
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -6,7 +7,8 @@
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/new-configurable-unit.css">
-
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 </head>
 <body>
 
@@ -19,7 +21,8 @@
 
     <form th:action="@{/products/configurable-units/create}"
           th:object="${request}"
-          th:method="POST">
+          th:method="POST"
+          id="create-configurable-unit-form">
 
         <!-- Избор на базов продукт -->
         <div class="form-group">
@@ -34,15 +37,14 @@
             <span class="error" th:if="${#fields.hasErrors('unitId')}" th:errors="*{unitId}"></span>
         </div>
 
-        <!-- Избор на опции (множествен) -->
+        <!-- Избор на опции (с количество) -->
         <div class="form-group">
             <label>Опции (незадължително):</label>
             <div class="options-group">
-                <div class="option-item" th:each="option : ${allOptions}">
+                <div class="option-item" th:each="option, stat : ${allOptions}">
                     <input type="checkbox"
                            th:id="${'opt_' + option.id}"
-                           name="optionIds"
-                           th:value="${option.id}">
+                           class="opt-checkbox">
                     <label class="option-label" th:for="${'opt_' + option.id}">
                         <div class="option-name" th:text="${option.code + ' - ' + option.name}"></div>
                         <div class="option-details">
@@ -51,29 +53,67 @@
                             <span th:text="${option.compatibleWith}"></span>
                         </div>
                     </label>
+
+                    <!-- Server binding inputs: optionId + quantity -->
+                    <input type="hidden"
+                           th:name="${'optionIds[' + stat.index + '].optionId'}"
+                           th:value="${option.id}"/>
+                    <input type="number"
+                           min="1"
+                           th:name="${'optionIds[' + stat.index + '].quantity'}"
+                           value="1"
+                           class="option-qty"
+                           style="width:4rem"/>
                 </div>
             </div>
         </div>
 
-        <!-- Количество -->
-<!--        <div class="form-group">-->
-<!--            <label for="quantity">Количество: *</label>-->
-<!--            <input type="number"-->
-<!--                   id="quantity"-->
-<!--                   th:field="*{quantity}"-->
-<!--                   min="1"-->
-<!--                   value="1"-->
-<!--                   required>-->
-<!--            <span class="error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></span>-->
-<!--        </div>-->
-
-        <!-- Бутони -->
+        <!-- Buttons -->
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Създай</button>
             <a th:href="@{/home}" class="btn btn-secondary">Откажи</a>
         </div>
     </form>
 </div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    (function () {
+        const form = document.getElementById('create-configurable-unit-form');
+        if (!form) return;
+
+        form.addEventListener('submit', function () {
+            document.querySelectorAll('.options-group .option-item').forEach((el) => {
+                const cb = el.querySelector('.opt-checkbox');
+                const hiddenId = el.querySelector('input[type="hidden"][name^="optionIds"]');
+                const qty = el.querySelector('input.option-qty');
+                if (!cb.checked) {
+                    if (hiddenId) hiddenId.disabled = true;
+                    if (qty) qty.disabled = true;
+                } else {
+                    // ensure quantity at least 1
+                    if (qty && (!qty.value || Number(qty.value) < 1)) {
+                        qty.value = 1;
+                    }
+                }
+            });
+        });
+
+        // toggle qty disabled state when checkbox toggled (UX)
+        document.querySelectorAll('.options-group .option-item').forEach((el) => {
+            const cb = el.querySelector('.opt-checkbox');
+            const qty = el.querySelector('input.option-qty');
+            if (cb && qty) {
+                cb.addEventListener('change', () => {
+                    qty.disabled = !cb.checked;
+                });
+                // initialize
+                qty.disabled = !cb.checked;
+            }
+        });
+    })();
+    /*]]>*/
+</script>
 
 </body>
 </html>

@@ -2,6 +2,7 @@ package lmc.configurableUnit.service;
 
 
 import lmc.configurableUnit.model.ConfiguredUnit;
+import lmc.configurableUnit.model.ConfiguredUnitOption;
 import lmc.configurableUnit.repository.ConfiguredUnitRepository;
 import lmc.option.model.Option;
 import lmc.option.service.OptionService;
@@ -9,10 +10,13 @@ import lmc.unit.model.CurrencyType;
 import lmc.unit.model.Unit;
 import lmc.unit.service.UnitService;
 import lmc.web.dto.CreateNewConfiguredUnitRequest;
+import lmc.web.dto.OptionSelectionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,25 +33,68 @@ public class ConfiguredUnitService {
         this.unitService = unitService;
     }
 
+//    public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request) {
+//        Unit unit = unitService.getUnitById(request.getUnitId());
+//
+//        List<Option> options = optionService.getOptionsByIds(request.getOptionIds());
+//
+//        String generatedCode = generateCode(unit, options);
+//
+//        return repository.findByCodeAndActiveIsTrue(generatedCode).orElseGet(()-> {
+//            ConfiguredUnit newUnit = ConfiguredUnit.builder()
+//                    .code(generatedCode)
+//                    .unit(unit)
+//                    .active(true)
+//                    .currency(CurrencyType.EUR)
+//                    .options(options)
+//                    .build();
+//
+//            return repository.save(newUnit);
+//        });
+//
+//    }
+
     public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request) {
         Unit unit = unitService.getUnitById(request.getUnitId());
 
-        List<Option> options = optionService.getOptionsByIds(request.getOptionIds());
+        List<OptionSelectionDTO> selections = request.getOptionIds() == null ? List.of() : request.getOptionIds();
+
+        // build map of id -> quantity (ensure at least 1)
+        Map<UUID, Integer> qtyById = selections.stream()
+                .filter(s -> s != null && s.getOptionId() != null)
+                .collect(Collectors.toMap(
+                        OptionSelectionDTO::getOptionId,
+                        s -> Math.max(1, s.getQuantity()),
+                        (a, b) -> a
+                ));
+
+        // load Option entities by ids
+        List<UUID> ids = qtyById.keySet().stream().toList();
+        List<Option> options = ids.isEmpty() ? List.of() : optionService.getOptionsByIds(ids);
+
+        // map Option -> ConfiguredUnitOption with correct quantity
+        List<ConfiguredUnitOption> configuredOptions = options.stream()
+                .map(opt -> ConfiguredUnitOption.builder()
+                        .option(opt)
+                        .quantity(qtyById.getOrDefault(opt.getId(), 1))
+                        .build())
+                .toList();
 
         String generatedCode = generateCode(unit, options);
 
-        return repository.findByCodeAndActiveIsTrue(generatedCode).orElseGet(()-> {
+        return repository.findByCodeAndActiveIsTrue(generatedCode).orElseGet(() -> {
             ConfiguredUnit newUnit = ConfiguredUnit.builder()
                     .code(generatedCode)
                     .unit(unit)
                     .active(true)
                     .currency(CurrencyType.EUR)
-                    .options(options)
                     .build();
+
+            // attach join-entities and set back-reference
+            configuredOptions.forEach(newUnit::addOption);
 
             return repository.save(newUnit);
         });
-
     }
 
     private String generateCode(Unit unit, List<Option> options) {

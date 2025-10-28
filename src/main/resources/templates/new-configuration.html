@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="/css/new-configuration.css">
-<!--    <link rel="stylesheet" href="/css/edit-unit.css">-->
-
 </head>
 <body>
 
@@ -62,7 +60,7 @@
 
         <h3>Units</h3>
 
-        <!-- Скрит шаблон за options -->
+        <!-- Hidden template for units select options -->
         <select id="unitOptionsTemplate" style="display:none">
             <option value="">Изберете unit</option>
             <option th:each="u : ${existingUnits}"
@@ -71,7 +69,7 @@
             </option>
         </select>
 
-        <!-- Контейнер за units -->
+        <!-- Units container -->
         <div id="units-container">
             <div th:each="unit, stat : *{units}" class="unit-row">
                 <select th:field="*{units[__${stat.index}__].configurableUnitId}" required>
@@ -97,11 +95,11 @@
     </form>
 </div>
 
-<!-- Модален прозорец за създаване на нов unit -->
-<div id="createUnitModal">
+<!-- Modal for creating a new configurable unit -->
+<div id="createUnitModal" style="display:none;">
     <div class="modal-content">
         <h3>Създай нов Configurable Unit</h3>
-        <form id="createUnitForm">
+        <form id="createUnitForm" onsubmit="return false;">
             <div>
                 <label>Базов продукт:</label>
                 <select id="newUnitBase" required>
@@ -116,10 +114,9 @@
                 <label>Опции (незадължително):</label>
                 <div id="newUnitOptions">
                     <div th:each="option : ${allOptions}">
-                        <input type="checkbox" th:id="'newOpt_' + ${option.id}" th:value="${option.id}"/>
-                        <label th:for="'newOpt_' + ${option.id}"
-                               th:text="${option.code + ' - ' + option.name}">
-                        </label>
+                        <input type="checkbox" th:id="'newOpt_' + ${option.id}" th:value="${option.id}" class="modal-opt"/>
+                        <label th:for="'newOpt_' + ${option.id}" th:text="${option.code + ' - ' + option.name}"></label>
+                        <input type="number" min="1" value="1" class="modal-opt-qty" style="width:60px"/>
                     </div>
                 </div>
             </div>
@@ -133,174 +130,141 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
+    (function () {
+        function addUnit() {
+            const container = document.getElementById('units-container');
+            const templateSelect = document.getElementById('unitOptionsTemplate');
 
-    function addUnit() {
-        const container = document.getElementById('units-container');
-        const templateSelect = document.getElementById('unitOptionsTemplate');
+            const div = document.createElement('div');
+            div.className = 'unit-row';
 
-        if (!container) {
-            console.error('units-container not found');
-            return;
-        }
+            const select = document.createElement('select');
+            select.required = true;
+            select.style.minWidth = '200px';
 
-        if (!templateSelect) {
-            console.error('unitOptionsTemplate not found');
-        } else {
-            console.log('template options count:', templateSelect.options.length);
-        }
-
-        const div = document.createElement('div');
-        div.className = 'unit-row';
-
-        // Create select and copy options
-        const select = document.createElement('select');
-        select.required = true;
-        select.style.minWidth = '200px'; // ensure visible
-
-        // If template exists and has options, clone them, otherwise add fallback option
-        if (templateSelect && templateSelect.options && templateSelect.options.length > 0) {
-            Array.from(templateSelect.options).forEach(opt => {
-                select.appendChild(opt.cloneNode(true));
-            });
-        } else {
-            const fallback = document.createElement('option');
-            fallback.value = '';
-            fallback.textContent = 'Изберете unit';
-            select.appendChild(fallback);
-        }
-
-        // Create quantity input
-        const input = document.createElement('input');
-        input.type = 'number';
-        input.min = '1';
-        input.value = '1';
-        input.required = true;
-        input.placeholder = 'Бр.';
-
-        // Create remove button
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'remove-btn';
-        btn.textContent = 'Премахни';
-        btn.addEventListener('click', function () {
-            div.remove();
-            reindexUnits();
-        });
-
-        div.appendChild(select);
-        div.appendChild(input);
-        div.appendChild(btn);
-
-        container.appendChild(div);
-        reindexUnits();
-
-        // debug: show what was added
-        console.log('Added unit row, select options:', Array.from(select.options).map(o => o.textContent));
-    }
-
-
-
-
-    // function addUnit() {
-    //     const container = document.getElementById('units-container');
-    //     const optionsHtml = document.getElementById('unitOptionsTemplate').innerHTML;
-    //
-    //     const div = document.createElement('div');
-    //     div.className = 'unit-row';
-    //
-    //     div.innerHTML = `
-    //         <select required></select>
-    //         <input type="number" min="1" value="1" required placeholder="Бр."/>
-    //         <button type="button" class="remove-btn">Премахни</button>
-    //     `;
-    //
-    //     div.querySelector('select').innerHTML = optionsHtml;
-    //
-    //     div.querySelector('.remove-btn').addEventListener('click', function () {
-    //         div.remove();
-    //         reindexUnits();
-    //     });
-    //
-    //     container.appendChild(div);
-    //     reindexUnits();
-    // }
-
-    function removeUnit(button) {
-        const row = button.closest('.unit-row');
-        if (row) {
-            row.remove();
-            reindexUnits();
-        }
-    }
-
-    function reindexUnits() {
-        const container = document.getElementById('units-container');
-        Array.from(container.children).forEach((row, i) => {
-            const select = row.querySelector('select');
-            const quantityInput = row.querySelector('input[type="number"]');
-
-            if (select) select.name = `units[${i}].configurableUnitId`;
-            if (quantityInput) quantityInput.name = `units[${i}].quantity`;
-        });
-    }
-
-    function openCreateUnitModal() {
-        document.getElementById('createUnitModal').style.display = 'block';
-    }
-
-    function closeCreateUnitModal() {
-        document.getElementById('createUnitModal').style.display = 'none';
-        document.getElementById('createUnitForm').reset();
-    }
-
-    function submitNewUnit() {
-        const unitId = document.getElementById('newUnitBase').value;
-        const optionCheckboxes = document.querySelectorAll('#newUnitOptions input[type="checkbox"]:checked');
-        const optionIds = Array.from(optionCheckboxes).map(cb => cb.value);
-
-        if (!unitId) {
-            alert('Моля изберете базов продукт');
-            return;
-        }
-
-        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-
-        fetch('/products/configurable-units/create-new', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
-            body: JSON.stringify({
-                unitId: unitId,
-                optionIds: optionIds.length > 0 ? optionIds : null
-            })
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Network error');
-                return response.json();
-            })
-            .then(newUnit => {
-                const template = document.getElementById('unitOptionsTemplate');
-                const option = document.createElement('option');
-                option.value = newUnit.id;
-                option.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
-                template.appendChild(option);
-
-                document.querySelectorAll('#units-container select').forEach(select => {
-                    const opt = document.createElement('option');
-                    opt.value = newUnit.id;
-                    opt.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
-                    select.appendChild(opt);
+            if (templateSelect && templateSelect.options && templateSelect.options.length > 0) {
+                Array.from(templateSelect.options).forEach(opt => {
+                    select.appendChild(opt.cloneNode(true));
                 });
+            } else {
+                const fallback = document.createElement('option');
+                fallback.value = '';
+                fallback.textContent = 'Изберете unit';
+                select.appendChild(fallback);
+            }
 
-                closeCreateUnitModal();
-                alert('Unit създаден успешно!');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Грешка при създаване: ' + error.message);
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '1';
+            input.value = '1';
+            input.required = true;
+            input.placeholder = 'Бр.';
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'remove-btn';
+            btn.textContent = 'Премахни';
+            btn.addEventListener('click', function () {
+                div.remove();
+                reindexUnits();
             });
-    }
 
+            div.appendChild(select);
+            div.appendChild(input);
+            div.appendChild(btn);
+
+            container.appendChild(div);
+            reindexUnits();
+        }
+
+        window.addUnit = addUnit;
+        window.removeUnit = function (button) {
+            const row = button.closest('.unit-row');
+            if (row) {
+                row.remove();
+                reindexUnits();
+            }
+        };
+
+        function reindexUnits() {
+            const container = document.getElementById('units-container');
+            Array.from(container.children).forEach((row, i) => {
+                const select = row.querySelector('select');
+                const quantityInput = row.querySelector('input[type="number"]');
+
+                if (select) select.name = `units[${i}].configurableUnitId`;
+                if (quantityInput) quantityInput.name = `units[${i}].quantity`;
+            });
+        }
+
+        window.openCreateUnitModal = function () {
+            document.getElementById('createUnitModal').style.display = 'block';
+        };
+
+        window.closeCreateUnitModal = function () {
+            document.getElementById('createUnitModal').style.display = 'none';
+            document.getElementById('createUnitForm').reset();
+        };
+
+        window.submitNewUnit = function () {
+            const unitId = document.getElementById('newUnitBase').value;
+            const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
+            const options = rows.map(row => {
+                const cb = row.querySelector('input[type="checkbox"]');
+                const qtyInput = row.querySelector('input[type="number"]');
+                return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
+            }).filter(x => x !== null);
+
+            if (!unitId) {
+                alert('Моля изберете базов продукт');
+                return;
+            }
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            fetch('/products/configurable-units/create-new', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                body: JSON.stringify({
+                    unitId: unitId,
+                    optionIds: options.length ? options : null
+                })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(newUnit => {
+                    // append created unit to template selects
+                    const template = document.getElementById('unitOptionsTemplate');
+                    if (template) {
+                        const opt = document.createElement('option');
+                        opt.value = newUnit.id;
+                        opt.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
+                        template.appendChild(opt);
+                    }
+
+                    // append to existing selects in the form
+                    document.querySelectorAll('#units-container select').forEach(select => {
+                        const opt = document.createElement('option');
+                        opt.value = newUnit.id;
+                        opt.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
+                        select.appendChild(opt);
+                    });
+
+                    closeCreateUnitModal();
+                    alert('Unit създаден успешно!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Грешка при създаване: ' + error.message);
+                });
+        };
+
+        // initialize reindex on load
+        document.addEventListener('DOMContentLoaded', reindexUnits);
+    })();
     /*]]>*/
 </script>
 

@@ -3,9 +3,9 @@ package lmc.configurableUnit.service;
 
 import lmc.configurableUnit.model.ConfigurableUnit;
 import lmc.configurableUnit.model.ConfiguredUnit;
+import lmc.configurableUnit.model.ConfiguredUnitOption;
 import lmc.configurableUnit.model.SimpleUnit;
 import lmc.configuration.model.Configuration;
-import lmc.option.model.Option;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +33,16 @@ public class PriceCalculationService {
         BigDecimal basePrice = unit.getUnit().getPrice();
 
         BigDecimal optionsPrice = unit.getOptions().stream()
-                .map(Option::getPrice)
+                .map((ConfiguredUnitOption cuo) ->
+                        cuo.getOption().getPrice()
+                                .multiply(new BigDecimal(Math.max(1, cuo.getQuantity())))
+                )
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return basePrice.add(optionsPrice);
-
     }
+
+    // TODO Recalculate ConfiguredUnit Price !!!
 
     public BigDecimal calculateConfigurationTotalPrice(Configuration configuration){
         return configuration.getIncludedUnits().stream()

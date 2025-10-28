@@ -2,7 +2,6 @@ package lmc.configurableUnit.model;
 
 
 import jakarta.persistence.*;
-import lmc.option.model.Option;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,14 +21,31 @@ public class ConfiguredUnit extends ConfigurableUnit {
 
 
     @Builder.Default
-    @ManyToMany
-    @JoinTable(
-        name = "configured_unit_options",
-        joinColumns = @JoinColumn(name = "configured_unit_id"),
-        inverseJoinColumns = @JoinColumn(name = "option_id")
-    )
-        @OrderColumn(name = "option_order")
-        private List<Option> options = new ArrayList<>();
+    @OneToMany(mappedBy = "configuredUnit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "option_order")
+
+        private List<ConfiguredUnitOption> options = new ArrayList<>();
+
+    public void addOption(ConfiguredUnitOption cuo){
+        if (cuo == null) {
+            return;
+        }
+        if (!this.options.contains(cuo)) {
+            cuo.setConfiguredUnit(this);
+            this.options.add(cuo);
+        } else {
+            cuo.setConfiguredUnit(this);
+        }
+    }
+
+    public void removeOption(ConfiguredUnitOption cuo){
+        if (cuo == null){
+            return;
+        }
+        if (this.options.remove(cuo)) {
+            cuo.setConfiguredUnit(null);
+        }
+    }
 
 
 
