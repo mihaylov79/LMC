@@ -1,0 +1,13 @@
+form:not(.logout-form) {
+
+    width: 70ch;
+
+    margin-bottom: 2em;
+}
+
+input[type="submit"] {
+
+    width: 30%;
+
+}
+
