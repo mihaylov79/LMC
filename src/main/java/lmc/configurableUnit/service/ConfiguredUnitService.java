@@ -14,9 +14,7 @@ import lmc.web.dto.OptionSelectionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +52,50 @@ public class ConfiguredUnitService {
 //
 //    }
 
+//    public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request) {
+//        Unit unit = unitService.getUnitById(request.getUnitId());
+//
+//        List<OptionSelectionDTO> selections = request.getOptionIds() == null ? List.of() : request.getOptionIds();
+//
+//        // build map of id -> quantity (ensure at least 1)
+//        Map<UUID, Integer> qtyById = selections.stream()
+//                .filter(s -> s != null && s.getOptionId() != null)
+//                .collect(Collectors.toMap(
+//                        OptionSelectionDTO::getOptionId,
+//                        s -> Math.max(1, s.getQuantity()),
+//                        (a, b) -> a
+//                ));
+//
+//        // load Option entities by ids
+//        List<UUID> ids = qtyById.keySet().stream().toList();
+//        List<Option> options = ids.isEmpty() ? List.of() : optionService.getOptionsByIds(ids);
+//
+//        // map Option -> ConfiguredUnitOption with correct quantity
+//        List<ConfiguredUnitOption> configuredOptions = options.stream()
+//                .map(opt -> ConfiguredUnitOption.builder()
+//                        .option(opt)
+//                        .quantity(qtyById.getOrDefault(opt.getId(), 1))
+//                        .build())
+//                .toList();
+//
+//        String generatedCode = generateCode(unit, options);
+//
+//        return repository.findByCodeAndActiveIsTrue(generatedCode).orElseGet(() -> {
+//            ConfiguredUnit newUnit = ConfiguredUnit.builder()
+//                    .code(generatedCode)
+//                    .unit(unit)
+//                    .active(true)
+//                    .currency(CurrencyType.EUR)
+//                    .build();
+//
+//            // attach join-entities and set back-reference
+//            configuredOptions.forEach(newUnit::addOption);
+//
+//            return repository.save(newUnit);
+//        });
+//    }
+
+
     public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request) {
         Unit unit = unitService.getUnitById(request.getUnitId());
 
@@ -65,11 +107,11 @@ public class ConfiguredUnitService {
                 .collect(Collectors.toMap(
                         OptionSelectionDTO::getOptionId,
                         s -> Math.max(1, s.getQuantity()),
-                        (a, b) -> a
+                        Integer::sum
                 ));
 
         // load Option entities by ids
-        List<UUID> ids = qtyById.keySet().stream().toList();
+        List<UUID> ids = new ArrayList<>(qtyById.keySet());
         List<Option> options = ids.isEmpty() ? List.of() : optionService.getOptionsByIds(ids);
 
         // map Option -> ConfiguredUnitOption with correct quantity
@@ -80,50 +122,89 @@ public class ConfiguredUnitService {
                         .build())
                 .toList();
 
-        String generatedCode = generateCode(unit, options);
+        String generatedCode = generateCode(unit, configuredOptions);
 
-        return repository.findByCodeAndActiveIsTrue(generatedCode).orElseGet(() -> {
-            ConfiguredUnit newUnit = ConfiguredUnit.builder()
-                    .code(generatedCode)
-                    .unit(unit)
-                    .active(true)
-                    .currency(CurrencyType.EUR)
-                    .build();
+        // try to find existing by code
+        Optional<ConfiguredUnit> existingOpt = repository.findByCodeAndActiveIsTrue(generatedCode);
 
-            // attach join-entities and set back-reference
-            configuredOptions.forEach(newUnit::addOption);
+        if (existingOpt.isPresent()) {
+            ConfiguredUnit existing = existingOpt.get();
+            // compare option id -> qty maps to ensure exact match
+            if (optionsMatch(existing.getOptions(), qtyById)) {
+                return existing;
+            }
+            // fallthrough: mismatch -> create new configured unit with same code (or you may alter code generation strategy)
+        }
 
-            return repository.save(newUnit);
-        });
+        ConfiguredUnit newUnit = ConfiguredUnit.builder()
+                .code(generatedCode)
+                .unit(unit)
+                .active(true)
+                .currency(CurrencyType.EUR)
+                .build();
+
+        // attach join-entities and set back-reference
+        configuredOptions.forEach(newUnit::addOption);
+
+        return repository.save(newUnit);
     }
 
-    private String generateCode(Unit unit, List<Option> options) {
+    private String generateCode(Unit unit, List<ConfiguredUnitOption> configuredOptions) {
         if (unit == null) {
             throw new IllegalArgumentException("unit must not be null");
         }
 
-        if (options == null || options.isEmpty()) {
+        if (configuredOptions == null || configuredOptions.isEmpty()) {
             return unit.getCode();
         }
 
-        String optionCodes = options.stream()
-                .map(Option::getCode)
-                .filter(code -> code != null && !code.trim().isEmpty())
-                .map(String::trim)
-                .map(String::toUpperCase)
+        // produce stable representation including quantities: CODE_OPT1x2_OPT2x1 (sorted by option code)
+        String optionPart = configuredOptions.stream()
+                .map(co -> {
+                    String optCode = co.getOption() != null && co.getOption().getCode() != null
+                            ? co.getOption().getCode().trim().toUpperCase()
+                            : co.getOption() != null ? co.getOption().getId().toString() : "";
+                    return optCode + "x" + Math.max(1, co.getQuantity());
+                })
+                .filter(s -> !s.isEmpty())
                 .sorted()
                 .collect(Collectors.joining("_"));
 
-        return optionCodes.isEmpty() ? unit.getCode() : unit.getCode() + "_" + optionCodes;
+        return optionPart.isEmpty() ? unit.getCode() : unit.getCode() + "_" + optionPart;
     }
 
-//    private String generateCode(Unit unit, List<Option>options ){
+    private boolean optionsMatch(List<ConfiguredUnitOption> existingOptions, Map<UUID, Integer> requestedQtyById) {
+        if ((existingOptions == null || existingOptions.isEmpty()) && (requestedQtyById == null || requestedQtyById.isEmpty())) {
+            return true;
+        }
+        if (existingOptions == null) return requestedQtyById == null || requestedQtyById.isEmpty();
+        Map<UUID, Integer> existingMap = existingOptions.stream()
+                .filter(Objects::nonNull)
+                .filter(co -> co.getOption() != null && co.getOption().getId() != null)
+                .collect(Collectors.toMap(co -> co.getOption().getId(), ConfiguredUnitOption::getQuantity, (a, b) -> a));
+
+        return existingMap.equals(requestedQtyById);
+    }
+
+
+//    private String generateCode(Unit unit, List<Option> options) {
+//        if (unit == null) {
+//            throw new IllegalArgumentException("unit must not be null");
+//        }
+//
+//        if (options == null || options.isEmpty()) {
+//            return unit.getCode();
+//        }
+//
 //        String optionCodes = options.stream()
 //                .map(Option::getCode)
-//                .reduce((acc, optionCode) -> acc + "_" + optionCode).orElse("");
+//                .filter(code -> code != null && !code.trim().isEmpty())
+//                .map(String::trim)
+//                .map(String::toUpperCase)
+//                .sorted()
+//                .collect(Collectors.joining("_"));
 //
-//        return unit.getCode() + (optionCodes.isEmpty() ? "" : "_" + optionCodes);
-//
+//        return optionCodes.isEmpty() ? unit.getCode() : unit.getCode() + "_" + optionCodes;
 //    }
 
 
