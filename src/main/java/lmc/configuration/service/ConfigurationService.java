@@ -20,10 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -187,6 +184,24 @@ public class ConfigurationService {
                         newUnit.addOption(cuo);
                     });
 
+                    // If no explicit selections provided but the template unit has default options, copy them
+                    if ((optionSelections == null || optionSelections.isEmpty()) && cu instanceof lmc.configurableUnit.model.ConfiguredUnit) {
+                        var templateOptions = ((lmc.configurableUnit.model.ConfiguredUnit) cu).getOptions();
+                        if (templateOptions != null) {
+                            templateOptions.stream()
+                                    .filter(Objects::nonNull)
+                                    .map(tco -> tco.getOption())
+                                    .filter(Objects::nonNull)
+                                    .forEach(opt -> {
+                                        ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
+                                                .option(opt)
+                                                .quantity(1)
+                                                .build();
+                                        newUnit.addOption(cuo);
+                                    });
+                        }
+                    }
+
                     configuration.addIncludedUnit(newUnit);
                 }
             }
@@ -208,6 +223,24 @@ public class ConfigurationService {
                             .build();
                     newUnit.addOption(cuo);
                 });
+            } else {
+                // copy template options from ConfiguredUnit when no explicit selections provided
+                if (cu instanceof lmc.configurableUnit.model.ConfiguredUnit) {
+                    var templateOptions = ((lmc.configurableUnit.model.ConfiguredUnit) cu).getOptions();
+                    if (templateOptions != null) {
+                        templateOptions.stream()
+                                .filter(Objects::nonNull)
+                                .map(tco -> tco.getOption())
+                                .filter(Objects::nonNull)
+                                .forEach(opt -> {
+                                    ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
+                                            .option(opt)
+                                            .quantity(1)
+                                            .build();
+                                    newUnit.addOption(cuo);
+                                });
+                    }
+                }
             }
 
             configuration.addIncludedUnit(newUnit);
@@ -242,9 +275,39 @@ public class ConfigurationService {
                         return existingMap.equals(req);
                     })
                     .findFirst();
+        } else {
+            // No selections provided: prefer a unit that matches the ConfiguredUnit template options (quantity = 1)
+            try {
+                ConfigurableUnit cu = configurableUnitService.findUnitById(configurableUnitId);
+                if (cu instanceof lmc.configurableUnit.model.ConfiguredUnit) {
+                    var templateOptions = ((lmc.configurableUnit.model.ConfiguredUnit) cu).getOptions();
+                    Map<UUID, Integer> templateMap = (templateOptions == null ? Map.of() :
+                            templateOptions.stream()
+                                    .filter(Objects::nonNull)
+                                    .map(tco -> tco.getOption())
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toMap(o -> o.getId(), o -> 1, Integer::sum))
+                    );
+
+                    if (!templateMap.isEmpty()) {
+                        match = configuration.getIncludedUnits().stream()
+                                .filter(u -> u.getConfigurableUnit() != null && configurableUnitId.equals(u.getConfigurableUnit().getId()))
+                                .filter(u -> {
+                                    Map<UUID,Integer> existingMap = (u.getOptions() == null ? List.<ConfigurationUnitOption>of() : u.getOptions())
+                                            .stream()
+                                            .filter(o -> o.getOption() != null && o.getOption().getId() != null)
+                                            .collect(Collectors.toMap(o -> o.getOption().getId(), ConfigurationUnitOption::getQuantity, Integer::sum));
+                                    return existingMap.equals(templateMap);
+                                })
+                                .findFirst();
+                    }
+                }
+            } catch (IllegalArgumentException ignored) {
+                // fallback to generic lookup below
+            }
         }
 
-        // fallback: if no selections provided or no exact match found, try the generic lookup
+        // fallback: if no exact/template match found, try the generic lookup
         if (match.isEmpty()) {
             match = configurationUnitService
                     .findConfigurationUnitByConfigurationIdAndConfigurableUnitId(configurationId, configurableUnitId);

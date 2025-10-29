@@ -21,7 +21,7 @@ public class ConfiguredUnit extends ConfigurableUnit {
 
 
     @Builder.Default
-    @OneToMany(mappedBy = "configuredUnit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "configuredUnit", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderColumn(name = "option_order")
 
         private List<ConfiguredUnitOption> options = new ArrayList<>();

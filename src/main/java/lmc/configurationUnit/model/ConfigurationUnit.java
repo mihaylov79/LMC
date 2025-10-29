@@ -38,6 +38,7 @@ public class ConfigurationUnit {
 
     @Builder.Default
     @OneToMany(mappedBy = "configurationUnit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "option_index")
     private List<ConfigurationUnitOption> options = new ArrayList<>();
 
     public void addOption(ConfigurationUnitOption cuo) {

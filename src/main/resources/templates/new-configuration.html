@@ -1,3 +1,4 @@
+<!-- language: html -->
 <!DOCTYPE html>
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -70,26 +71,58 @@
             </option>
         </select>
 
-        <!-- Server-side map of unitId -> options (used by JS) -->
-        <script th:inline="javascript">
-            /*<![CDATA[*/
-            const unitOptionsMap = {};
-            /*[[# th:each="cu,cuStat : ${existingUnits}" ]]*/
-            unitOptionsMap['/*[[${cu.id}]]*/'] = [
-                /*[[# th:each="co,coStat : ${cu.options}" ]]*/
-                {
-                    optionId: '/*[[${co.option.id}]]*/',
-                    code: '/*[[${co.option.code}]]*/',
-                    name: '/*[[${co.option.name}]]*/',
-                    price: '/*[[${co.option.price}]]*/'
-                }/*[[${coStat.last} ? '' : ',' ]]*/
-                /*[[/]]*/
-            ];
-            /*[[/]]*/
+        <!-- Server-rendered hidden DOM used to build JS maps (safe Thymeleaf usage) -->
+        <div id="server-data" style="display:none">
+            <!-- iterate only configured units (they have `options`) -->
+            <div th:each="cu : ${configuredUnits}" th:attr="data-unit-id=${cu.id}">
+                <div th:each="co : ${cu.options}"
+                     class="unit-option"
+                     th:attr="data-option-id=${co.option.id}, data-code=${co.option.code}, data-name=${co.option.name}, data-price=${co.option.price}">
+                </div>
+            </div>
 
-            // no server-side prefilled units on "create new" -> empty map
-            const initialUnitSelections = {};
-            /*]]>*/
+            <div th:if="${configuration != null and configuration.units != null}">
+                <div th:each="unit, idx : *{units}" th:attr="data-unit-idx=${idx.index}">
+                    <div th:each="sel : ${unit.optionSelections}"
+                         class="sel"
+                         th:attr="data-option-id=${sel.optionId}, data-qty=${sel.quantity}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Build JS maps from the hidden DOM (no thymeleaf inlined JS) -->
+        <script>
+            var unitOptionsMap = {};
+            var initialUnitSelections = {};
+
+            (function buildMaps() {
+                // units -> options
+                document.querySelectorAll('#server-data > div[data-unit-id]').forEach(u => {
+                    const id = u.getAttribute('data-unit-id');
+                    const options = Array.from(u.querySelectorAll('.unit-option')).map(o => {
+                        const priceAttr = o.getAttribute('data-price');
+                        const price = (priceAttr === null || priceAttr === 'null' || priceAttr === '') ? null : Number(priceAttr);
+                        return {
+                            optionId: o.getAttribute('data-option-id'),
+                            code: o.getAttribute('data-code'),
+                            name: o.getAttribute('data-name'),
+                            price: price
+                        };
+                    });
+                    unitOptionsMap[id] = options;
+                });
+
+                // initial selections for edit/prefill
+                document.querySelectorAll('#server-data div[data-unit-idx]').forEach(u => {
+                    const idx = u.getAttribute('data-unit-idx');
+                    const sels = Array.from(u.querySelectorAll('.sel')).map(s => ({
+                        optionId: s.getAttribute('data-option-id'),
+                        quantity: Math.max(1, parseInt(s.getAttribute('data-qty') || '1', 10))
+                    }));
+                    initialUnitSelections[idx] = sels;
+                });
+            })();
         </script>
 
         <!-- Units container -->
@@ -158,8 +191,7 @@
     </div>
 </div>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
+<script>
     const unitTemplate = document.getElementById('unitOptionsTemplate');
     const unitsContainer = document.getElementById('units-container');
 
@@ -167,13 +199,11 @@
         const div = document.createElement('div');
         div.className = 'unit-row';
 
-        // select
         const select = document.createElement('select');
         select.className = 'unit-select';
         select.required = true;
         select.innerHTML = unitTemplate.innerHTML;
 
-        // qty
         const qty = document.createElement('input');
         qty.type = 'number';
         qty.min = '1';
@@ -181,27 +211,23 @@
         qty.required = true;
         qty.placeholder = 'Бр.';
 
-        // options container (rendered but without names)
         const optionsWrapper = document.createElement('div');
         optionsWrapper.className = 'inline-options';
         const optionsInner = document.createElement('div');
         optionsInner.className = 'options-for-row';
         optionsWrapper.appendChild(optionsInner);
 
-        // remove button
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'remove-btn';
         btn.textContent = 'Премахни';
         btn.addEventListener('click', () => { div.remove(); reindexUnits(); });
 
-        // assemble
         div.appendChild(select);
         div.appendChild(qty);
         div.appendChild(optionsWrapper);
         div.appendChild(btn);
 
-        // when unit selected render options
         select.addEventListener('change', () => renderOptionsForRow(div, select.value));
 
         unitsContainer.appendChild(div);
@@ -232,7 +258,7 @@
             cb.dataset.optionId = opt.optionId;
 
             const label = document.createElement('label');
-            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price ? ' (' + opt.price + ' EUR)' : '');
+            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
 
             const qty = document.createElement('input');
             qty.type = 'number';
@@ -242,7 +268,6 @@
             qty.style.width = '70px';
             qty.disabled = true;
 
-            // set data-option-id on qty so prefill code can find it
             qty.dataset.optionId = opt.optionId;
 
             cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
@@ -254,7 +279,6 @@
         });
     }
 
-    // helper used in other templates: render options for the add-unit panel
     function renderOptionsForUnit(unitId) {
         const optionsList = document.getElementById('options-list');
         if (!optionsList) return;
@@ -308,17 +332,14 @@
             if (select) select.name = `units[${i}].configurableUnitId`;
             if (qty) qty.name = `units[${i}].quantity`;
 
-            // remove any existing hidden optionSelection inputs (they will be rebuilt on submit)
             Array.from(row.querySelectorAll('input[type="hidden"].option-selection')).forEach(h => h.remove());
         });
     }
 
-    // Before submit, build hidden inputs for selected options per unit
     function prepareOptionSelections() {
         reindexUnits();
         const rows = Array.from(document.querySelectorAll('#units-container .unit-row'));
         rows.forEach((row, i) => {
-            // clean previous hidden inputs
             Array.from(row.querySelectorAll('input[type="hidden"].option-selection')).forEach(h => h.remove());
 
             const checkedRows = Array.from(row.querySelectorAll('.options-for-row div')).filter(r => {
@@ -332,7 +353,6 @@
                 const optionId = cb.dataset.optionId;
                 const quantity = Math.max(1, parseInt(q.value || '1', 10));
 
-                // create hidden inputs names: units[i].optionSelections[j].optionId and ...quantity
                 const hidOption = document.createElement('input');
                 hidOption.type = 'hidden';
                 hidOption.className = 'option-selection';
@@ -351,15 +371,12 @@
         });
     }
 
-    // init: attach change listeners for any server-rendered rows and prefill saved selections
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#units-container .unit-row').forEach((row, index) => {
             const select = row.querySelector('.unit-select');
             if (select) {
-                // render options for pre-selected unit
                 renderOptionsForRow(row, select.value);
 
-                // prefill selections from server-model (if present)
                 const sel = initialUnitSelections && initialUnitSelections[index];
                 if (Array.isArray(sel)) {
                     sel.forEach(s => {
@@ -374,14 +391,12 @@
                     });
                 }
 
-                // attach change listener for later selection changes
                 select.addEventListener('change', () => renderOptionsForRow(row, select.value));
             }
         });
         reindexUnits();
     });
 
-    // Modal helpers and AJAX new-unit creation
     window.openCreateUnitModal = function () {
         document.getElementById('createUnitModal').style.display = 'block';
     };
@@ -422,14 +437,12 @@
                 return response.json();
             })
             .then(newUnit => {
-                // append created unit to template selects
                 if (unitTemplate) {
                     const opt = document.createElement('option');
                     opt.value = newUnit.id;
                     opt.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
                     unitTemplate.appendChild(opt);
                 }
-                // append to existing selects in the form
                 document.querySelectorAll('#units-container select').forEach(select => {
                     const opt = document.createElement('option');
                     opt.value = newUnit.id;
@@ -445,7 +458,6 @@
                 alert('Грешка при създаване: ' + error.message);
             });
     };
-    /*]]>*/
 </script>
 
 </body>

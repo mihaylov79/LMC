@@ -13,6 +13,7 @@ import lmc.web.dto.CreateNewConfiguredUnitRequest;
 import lmc.web.dto.OptionSelectionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -118,6 +119,11 @@ public class ConfiguredUnitService {
                 ));
 
         return existingMap.equals(req);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ConfiguredUnit> getAllWithOptions() {
+        return repository.findAllWithOptions();
     }
 
 

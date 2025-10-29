@@ -56,6 +56,7 @@ public class Configuration {
 
     @Builder.Default
     @OneToMany(mappedBy = "configuration", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "unit_index")
     private List<ConfigurationUnit> includedUnits = new ArrayList<>();
 
     // helper to maintain bidirectional association

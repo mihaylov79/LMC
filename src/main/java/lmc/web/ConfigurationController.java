@@ -3,6 +3,7 @@ package lmc.web;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lmc.configurableUnit.service.ConfigurableUnitService;
+import lmc.configurableUnit.service.ConfiguredUnitService;
 import lmc.configuration.model.Configuration;
 import lmc.configuration.service.ConfigurationService;
 import lmc.option.service.OptionService;
@@ -36,15 +37,17 @@ public class ConfigurationController {
     private final OptionService optionService;
     private final UserService userService;
     private final ConfigurationMapper configurationMapper;
+    private final ConfiguredUnitService configuredUnitService;
 
     @Autowired
-    public ConfigurationController(ConfigurationService configurationService, ConfigurableUnitService configurableUnitService, UnitService unitService, OptionService optionService, UserService userService, ConfigurationMapper configurationMapper) {
+    public ConfigurationController(ConfigurationService configurationService, ConfigurableUnitService configurableUnitService, UnitService unitService, OptionService optionService, UserService userService, ConfigurationMapper configurationMapper, ConfiguredUnitService configuredUnitService) {
         this.configurationService = configurationService;
         this.configurableUnitService = configurableUnitService;
         this.unitService = unitService;
         this.optionService = optionService;
         this.userService = userService;
         this.configurationMapper = configurationMapper;
+        this.configuredUnitService = configuredUnitService;
     }
 
 
@@ -53,11 +56,10 @@ public class ConfigurationController {
         ModelAndView modelAndView = new ModelAndView("new-configuration");
         modelAndView.addObject("configuration", new CreateNewConfigurationRequest());
         modelAndView.addObject("existingUnits", configurableUnitService.getAllUnits());
+        modelAndView.addObject("configuredUnits", configuredUnitService.getAllWithOptions()); // <--- added
         modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
         modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
         return modelAndView;
-
-
     }
 
     @PostMapping("/create/new")
@@ -68,6 +70,10 @@ public class ConfigurationController {
             ModelAndView modelAndView = new ModelAndView("new-configuration");
             modelAndView.addObject("configuration", request);
             modelAndView.addObject("existingUnits", configurableUnitService.getAllUnits());
+            modelAndView.addObject("configuredUnits", configuredUnitService.getAllWithOptions()); // <--- added
+            modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
+            modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
+            return modelAndView;
         }
         configurationService.createNewConfiguration(request);
         return new ModelAndView("redirect:/home");
@@ -95,6 +101,7 @@ public class ConfigurationController {
         ModelAndView modelAndView = new ModelAndView("edit-configuration");
         modelAndView.addObject("configuration", configurationMapper.toEditRequest(configuration));
         modelAndView.addObject("existingUnits", configurableUnitService.getAllUnits());
+        modelAndView.addObject("configuredUnits", configuredUnitService.getAllWithOptions()); // <--- added
         modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
         modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
         modelAndView.addObject("user", user);
@@ -108,13 +115,14 @@ public class ConfigurationController {
             ModelAndView modelAndView = new ModelAndView("edit-configuration");
             modelAndView.addObject("configuration", request);
             modelAndView.addObject("existingUnits", configurableUnitService.getAllUnits());
+            modelAndView.addObject("configuredUnits", configuredUnitService.getAllWithOptions()); // <--- added
             modelAndView.addObject("allUnits", unitService.getAllActiveUnits());
             modelAndView.addObject("allOptions", optionService.getAllActiveOptions());
             modelAndView.addObject("configurationId", configurationId);
             return modelAndView;
         }
         configurationService.updateConfiguration(configurationId, request);
-        return new ModelAndView("redirect:/configurations/edit/{configurationId}");
+        return new ModelAndView("redirect:/configurations/edit/" + configurationId);
     }
 
     @PostMapping("/{configurationId}/units/add")
