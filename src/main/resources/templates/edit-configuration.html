@@ -1,11 +1,10 @@
-<!-- html -->
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" lang="bg">
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Edit Configuration</title>
+    <title>Редакция на конфигурация</title>
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="/css/edit-configuration.css?v=1.0">
@@ -18,30 +17,59 @@
 <h1 class="page-title"
     th:text="|Редактиране на ${configuration.model} ${configuration.description}|">Редактиране на конфигурация</h1>
 
-<form id="details-form" th:action="@{|/configurations/edit/${configurationId}|}" th:object="${configuration}"
-      th:attr="data-id=${configurationId}" method="post" onsubmit="prepareOptionSelections();">
+<form id="details-form"
+      th:action="@{|/configurations/edit/${configurationId}|}"
+      th:object="${configuration}"
+      th:attr="data-id=${configurationId}"
+      method="post"
+      onsubmit="prepareOptionSelections();">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-    <!-- Hidden bind inputs so full "Запази" submit works without visible th:field duplicates -->
-    <input type="hidden" th:field="*{imgUrl}" id="hidden-imgUrl"/>
-    <input type="hidden" th:field="*{code}" id="hidden-code"/>
-    <input type="hidden" th:field="*{line}" id="hidden-line"/>
-    <input type="hidden" th:field="*{type}" id="hidden-type"/>
-    <input type="hidden" th:field="*{description}" id="hidden-description"/>
-    <input type="hidden" th:field="*{model}" id="hidden-model"/>
-
-    <!-- Section title for Details -->
+    <!-- Visible detail inputs -->
     <h2 class="section-title">Детайли:</h2>
-
     <div class="details-grid">
-        <!-- existing detail fields (no change) -->
-        <!-- keep original detail inputs if needed (omitted here for brevity) -->
-    </div> <!-- /.details-grid -->
+        <div class="detail-field">
+            <label for="imgUrl">URL на изображение:</label>
+            <input type="text" id="imgUrl" th:field="*{imgUrl}" placeholder="URL на изображение"/>
+        </div>
 
-    <!-- Units section title -->
+        <div class="detail-field">
+            <label for="code">Код:</label>
+            <input type="text" id="code" th:field="*{code}" placeholder="Код" required/>
+        </div>
+
+        <div class="detail-field">
+            <label for="line">Линия:</label>
+            <select id="line" th:field="*{line}" required>
+                <option value="">Изберете линия</option>
+                <option th:each="line : ${T(lmc.configuration.model.MachineLine).values()}"
+                        th:value="${line}" th:text="${line}"></option>
+            </select>
+        </div>
+
+        <div class="detail-field">
+            <label for="type">Тип:</label>
+            <select id="type" th:field="*{type}" required>
+                <option value="">Изберете тип</option>
+                <option th:each="type : ${T(lmc.configuration.model.MachineType).values()}"
+                        th:value="${type}" th:text="${type}"></option>
+            </select>
+        </div>
+
+        <div class="detail-field">
+            <label for="description">Описание:</label>
+            <input type="text" id="description" th:field="*{description}" placeholder="Описание"/>
+        </div>
+
+        <div class="detail-field">
+            <label for="model">Модел:</label>
+            <input type="text" id="model" th:field="*{model}" placeholder="Модел"/>
+        </div>
+    </div>
+
     <h3 class="section-title section-spaced">Елементи на конфигурацията:</h3>
 
-    <!-- Hidden template for units select options -->
+    <!-- Hidden template for unit selects -->
     <select id="unitOptionsTemplate" style="display:none">
         <option value="">Изберете unit</option>
         <option th:each="u : ${existingUnits}"
@@ -50,39 +78,65 @@
         </option>
     </select>
 
-    <!-- Server-side map of unitId -> options (used by JS) -->
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        const unitOptionsMap = {};
-        /*[[# th:each="cu,cuStat : ${existingUnits}" ]]*/
-        unitOptionsMap['/*[[${cu.id}]]*/'] = [
-            /*[[# th:each="co,coStat : ${cu.options}" ]]*/
-            {
-                optionId: '/*[[${co.option.id}]]*/',
-                code: '/*[[${co.option.code}]]*/',
-                name: '/*[[${co.option.name}]]*/',
-                price: '/*[[${co.option.price}]]*/'
-            }/*[[${coStat.last} ? '' : ',' ]]*/
-            /*[[/]]*/
-        ];
-        /*[[/]]*/
+    <!-- Server-rendered hidden DOM to safely expose configuredUnits/options and current selections -->
+    <div id="server-data" style="display:none">
+        <div th:each="cu : ${configuredUnits}" th:attr="data-unit-id=${cu.id}">
+            <div th:each="co : ${cu.options}"
+                 class="unit-option"
+                 th:attr="data-option-id=${co.option.id},data-code=${co.option.code},data-name=${co.option.name},data-price=${co.option.price}">
+            </div>
+        </div>
 
-        // initialUnitSelections: always emit a valid JS literal (array) using a single inline expression
-        const initialUnitSelections = {};
-        /*[[# th:each="u, stat : ${configuration.units}" ]]*/
-        initialUnitSelections['/*[[${stat.index}]]*/'] = /*[[${u.optionSelections} != null ? u.optionSelections : T(java.util.Collections).emptyList()}]]*/;
-        /*[[/]]*/
-        /*]]>*/
+        <div th:if="${configuration != null and configuration.units != null}">
+            <div th:each="unit, idx : *{units}" th:attr="data-unit-idx=${idx.index}">
+                <div th:each="sel : ${unit.optionSelections}"
+                     class="sel"
+                     th:attr="data-option-id=${sel.optionId},data-qty=${sel.quantity}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS: build maps from server-data (no thymeleaf inline JS) -->
+    <script>
+        var unitOptionsMap = {};
+        var initialUnitSelections = {};
+
+        (function buildMaps() {
+            document.querySelectorAll('#server-data > div[data-unit-id]').forEach(u => {
+                const id = u.getAttribute('data-unit-id');
+                const options = Array.from(u.querySelectorAll('.unit-option')).map(o => {
+                    const priceAttr = o.getAttribute('data-price');
+                    const price = (priceAttr === null || priceAttr === 'null' || priceAttr === '') ? null : Number(priceAttr);
+                    return {
+                        optionId: o.getAttribute('data-option-id'),
+                        code: o.getAttribute('data-code'),
+                        name: o.getAttribute('data-name'),
+                        price: price
+                    };
+                });
+                unitOptionsMap[id] = options;
+            });
+
+            document.querySelectorAll('#server-data div[data-unit-idx]').forEach(u => {
+                const idx = u.getAttribute('data-unit-idx');
+                const sels = Array.from(u.querySelectorAll('.sel')).map(s => ({
+                    optionId: s.getAttribute('data-option-id'),
+                    quantity: Math.max(1, parseInt(s.getAttribute('data-qty') || '1', 10))
+                }));
+                initialUnitSelections[idx] = sels;
+            });
+        })();
     </script>
 
-    <!-- Units container: this form uses the same structure as new-configuration to allow editing -->
+    <!-- Units container bound to form -->
     <div id="units-container">
         <div th:each="unit, stat : *{units}" class="unit-row">
             <select th:field="*{units[__${stat.index}__].configurableUnitId}" class="unit-select" required>
                 <option value="">Изберете unit</option>
                 <option th:each="u : ${existingUnits}"
                         th:value="${u.id}"
-                        th:text="${u.unit.code + ' - ' + u.unit.name}">
+                        th:text="${u.unit.code + ' - ' + u.unit.name }">
                 </option>
             </select>
 
@@ -93,7 +147,6 @@
                    required
                    placeholder="Бр."/>
 
-            <!-- options panel for this row (will be filled by JS) -->
             <div class="inline-options" style="margin-left:1rem;">
                 <div class="options-for-row"></div>
             </div>
@@ -104,6 +157,7 @@
 
     <div style="margin-top:1rem;">
         <button type="button" onclick="addUnit()">Добави Unit</button>
+        <button type="button" onclick="openCreateUnitModal()">Създай нов Unit</button>
         <button type="submit">Запази</button>
         <a th:href="@{|/configurations/${configurationId}/details|}">
             <button type="button" class="finish-btn">Край</button>
@@ -111,19 +165,50 @@
     </div>
 </form>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    const configurationId = (/*[[${configurationId}]]*/ '') || document.querySelector('form#details-form').dataset.id;
+<!-- Create Unit Modal (mirrors new-configuration behavior) -->
+<div id="createUnitModal" style="display:none;">
+    <div class="modal-content create-modal-content">
+        <h3>Създай нов Configurable Unit</h3>
+        <form id="createUnitForm" onsubmit="return false;">
+            <input type="hidden" id="csrfToken" th:value="${_csrf.token}"/>
+            <div>
+                <label>Базов продукт:</label>
+                <select id="newUnitBase" required>
+                    <option value="">-- Изберете --</option>
+                    <option th:each="unit : ${allUnits}"
+                            th:value="${unit.id}"
+                            th:text="${unit.code + ' - ' + unit.name}"></option>
+                </select>
+            </div>
+
+            <div>
+                <label>Опции (незадължително):</label>
+                <div id="newUnitOptions">
+                    <div th:each="option : ${allOptions}">
+                        <input type="checkbox" th:id="'newOpt_' + ${option.id}" th:value="${option.id}" class="modal-opt"/>
+                        <label th:for="'newOpt_' + ${option.id}" th:text="${option.code + ' - ' + option.name}"></label>
+                        <input type="number" min="1" value="1" class="modal-opt-qty" style="width:60px"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-create" onclick="submitNewUnit()">Създай и добави</button>
+                <button type="button" class="btn-cancel" onclick="closeCreateUnitModal()">Откажи</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // CSRF helpers
     const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
     const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
     const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
     const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : 'X-CSRF-TOKEN';
 
     function buildHeaders(contentType='application/json') {
-        const headers = {
-            'Content-Type': contentType,
-            'X-Requested-With': 'XMLHttpRequest'
-        };
+        const headers = { 'Content-Type': contentType, 'X-Requested-With': 'XMLHttpRequest' };
         if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
         return headers;
     }
@@ -135,13 +220,11 @@
         const div = document.createElement('div');
         div.className = 'unit-row';
 
-        // select
         const select = document.createElement('select');
         select.className = 'unit-select';
         select.required = true;
         select.innerHTML = unitTemplate.innerHTML;
 
-        // qty
         const qty = document.createElement('input');
         qty.type = 'number';
         qty.min = '1';
@@ -149,27 +232,23 @@
         qty.required = true;
         qty.placeholder = 'Бр.';
 
-        // options container (rendered but without names)
         const optionsWrapper = document.createElement('div');
         optionsWrapper.className = 'inline-options';
         const optionsInner = document.createElement('div');
         optionsInner.className = 'options-for-row';
         optionsWrapper.appendChild(optionsInner);
 
-        // remove button
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'remove-btn';
         btn.textContent = 'Премахни';
         btn.addEventListener('click', () => { div.remove(); reindexUnits(); });
 
-        // assemble
         div.appendChild(select);
         div.appendChild(qty);
         div.appendChild(optionsWrapper);
         div.appendChild(btn);
 
-        // when unit selected render options
         select.addEventListener('change', () => renderOptionsForRow(div, select.value));
 
         unitsContainer.appendChild(div);
@@ -200,7 +279,7 @@
             cb.dataset.optionId = opt.optionId;
 
             const label = document.createElement('label');
-            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price ? ' (' + opt.price + ' EUR)' : '');
+            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
 
             const qty = document.createElement('input');
             qty.type = 'number';
@@ -209,8 +288,6 @@
             qty.className = 'opt-qty';
             qty.style.width = '70px';
             qty.disabled = true;
-
-            // set data-option-id on qty so prefill code can find it
             qty.dataset.optionId = opt.optionId;
 
             cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
@@ -222,75 +299,22 @@
         });
     }
 
-    // helper used in other templates: render options for the add-unit panel
-    function renderOptionsForUnit(unitId) {
-        // reuse logic used for add-controls panel (not complicated here)
-        // find global options-list if present
-        const optionsList = document.getElementById('options-list');
-        if (!optionsList) return;
-        optionsList.innerHTML = '';
-        if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) {
-            document.getElementById('options-panel').style.display = 'none';
-            return;
-        }
-        document.getElementById('options-panel').style.display = 'block';
-        unitOptionsMap[unitId].forEach(opt => {
-            const row = document.createElement('div');
-            row.className = 'option-row';
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.gap = '0.5rem';
-            row.style.marginBottom = '0.4rem';
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'option-checkbox';
-            checkbox.dataset.optionId = opt.optionId;
-
-            const label = document.createElement('label');
-            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price ? ' (' + opt.price + ' EUR)' : '');
-
-            const qty = document.createElement('input');
-            qty.type = 'number';
-            qty.min = '1';
-            qty.value = '1';
-            qty.className = 'option-qty';
-            qty.style.width = '70px';
-            qty.style.marginLeft = 'auto';
-            qty.dataset.optionId = opt.optionId;
-
-            row.appendChild(checkbox);
-            row.appendChild(label);
-            row.appendChild(qty);
-            optionsList.appendChild(row);
-
-            checkbox.addEventListener('change', () => { qty.disabled = !checkbox.checked; });
-            qty.disabled = true;
-        });
-    }
-
     function reindexUnits() {
         const rows = Array.from(document.querySelectorAll('#units-container .unit-row'));
         rows.forEach((row, i) => {
             const select = row.querySelector('.unit-select');
             const qty = row.querySelector('input[type="number"]:not(.opt-qty)');
-
             if (select) select.name = `units[${i}].configurableUnitId`;
             if (qty) qty.name = `units[${i}].quantity`;
-
-            // remove any existing hidden optionSelection inputs (they will be rebuilt on submit)
             Array.from(row.querySelectorAll('input[type="hidden"].option-selection')).forEach(h => h.remove());
         });
     }
 
-    // Before submit, build hidden inputs for selected options per unit
     function prepareOptionSelections() {
         reindexUnits();
         const rows = Array.from(document.querySelectorAll('#units-container .unit-row'));
         rows.forEach((row, i) => {
-            // clean previous hidden inputs
             Array.from(row.querySelectorAll('input[type="hidden"].option-selection')).forEach(h => h.remove());
-
             const checkedRows = Array.from(row.querySelectorAll('.options-for-row div')).filter(r => {
                 const cb = r.querySelector('.opt-cb');
                 return cb && cb.checked;
@@ -302,7 +326,6 @@
                 const optionId = cb.dataset.optionId;
                 const quantity = Math.max(1, parseInt(q.value || '1', 10));
 
-                // create hidden inputs names: units[i].optionSelections[j].optionId and ...quantity
                 const hidOption = document.createElement('input');
                 hidOption.type = 'hidden';
                 hidOption.className = 'option-selection';
@@ -321,15 +344,14 @@
         });
     }
 
-    // init: attach change listeners for any server-rendered rows and prefill saved selections
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('#units-container .unit-row').forEach((row, index) => {
             const select = row.querySelector('.unit-select');
             if (select) {
-                // render options for pre-selected unit
+                // initial render
                 renderOptionsForRow(row, select.value);
 
-                // prefill selections from server-model (if present)
+                // apply any initial selections from server-data
                 const sel = initialUnitSelections && initialUnitSelections[index];
                 if (Array.isArray(sel)) {
                     sel.forEach(s => {
@@ -344,19 +366,63 @@
                     });
                 }
 
-                // attach change listener for later selection changes
                 select.addEventListener('change', () => renderOptionsForRow(row, select.value));
             }
         });
         reindexUnits();
-
-        // if an add-unit panel exists, render its options (compat)
-        const initialAddSel = document.getElementById('add-unit-select');
-        if (initialAddSel && initialAddSel.value) {
-            renderOptionsForUnit(initialAddSel.value);
-        }
     });
-    /*]]>*/
+
+    // Modal helpers and create-unit flow
+    function openCreateUnitModal() { document.getElementById('createUnitModal').style.display = 'block'; }
+    function closeCreateUnitModal() {
+        document.getElementById('createUnitModal').style.display = 'none';
+        const form = document.getElementById('createUnitForm');
+        if (form) form.reset();
+    }
+
+    async function submitNewUnit() {
+        const unitId = document.getElementById('newUnitBase').value;
+        if (!unitId) { alert('Моля изберете базов продукт'); return; }
+
+        const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
+        const options = rows.map(row => {
+            const cb = row.querySelector('input[type="checkbox"]');
+            const qtyInput = row.querySelector('input[type="number"]');
+            return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
+        }).filter(x => x !== null);
+
+        try {
+            const res = await fetch('/configurable-units/create', {
+                method: 'POST',
+                headers: buildHeaders(),
+                body: JSON.stringify({ unitId: unitId, optionSelections: options.length ? options : null })
+            });
+            if (!res.ok) throw new Error('Network error');
+            const newUnit = await res.json();
+
+            // append option to template and existing selects
+            if (unitTemplate) {
+                const opt = document.createElement('option');
+                opt.value = newUnit.id;
+                opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
+                unitTemplate.appendChild(opt);
+            }
+            document.querySelectorAll('#units-container select').forEach(select => {
+                const opt = document.createElement('option');
+                opt.value = newUnit.id;
+                opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
+                select.appendChild(opt);
+            });
+
+            closeCreateUnitModal();
+            alert('Unit създаден успешно!');
+            // reload to refresh server-data safely
+            window.location.reload();
+        } catch (err) {
+            console.error(err);
+            alert('Грешка при създаване: ' + err.message);
+        }
+    }
 </script>
 
 </body>
