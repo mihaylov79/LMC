@@ -1,3 +1,4 @@
+<!-- html -->
 <!DOCTYPE html>
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -14,8 +15,7 @@
     <th:block th:insert="~{fragments/nav :: nav}"></th:block>
 </div>
 
-<h1 class="page-title"
-    th:text="|Редактиране на ${configuration.model} ${configuration.description}|">Редактиране на конфигурация</h1>
+<h1 class="page-title" th:text="|Редактиране на ${configuration.model} ${configuration.description}|">Редактиране на конфигурация</h1>
 
 <form id="details-form"
       th:action="@{|/configurations/edit/${configurationId}|}"
@@ -25,60 +25,143 @@
       onsubmit="prepareOptionSelections();">
     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-    <!-- Visible detail inputs -->
+    <!-- keep hidden binding inputs for full-submit compatibility (hidden by CSS) -->
+    <input type="hidden" th:field="*{imgUrl}" id="hidden-imgUrl"/>
+    <input type="hidden" th:field="*{code}" id="hidden-code"/>
+    <input type="hidden" th:field="*{line}" id="hidden-line"/>
+    <input type="hidden" th:field="*{type}" id="hidden-type"/>
+    <input type="hidden" th:field="*{description}" id="hidden-description"/>
+    <input type="hidden" th:field="*{model}" id="hidden-model"/>
+
     <h2 class="section-title">Детайли:</h2>
     <div class="details-grid">
+
+        <!-- imgUrl (text) -->
         <div class="detail-field">
-            <label for="imgUrl">URL на изображение:</label>
-            <input type="text" id="imgUrl" th:field="*{imgUrl}" placeholder="URL на изображение"/>
+            <label>URL на изображение:</label>
+            <div class="detail-row">
+                <span id="display-imgUrl" class="detail-value" th:text="*{imgUrl}">-</span>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="button" class="edit-field-btn" onclick="toggleInline('imgUrl')">Редактирай</button>
+                </div>
+            </div>
+
+            <div id="inline-imgUrl" class="inline-field-form" style="display:none;">
+                <input type="url" id="input-imgUrl" class="inline-input" th:value="*{imgUrl}" placeholder="URL на изображение"/>
+                <button type="button" class="change-btn" onclick="submitField('imgUrl')">Промени</button>
+                <button type="button" class="finish-btn" onclick="toggleInline('imgUrl')">Откажи</button>
+                <div id="feedback-imgUrl" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            </div>
         </div>
 
+        <!-- code (text) -->
         <div class="detail-field">
-            <label for="code">Код:</label>
-            <input type="text" id="code" th:field="*{code}" placeholder="Код" required/>
+            <label>Код:</label>
+            <div class="detail-row">
+                <span id="display-code" class="detail-value" th:text="*{code}">-</span>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="button" class="edit-field-btn" onclick="toggleInline('code')">Редактирай</button>
+                </div>
+            </div>
+
+            <div id="inline-code" class="inline-field-form" style="display:none;">
+                <input type="text" id="input-code" class="inline-input" th:value="*{code}" placeholder="Код"/>
+                <button type="button" class="change-btn" onclick="submitField('code')">Промени</button>
+                <button type="button" class="finish-btn" onclick="toggleInline('code')">Откажи</button>
+                <div id="feedback-code" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            </div>
         </div>
 
+        <!-- line (enum select) -->
         <div class="detail-field">
-            <label for="line">Линия:</label>
-            <select id="line" th:field="*{line}" required>
-                <option value="">Изберете линия</option>
-                <option th:each="line : ${T(lmc.configuration.model.MachineLine).values()}"
-                        th:value="${line}" th:text="${line}"></option>
-            </select>
+            <label>Линия:</label>
+            <div class="detail-row">
+                <span id="display-line" class="detail-value" th:text="${configuration.line}">-</span>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="button" class="edit-field-btn" onclick="toggleInline('line')">Редактирай</button>
+                </div>
+            </div>
+
+            <div id="inline-line" class="inline-field-form" style="display:none;">
+                <select id="input-line" class="inline-select">
+                    <option value="">Изберете линия</option>
+                    <option th:each="line : ${T(lmc.configuration.model.MachineLine).values()}"
+                            th:value="${line}" th:text="${line}" th:selected="${line == configuration.line}"></option>
+                </select>
+                <button type="button" class="change-btn" onclick="submitField('line')">Промени</button>
+                <button type="button" class="finish-btn" onclick="toggleInline('line')">Откажи</button>
+                <div id="feedback-line" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            </div>
         </div>
 
+        <!-- type (enum select) -->
         <div class="detail-field">
-            <label for="type">Тип:</label>
-            <select id="type" th:field="*{type}" required>
-                <option value="">Изберете тип</option>
-                <option th:each="type : ${T(lmc.configuration.model.MachineType).values()}"
-                        th:value="${type}" th:text="${type}"></option>
-            </select>
+            <label>Тип:</label>
+            <div class="detail-row">
+                <span id="display-type" class="detail-value" th:text="${configuration.type}">-</span>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="button" class="edit-field-btn" onclick="toggleInline('type')">Редактирай</button>
+                </div>
+            </div>
+
+            <div id="inline-type" class="inline-field-form" style="display:none;">
+                <select id="input-type" class="inline-select">
+                    <option value="">Изберете тип</option>
+                    <option th:each="type : ${T(lmc.configuration.model.MachineType).values()}"
+                            th:value="${type}" th:text="${type}" th:selected="${type == configuration.type}"></option>
+                </select>
+                <button type="button" class="change-btn" onclick="submitField('type')">Промени</button>
+                <button type="button" class="finish-btn" onclick="toggleInline('type')">Откажи</button>
+                <div id="feedback-type" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            </div>
         </div>
 
+        <!-- description (text) -->
         <div class="detail-field">
-            <label for="description">Описание:</label>
-            <input type="text" id="description" th:field="*{description}" placeholder="Описание"/>
+            <label>Описание:</label>
+            <div class="detail-row">
+                <span id="display-description" class="detail-value" th:text="*{description}">-</span>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="button" class="edit-field-btn" onclick="toggleInline('description')">Редактирай</button>
+                </div>
+            </div>
+
+            <div id="inline-description" class="inline-field-form" style="display:none;">
+                <input type="text" id="input-description" class="inline-input" th:value="*{description}" placeholder="Описание"/>
+                <button type="button" class="change-btn" onclick="submitField('description')">Промени</button>
+                <button type="button" class="finish-btn" onclick="toggleInline('description')">Откажи</button>
+                <div id="feedback-description" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            </div>
         </div>
 
+        <!-- model (text) -->
         <div class="detail-field">
-            <label for="model">Модел:</label>
-            <input type="text" id="model" th:field="*{model}" placeholder="Модел"/>
+            <label>Модел:</label>
+            <div class="detail-row">
+                <span id="display-model" class="detail-value" th:text="*{model}">-</span>
+                <div style="display:flex;gap:0.5rem;">
+                    <button type="button" class="edit-field-btn" onclick="toggleInline('model')">Редактирай</button>
+                </div>
+            </div>
+
+            <div id="inline-model" class="inline-field-form" style="display:none;">
+                <input type="text" id="input-model" class="inline-input" th:value="*{model}" placeholder="Модел"/>
+                <button type="button" class="change-btn" onclick="submitField('model')">Промени</button>
+                <button type="button" class="finish-btn" onclick="toggleInline('model')">Откажи</button>
+                <div id="feedback-model" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            </div>
         </div>
+
     </div>
 
     <h3 class="section-title section-spaced">Елементи на конфигурацията:</h3>
 
-    <!-- Hidden template for unit selects -->
+    <!-- unit/templates/server-data and units container are kept identical to existing implementation -->
     <select id="unitOptionsTemplate" style="display:none">
         <option value="">Изберете unit</option>
-        <option th:each="u : ${existingUnits}"
-                th:value="${u.id}"
-                th:text="${u.unit.code + ' - ' + u.unit.name }">
-        </option>
+        <option th:each="u : ${existingUnits}" th:value="${u.id}" th:text="${u.unit.code + ' - ' + u.unit.name }"></option>
     </select>
 
-    <!-- Server-rendered hidden DOM to safely expose configuredUnits/options and current selections -->
     <div id="server-data" style="display:none">
         <div th:each="cu : ${configuredUnits}" th:attr="data-unit-id=${cu.id}">
             <div th:each="co : ${cu.options}"
@@ -97,47 +180,31 @@
         </div>
     </div>
 
-    <!-- JS: build maps from server-data (no thymeleaf inline JS) -->
     <script>
-        var unitOptionsMap = {};
-        var initialUnitSelections = {};
-
-        (function buildMaps() {
-            document.querySelectorAll('#server-data > div[data-unit-id]').forEach(u => {
+        var unitOptionsMap = {}; var initialUnitSelections = {};
+        (function buildMaps(){
+            document.querySelectorAll('#server-data > div[data-unit-id]').forEach(u=>{
                 const id = u.getAttribute('data-unit-id');
-                const options = Array.from(u.querySelectorAll('.unit-option')).map(o => {
+                const options = Array.from(u.querySelectorAll('.unit-option')).map(o=>{
                     const priceAttr = o.getAttribute('data-price');
                     const price = (priceAttr === null || priceAttr === 'null' || priceAttr === '') ? null : Number(priceAttr);
-                    return {
-                        optionId: o.getAttribute('data-option-id'),
-                        code: o.getAttribute('data-code'),
-                        name: o.getAttribute('data-name'),
-                        price: price
-                    };
+                    return { optionId: o.getAttribute('data-option-id'), code: o.getAttribute('data-code'), name: o.getAttribute('data-name'), price: price };
                 });
                 unitOptionsMap[id] = options;
             });
-
-            document.querySelectorAll('#server-data div[data-unit-idx]').forEach(u => {
+            document.querySelectorAll('#server-data div[data-unit-idx]').forEach(u=>{
                 const idx = u.getAttribute('data-unit-idx');
-                const sels = Array.from(u.querySelectorAll('.sel')).map(s => ({
-                    optionId: s.getAttribute('data-option-id'),
-                    quantity: Math.max(1, parseInt(s.getAttribute('data-qty') || '1', 10))
-                }));
+                const sels = Array.from(u.querySelectorAll('.sel')).map(s=>({ optionId: s.getAttribute('data-option-id'), quantity: Math.max(1, parseInt(s.getAttribute('data-qty')||'1',10)) }));
                 initialUnitSelections[idx] = sels;
             });
         })();
     </script>
 
-    <!-- Units container bound to form -->
     <div id="units-container">
         <div th:each="unit, stat : *{units}" class="unit-row">
             <select th:field="*{units[__${stat.index}__].configurableUnitId}" class="unit-select" required>
                 <option value="">Изберете unit</option>
-                <option th:each="u : ${existingUnits}"
-                        th:value="${u.id}"
-                        th:text="${u.unit.code + ' - ' + u.unit.name }">
-                </option>
+                <option th:each="u : ${existingUnits}" th:value="${u.id}" th:text="${u.unit.code + ' - ' + u.unit.name }"></option>
             </select>
 
             <input type="number"
@@ -165,7 +232,7 @@
     </div>
 </form>
 
-<!-- Create Unit Modal (mirrors new-configuration behavior) -->
+<!-- Create Unit Modal kept as before -->
 <div id="createUnitModal" style="display:none;">
     <div class="modal-content create-modal-content">
         <h3>Създай нов Configurable Unit</h3>
@@ -175,12 +242,9 @@
                 <label>Базов продукт:</label>
                 <select id="newUnitBase" required>
                     <option value="">-- Изберете --</option>
-                    <option th:each="unit : ${allUnits}"
-                            th:value="${unit.id}"
-                            th:text="${unit.code + ' - ' + unit.name}"></option>
+                    <option th:each="unit : ${allUnits}" th:value="${unit.id}" th:text="${unit.code + ' - ' + unit.name}"></option>
                 </select>
             </div>
-
             <div>
                 <label>Опции (незадължително):</label>
                 <div id="newUnitOptions">
@@ -191,7 +255,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="modal-buttons">
                 <button type="button" class="btn-create" onclick="submitNewUnit()">Създай и добави</button>
                 <button type="button" class="btn-cancel" onclick="closeCreateUnitModal()">Откажи</button>
@@ -213,89 +276,81 @@
         return headers;
     }
 
+    // retrieve configurationId from form dataset
+    const cfgForm = document.getElementById('details-form');
+    const configurationId = window.configurationId || (cfgForm ? cfgForm.getAttribute('data-id') : null);
+
+    // inline edit helpers
+    function toggleInline(field) {
+        const el = document.getElementById('inline-' + field);
+        if (!el) return;
+        const open = el.style.display !== 'none' && el.style.display !== '';
+        el.style.display = open ? 'none' : 'flex';
+        const fb = document.getElementById('feedback-' + field);
+        if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
+    }
+
+    async function submitField(field) {
+        const container = document.getElementById('inline-' + field);
+        if (!container) return;
+        const input = document.getElementById('input-' + field) || container.querySelector('input, select, textarea');
+        if (!input) return;
+        const value = input.value;
+
+        try {
+            const res = await fetch(`/configurations/edit/${configurationId}/field-update`, {
+                method: 'POST',
+                headers: buildHeaders(),
+                body: JSON.stringify({ field: field, value: value })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                const disp = document.getElementById('display-' + field);
+                if (disp) disp.textContent = value || '';
+                // update hidden binding input so full-form save remains coherent
+                const hidden = document.getElementById('hidden-' + field);
+                if (hidden) hidden.value = value || '';
+                toggleInline(field);
+            } else {
+                const fb = document.getElementById('feedback-' + field);
+                if (fb) { fb.style.display = 'block'; fb.textContent = data.message || 'Error'; }
+            }
+        } catch (err) {
+            const fb = document.getElementById('feedback-' + field);
+            if (fb) { fb.style.display = 'block'; fb.textContent = err.message || 'Network error'; }
+        }
+    }
+
+    // --- Units / configured units JS (kept from existing implementation) ---
     const unitTemplate = document.getElementById('unitOptionsTemplate');
     const unitsContainer = document.getElementById('units-container');
 
     function addUnit() {
-        const div = document.createElement('div');
-        div.className = 'unit-row';
-
-        const select = document.createElement('select');
-        select.className = 'unit-select';
-        select.required = true;
+        const div = document.createElement('div'); div.className = 'unit-row';
+        const select = document.createElement('select'); select.className = 'unit-select'; select.required = true;
         select.innerHTML = unitTemplate.innerHTML;
-
-        const qty = document.createElement('input');
-        qty.type = 'number';
-        qty.min = '1';
-        qty.value = '1';
-        qty.required = true;
-        qty.placeholder = 'Бр.';
-
-        const optionsWrapper = document.createElement('div');
-        optionsWrapper.className = 'inline-options';
-        const optionsInner = document.createElement('div');
-        optionsInner.className = 'options-for-row';
-        optionsWrapper.appendChild(optionsInner);
-
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'remove-btn';
-        btn.textContent = 'Премахни';
+        const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.required = true; qty.placeholder = 'Бр.';
+        const optionsWrapper = document.createElement('div'); optionsWrapper.className = 'inline-options';
+        const optionsInner = document.createElement('div'); optionsInner.className = 'options-for-row'; optionsWrapper.appendChild(optionsInner);
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'remove-btn'; btn.textContent = 'Премахни';
         btn.addEventListener('click', () => { div.remove(); reindexUnits(); });
-
-        div.appendChild(select);
-        div.appendChild(qty);
-        div.appendChild(optionsWrapper);
-        div.appendChild(btn);
-
+        div.appendChild(select); div.appendChild(qty); div.appendChild(optionsWrapper); div.appendChild(btn);
         select.addEventListener('change', () => renderOptionsForRow(div, select.value));
-
-        unitsContainer.appendChild(div);
-        reindexUnits();
+        unitsContainer.appendChild(div); reindexUnits();
     }
 
-    function removeUnitRow(btn) {
-        const row = btn.closest('.unit-row');
-        if (row) { row.remove(); reindexUnits(); }
-    }
+    function removeUnitRow(btn) { const row = btn.closest('.unit-row'); if (row) { row.remove(); reindexUnits(); } }
 
     function renderOptionsForRow(rowElement, unitId) {
-        const container = rowElement.querySelector('.options-for-row');
-        container.innerHTML = '';
-        if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) {
-            return;
-        }
+        const container = rowElement.querySelector('.options-for-row'); container.innerHTML = '';
+        if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) return;
         unitOptionsMap[unitId].forEach(opt => {
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.gap = '0.4rem';
-            row.style.marginBottom = '0.25rem';
-
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.className = 'opt-cb';
-            cb.dataset.optionId = opt.optionId;
-
-            const label = document.createElement('label');
-            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
-
-            const qty = document.createElement('input');
-            qty.type = 'number';
-            qty.min = '1';
-            qty.value = '1';
-            qty.className = 'opt-qty';
-            qty.style.width = '70px';
-            qty.disabled = true;
-            qty.dataset.optionId = opt.optionId;
-
+            const row = document.createElement('div'); row.style.display = 'flex'; row.style.alignItems = 'center'; row.style.gap = '0.4rem'; row.style.marginBottom = '0.25rem';
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'opt-cb'; cb.dataset.optionId = opt.optionId;
+            const label = document.createElement('label'); label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
+            const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.className = 'opt-qty'; qty.style.width = '70px'; qty.disabled = true; qty.dataset.optionId = opt.optionId;
             cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
-
-            row.appendChild(cb);
-            row.appendChild(label);
-            row.appendChild(qty);
-            container.appendChild(row);
+            row.appendChild(cb); row.appendChild(label); row.appendChild(qty); container.appendChild(row);
         });
     }
 
@@ -316,74 +371,49 @@
         rows.forEach((row, i) => {
             Array.from(row.querySelectorAll('input[type="hidden"].option-selection')).forEach(h => h.remove());
             const checkedRows = Array.from(row.querySelectorAll('.options-for-row div')).filter(r => {
-                const cb = r.querySelector('.opt-cb');
-                return cb && cb.checked;
+                const cb = r.querySelector('.opt-cb'); return cb && cb.checked;
             });
-
             checkedRows.forEach((r, j) => {
                 const cb = r.querySelector('.opt-cb');
                 const q = r.querySelector('.opt-qty');
                 const optionId = cb.dataset.optionId;
                 const quantity = Math.max(1, parseInt(q.value || '1', 10));
-
-                const hidOption = document.createElement('input');
-                hidOption.type = 'hidden';
-                hidOption.className = 'option-selection';
-                hidOption.name = `units[${i}].optionSelections[${j}].optionId`;
-                hidOption.value = optionId;
-
-                const hidQty = document.createElement('input');
-                hidQty.type = 'hidden';
-                hidQty.className = 'option-selection';
-                hidQty.name = `units[${i}].optionSelections[${j}].quantity`;
-                hidQty.value = quantity;
-
-                row.appendChild(hidOption);
-                row.appendChild(hidQty);
+                const hidOption = document.createElement('input'); hidOption.type = 'hidden'; hidOption.className = 'option-selection';
+                hidOption.name = `units[${i}].optionSelections[${j}].optionId`; hidOption.value = optionId;
+                const hidQty = document.createElement('input'); hidQty.type = 'hidden'; hidQty.className = 'option-selection';
+                hidQty.name = `units[${i}].optionSelections[${j}].quantity`; hidQty.value = quantity;
+                row.appendChild(hidOption); row.appendChild(hidQty);
             });
         });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // initial units render and apply existing selections
         document.querySelectorAll('#units-container .unit-row').forEach((row, index) => {
             const select = row.querySelector('.unit-select');
             if (select) {
-                // initial render
                 renderOptionsForRow(row, select.value);
-
-                // apply any initial selections from server-data
                 const sel = initialUnitSelections && initialUnitSelections[index];
-                if (Array.isArray(sel)) {
-                    sel.forEach(s => {
-                        try {
-                            const cb = row.querySelector(`.options-for-row .opt-cb[data-option-id="${s.optionId}"]`);
-                            const q = row.querySelector(`.options-for-row .opt-qty[data-option-id="${s.optionId}"]`);
-                            if (cb) {
-                                cb.checked = true;
-                                if (q) { q.value = Math.max(1, Number(s.quantity) || 1); q.disabled = false; }
-                            }
-                        } catch (e) { /* ignore invalid/missing entries */ }
-                    });
-                }
-
+                if (Array.isArray(sel)) sel.forEach(s => {
+                    try {
+                        const cb = row.querySelector(`.options-for-row .opt-cb[data-option-id="${s.optionId}"]`);
+                        const q = row.querySelector(`.options-for-row .opt-qty[data-option-id="${s.optionId}"]`);
+                        if (cb) { cb.checked = true; if (q) { q.value = Math.max(1, Number(s.quantity) || 1); q.disabled = false; } }
+                    } catch (e) {}
+                });
                 select.addEventListener('change', () => renderOptionsForRow(row, select.value));
             }
         });
         reindexUnits();
     });
 
-    // Modal helpers and create-unit flow
+    // Create unit modal + submitNewUnit (keeps previous endpoints)
     function openCreateUnitModal() { document.getElementById('createUnitModal').style.display = 'block'; }
-    function closeCreateUnitModal() {
-        document.getElementById('createUnitModal').style.display = 'none';
-        const form = document.getElementById('createUnitForm');
-        if (form) form.reset();
-    }
+    function closeCreateUnitModal() { document.getElementById('createUnitModal').style.display = 'none'; document.getElementById('createUnitForm').reset(); }
 
     async function submitNewUnit() {
         const unitId = document.getElementById('newUnitBase').value;
         if (!unitId) { alert('Моля изберете базов продукт'); return; }
-
         const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
         const options = rows.map(row => {
             const cb = row.querySelector('input[type="checkbox"]');
@@ -400,7 +430,6 @@
             if (!res.ok) throw new Error('Network error');
             const newUnit = await res.json();
 
-            // append option to template and existing selects
             if (unitTemplate) {
                 const opt = document.createElement('option');
                 opt.value = newUnit.id;
@@ -416,7 +445,6 @@
 
             closeCreateUnitModal();
             alert('Unit създаден успешно!');
-            // reload to refresh server-data safely
             window.location.reload();
         } catch (err) {
             console.error(err);
