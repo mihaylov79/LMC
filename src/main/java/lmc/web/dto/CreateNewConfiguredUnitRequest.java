@@ -10,7 +10,7 @@ public class CreateNewConfiguredUnitRequest {
 
     private UUID unitId;
 
-    private List<OptionSelectionDTO> optionIds;
+    private List<OptionSelectionDTO> optionSelections;
 
 //    private int quantity;
 }

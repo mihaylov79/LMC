@@ -8,7 +8,11 @@ import lmc.configuration.model.Configuration;
 import lmc.configuration.repository.ConfigurationRepository;
 import lmc.configurationUnit.model.ConfigurationUnit;
 import lmc.configurationUnit.service.ConfigurationUnitService;
+import lmc.configurationUnitOption.model.ConfigurationUnitOption;
+import lmc.option.model.Option;
+import lmc.option.service.OptionService;
 import lmc.web.dto.CreateNewConfigurationRequest;
+import lmc.web.dto.OptionSelectionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,8 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,13 +34,15 @@ public class ConfigurationService {
     private final ConfigurableUnitService configurableUnitService;
     private final PriceCalculationService calculationService;
     private final ConfigurationUnitService configurationUnitService;
+    private final OptionService optionService;
 
     @Autowired
-    public ConfigurationService(ConfigurationRepository configurationRepository, ConfigurableUnitService configurableUnitService, PriceCalculationService calculationService, ConfigurationUnitService configurationUnitService) {
+    public ConfigurationService(ConfigurationRepository configurationRepository, ConfigurableUnitService configurableUnitService, PriceCalculationService calculationService, ConfigurationUnitService configurationUnitService, OptionService optionService) {
         this.configurationRepository = configurationRepository;
         this.configurableUnitService = configurableUnitService;
         this.calculationService = calculationService;
         this.configurationUnitService = configurationUnitService;
+        this.optionService = optionService;
     }
 
     @Transactional
@@ -51,7 +59,8 @@ public class ConfigurationService {
                 .active(true)
                 .build();
 
-        // create ConfigurationUnit objects and attach them to the same configuration
+
+        // map DTO units -> ConfigurationUnit (include per-config option quantities)
         request.getUnits().forEach(dto -> {
             ConfigurableUnit cu = configurableUnitService.findUnitById(dto.getConfigurableUnitId());
             ConfigurationUnit configurationUnit = ConfigurationUnit.builder()
@@ -59,8 +68,23 @@ public class ConfigurationService {
                     .quantity(dto.getQuantity())
                     .build();
 
-            // helper sets the back-reference: configurationUnit.setConfiguration(configuration)
-            configuration.addIncludedUnit(configurationUnit);
+        if (dto.getOptionSelections() != null) {
+            dto.getOptionSelections().stream()
+                    .filter(s -> s != null && s.getOptionId() != null)
+                    .forEach(s -> {
+                        // load option (by id) - OptionService returns list for ids
+                        Option opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalArgumentException("Option not found: " + s.getOptionId()));
+                        ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
+                                .option(opt)
+                                .quantity(Math.max(1, s.getQuantity()))
+                                .build();
+                        configurationUnit.addOption(cuo);
+                    });
+        }
+
+        configuration.addIncludedUnit(configurationUnit);
         });
 
         // calculate and set price on the same configuration instance
@@ -72,42 +96,6 @@ public class ConfigurationService {
         return configurationRepository.save(configuration);
     }
 
-//    @Transactional
-//    public Configuration createNewConfiguration(CreateNewConfigurationRequest request){
-//
-//        final Configuration baseconfiguration = Configuration.builder()
-//                .imageUrl(request.getImgUrl())
-//                .code(request.getCode())
-//                .line(request.getLine())
-//                .type(request.getType())
-//                .description(request.getDescription())
-//                .model(request.getModel())
-//                .active(true)
-//                .build();
-//
-//        List<ConfigurationUnit>units = request.getUnits().stream()
-//                .map(dto -> {
-//                    ConfigurableUnit unit = configurableUnitService.findUnitById(dto.getConfigurableUnitId());
-//                    return ConfigurationUnit.builder()
-//                            .configuration(baseconfiguration)
-//                            .configurableUnit(unit)
-//                            .quantity(dto.getQuantity())
-//                            .build();
-//                }).toList();
-//
-//        Configuration configurationWithUnits = baseconfiguration.toBuilder()
-//                .includedUnits(units)
-//                .build();
-//
-//        BigDecimal totalPrice = calculationService.calculateConfigurationTotalPrice(configurationWithUnits);
-//
-//        Configuration configurationWithPrice = configurationWithUnits.toBuilder()
-//                .totalPrice(totalPrice)
-//                .priceUpdateDate(LocalDate.now())
-//                .build();
-//
-//        return configurationRepository.save(configurationWithPrice);
-//    }
 
 
     @Transactional
@@ -140,16 +128,7 @@ public class ConfigurationService {
         return updatedConfigurations.size();
     }
 
-//    public Configuration findConfigurationById(UUID id){
-//        return configurationRepository.findById(id)
-//                .orElseThrow(()-> new IllegalArgumentException("Конфигурация с идентификация: [ %s ] не беще открита"
-//                .formatted(id)));
-//    }
-//
-//    public List<Configuration> getAllConfigurations(){
-//        return  configurationRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-//
-//    }
+
 
     @Transactional(readOnly = true)
     public List<Configuration> getAllConfigurations(){
@@ -163,7 +142,7 @@ public class ConfigurationService {
     }
 
     @Transactional
-    public Configuration addConfigurableUnit(UUID configurationId, UUID configurableUnitId, int quantity) {
+    public Configuration addConfigurableUnit(UUID configurationId, UUID configurableUnitId, int quantity, List<OptionSelectionDTO> optionSelections) {
         if (quantity <= 0) throw new IllegalArgumentException("Количеството трябва да бъде положителна стойност!");
         Configuration configuration = findConfigurationById(configurationId);
 
@@ -172,13 +151,65 @@ public class ConfigurationService {
 
         if (existingOpt.isPresent()) {
             ConfigurationUnit existing = existingOpt.get();
-            existing.setQuantity(existing.getQuantity() + quantity);
+
+            if (optionSelections == null || optionSelections.isEmpty()) {
+                existing.setQuantity(existing.getQuantity() + quantity);
+            } else {
+                // build requested map id->qty
+                Map<UUID,Integer> req = optionSelections.stream()
+                        .filter(s -> s != null && s.getOptionId() != null)
+                        .collect(Collectors.toMap(OptionSelectionDTO::getOptionId, s -> Math.max(1, s.getQuantity()), Integer::sum));
+
+                /* Java: fix null-safety when building existingMap */
+                Map<UUID,Integer> existingMap = (existing.getOptions() == null ? List.<ConfigurationUnitOption>of() : existing.getOptions())
+                        .stream()
+                        .filter(o -> o.getOption() != null && o.getOption().getId() != null)
+                        .collect(Collectors.toMap(o -> o.getOption().getId(), ConfigurationUnitOption::getQuantity, Integer::sum));
+
+                if (existingMap.equals(req)) {
+                    existing.setQuantity(existing.getQuantity() + quantity);
+                } else {
+                    // different option composition => create new configuration unit instance
+                    ConfigurableUnit cu = configurableUnitService.findUnitById(configurableUnitId);
+                    ConfigurationUnit newUnit = ConfigurationUnit.builder()
+                            .configurableUnit(cu)
+                            .quantity(quantity)
+                            .build();
+
+                    optionSelections.forEach(s -> {
+                        var opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
+                                .findFirst()
+                                .orElseThrow(() -> new IllegalArgumentException("Option not found: " + s.getOptionId()));
+                        ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
+                                .option(opt)
+                                .quantity(Math.max(1, s.getQuantity()))
+                                .build();
+                        newUnit.addOption(cuo);
+                    });
+
+                    configuration.addIncludedUnit(newUnit);
+                }
+            }
         } else {
             ConfigurableUnit cu = configurableUnitService.findUnitById(configurableUnitId);
             ConfigurationUnit newUnit = ConfigurationUnit.builder()
                     .configurableUnit(cu)
                     .quantity(quantity)
                     .build();
+
+            if (optionSelections != null) {
+                optionSelections.forEach(s -> {
+                    var opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Option not found: " + s.getOptionId()));
+                    ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
+                            .option(opt)
+                            .quantity(Math.max(1, s.getQuantity()))
+                            .build();
+                    newUnit.addOption(cuo);
+                });
+            }
+
             configuration.addIncludedUnit(newUnit);
         }
 
@@ -188,19 +219,47 @@ public class ConfigurationService {
         return configurationRepository.save(configuration);
     }
 
+
     @Transactional
-    public Configuration removeConfigurableUnit(UUID configurationId, UUID configurableUnitId, int quantity) {
+    public Configuration removeConfigurableUnit(UUID configurationId, UUID configurableUnitId, int quantity, List<OptionSelectionDTO> optionSelections) {
         Configuration configuration = findConfigurationById(configurationId);
 
-        configurationUnitService
-                .findConfigurationUnitByConfigurationIdAndConfigurableUnitId(configurationId, configurableUnitId)
-                .ifPresent(existing -> {
-                    if (existing.getQuantity() <= quantity) {
-                        configuration.removeIncludedUnit(existing);
-                    } else {
-                        existing.setQuantity(existing.getQuantity() - quantity);
-                    }
-                });
+        // find matching ConfigurationUnit: prefer exact options match when optionSelections provided
+        Optional<ConfigurationUnit> match = Optional.empty();
+
+        if (optionSelections != null && !optionSelections.isEmpty()) {
+            Map<UUID,Integer> req = optionSelections.stream()
+                    .filter(s -> s != null && s.getOptionId() != null)
+                    .collect(Collectors.toMap(OptionSelectionDTO::getOptionId, s -> Math.max(1, s.getQuantity()), Integer::sum));
+
+            match = configuration.getIncludedUnits().stream()
+                    .filter(u -> u.getConfigurableUnit() != null && configurableUnitId.equals(u.getConfigurableUnit().getId()))
+                    .filter(u -> {
+                        Map<UUID,Integer> existingMap = (u.getOptions() == null ? List.<ConfigurationUnitOption>of() : u.getOptions())
+                                .stream()
+                                .filter(o -> o.getOption() != null && o.getOption().getId() != null)
+                                .collect(Collectors.toMap(o -> o.getOption().getId(), ConfigurationUnitOption::getQuantity, Integer::sum));
+                        return existingMap.equals(req);
+                    })
+                    .findFirst();
+        }
+
+        // fallback: if no selections provided or no exact match found, try the generic lookup
+        if (match.isEmpty()) {
+            match = configurationUnitService
+                    .findConfigurationUnitByConfigurationIdAndConfigurableUnitId(configurationId, configurableUnitId);
+        }
+
+        if (match.isPresent()) {
+            ConfigurationUnit existing = match.get();
+            if (existing.getQuantity() <= quantity) {
+                configuration.removeIncludedUnit(existing);
+            } else {
+                existing.setQuantity(existing.getQuantity() - quantity);
+            }
+        } else {
+            throw new IllegalArgumentException("No matching configuration unit found to remove");
+        }
 
         BigDecimal totalPrice = calculationService.calculateConfigurationTotalPrice(configuration);
         configuration.setTotalPrice(totalPrice);
@@ -221,6 +280,7 @@ public class ConfigurationService {
                 .description(request.getDescription())
                 .build();
 
+        // NOTE: if units changed mapping needed; for now just recompute price using existing includedUnits
         BigDecimal newPrice = calculationService.calculateConfigurationTotalPrice(configuration);
         configuration = configuration.toBuilder()
                 .totalPrice(newPrice)

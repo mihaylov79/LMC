@@ -5,10 +5,7 @@ import lmc.configurableUnit.service.PriceCalculationService;
 import lmc.configuration.model.Configuration;
 import lmc.configurationUnit.model.ConfigurationUnit;
 import lmc.unit.model.CurrencyType;
-import lmc.web.dto.ConfigurationDetailsDTO;
-import lmc.web.dto.ConfigurationIncludedUnitsDTO;
-import lmc.web.dto.ConfigurationUnitRequest;
-import lmc.web.dto.CreateNewConfigurationRequest;
+import lmc.web.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +47,7 @@ public class ConfigurationMapper {
 
     private ConfigurationIncludedUnitsDTO mapIncludedUnit(ConfigurationUnit unit) {
         ConfigurableUnit confUnit = unit.getConfigurableUnit();
-        BigDecimal unitPrice = calculationService.calculateConfigurableUnitPrice(confUnit);
+        BigDecimal unitPrice = calculationService.calculateConfigurationUnitPrice(unit);
         BigDecimal totalUnitPrice = unitPrice.multiply(BigDecimal.valueOf(unit.getQuantity()));
 
         return ConfigurationIncludedUnitsDTO.builder()
@@ -70,6 +67,19 @@ public class ConfigurationMapper {
             ConfigurationUnitRequest cu = new ConfigurationUnitRequest();
             cu.setConfigurableUnitId(u.getConfigurableUnit().getId());
             cu.setQuantity(u.getQuantity());
+
+            // map per-configuration option selections (optionId + quantity)
+            cu.setOptionSelections(u.getOptions() == null ? List.of() :
+                    u.getOptions().stream()
+                            .filter(o -> o != null && o.getOption() != null)
+                            .map(o -> {
+                                OptionSelectionDTO dto = new OptionSelectionDTO();
+                                dto.setOptionId(o.getOption().getId());
+                                dto.setQuantity(Math.max(1, o.getQuantity()));
+                                return dto;
+                            })
+                            .toList()
+            );
 
             ConfigurableUnit confUnit = u.getConfigurableUnit();
             String label = confUnit.getCode() + (confUnit.getUnit() != null ? " - " + confUnit.getUnit().getName() : "");

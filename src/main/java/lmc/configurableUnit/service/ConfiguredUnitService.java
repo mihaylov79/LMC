@@ -31,75 +31,11 @@ public class ConfiguredUnitService {
         this.unitService = unitService;
     }
 
-//    public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request) {
-//        Unit unit = unitService.getUnitById(request.getUnitId());
-//
-//        List<Option> options = optionService.getOptionsByIds(request.getOptionIds());
-//
-//        String generatedCode = generateCode(unit, options);
-//
-//        return repository.findByCodeAndActiveIsTrue(generatedCode).orElseGet(()-> {
-//            ConfiguredUnit newUnit = ConfiguredUnit.builder()
-//                    .code(generatedCode)
-//                    .unit(unit)
-//                    .active(true)
-//                    .currency(CurrencyType.EUR)
-//                    .options(options)
-//                    .build();
-//
-//            return repository.save(newUnit);
-//        });
-//
-//    }
-
-//    public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request) {
-//        Unit unit = unitService.getUnitById(request.getUnitId());
-//
-//        List<OptionSelectionDTO> selections = request.getOptionIds() == null ? List.of() : request.getOptionIds();
-//
-//        // build map of id -> quantity (ensure at least 1)
-//        Map<UUID, Integer> qtyById = selections.stream()
-//                .filter(s -> s != null && s.getOptionId() != null)
-//                .collect(Collectors.toMap(
-//                        OptionSelectionDTO::getOptionId,
-//                        s -> Math.max(1, s.getQuantity()),
-//                        (a, b) -> a
-//                ));
-//
-//        // load Option entities by ids
-//        List<UUID> ids = qtyById.keySet().stream().toList();
-//        List<Option> options = ids.isEmpty() ? List.of() : optionService.getOptionsByIds(ids);
-//
-//        // map Option -> ConfiguredUnitOption with correct quantity
-//        List<ConfiguredUnitOption> configuredOptions = options.stream()
-//                .map(opt -> ConfiguredUnitOption.builder()
-//                        .option(opt)
-//                        .quantity(qtyById.getOrDefault(opt.getId(), 1))
-//                        .build())
-//                .toList();
-//
-//        String generatedCode = generateCode(unit, options);
-//
-//        return repository.findByCodeAndActiveIsTrue(generatedCode).orElseGet(() -> {
-//            ConfiguredUnit newUnit = ConfiguredUnit.builder()
-//                    .code(generatedCode)
-//                    .unit(unit)
-//                    .active(true)
-//                    .currency(CurrencyType.EUR)
-//                    .build();
-//
-//            // attach join-entities and set back-reference
-//            configuredOptions.forEach(newUnit::addOption);
-//
-//            return repository.save(newUnit);
-//        });
-//    }
-
 
     public ConfiguredUnit createConfiguredUnit(CreateNewConfiguredUnitRequest request) {
         Unit unit = unitService.getUnitById(request.getUnitId());
 
-        List<OptionSelectionDTO> selections = request.getOptionIds() == null ? List.of() : request.getOptionIds();
+        List<OptionSelectionDTO> selections = request.getOptionSelections() == null ? List.of() : request.getOptionSelections();
 
         // build map of id -> quantity (ensure at least 1)
         Map<UUID, Integer> qtyById = selections.stream()
@@ -118,7 +54,6 @@ public class ConfiguredUnitService {
         List<ConfiguredUnitOption> configuredOptions = options.stream()
                 .map(opt -> ConfiguredUnitOption.builder()
                         .option(opt)
-                        .quantity(qtyById.getOrDefault(opt.getId(), 1))
                         .build())
                 .toList();
 
@@ -150,22 +85,13 @@ public class ConfiguredUnitService {
     }
 
     private String generateCode(Unit unit, List<ConfiguredUnitOption> configuredOptions) {
-        if (unit == null) {
-            throw new IllegalArgumentException("unit must not be null");
-        }
+        if (unit == null) throw new IllegalArgumentException("unit must not be null");
+        if (configuredOptions == null || configuredOptions.isEmpty()) return unit.getCode();
 
-        if (configuredOptions == null || configuredOptions.isEmpty()) {
-            return unit.getCode();
-        }
-
-        // produce stable representation including quantities: CODE_OPT1x2_OPT2x1 (sorted by option code)
         String optionPart = configuredOptions.stream()
-                .map(co -> {
-                    String optCode = co.getOption() != null && co.getOption().getCode() != null
-                            ? co.getOption().getCode().trim().toUpperCase()
-                            : co.getOption() != null ? co.getOption().getId().toString() : "";
-                    return optCode + "x" + Math.max(1, co.getQuantity());
-                })
+                .map(co -> co.getOption() != null && co.getOption().getCode() != null
+                        ? co.getOption().getCode().trim().toUpperCase()
+                        : co.getOption() != null ? co.getOption().getId().toString() : "")
                 .filter(s -> !s.isEmpty())
                 .sorted()
                 .collect(Collectors.joining("_"));
@@ -174,16 +100,24 @@ public class ConfiguredUnitService {
     }
 
     private boolean optionsMatch(List<ConfiguredUnitOption> existingOptions, Map<UUID, Integer> requestedQtyById) {
-        if ((existingOptions == null || existingOptions.isEmpty()) && (requestedQtyById == null || requestedQtyById.isEmpty())) {
-            return true;
+        // normalize requested map to avoid null checks
+        Map<UUID, Integer> req = requestedQtyById == null ? Map.of() : requestedQtyById;
+
+        // if there are no existing template options, match only when request is empty
+        if (existingOptions == null || existingOptions.isEmpty()) {
+            return req.isEmpty();
         }
-        if (existingOptions == null) return requestedQtyById == null || requestedQtyById.isEmpty();
+
         Map<UUID, Integer> existingMap = existingOptions.stream()
                 .filter(Objects::nonNull)
                 .filter(co -> co.getOption() != null && co.getOption().getId() != null)
-                .collect(Collectors.toMap(co -> co.getOption().getId(), ConfiguredUnitOption::getQuantity, (a, b) -> a));
+                .collect(Collectors.toMap(
+                        co -> co.getOption().getId(),
+                        co -> 1,            // template option counts as 1
+                        Integer::sum        // aggregate duplicates defensively
+                ));
 
-        return existingMap.equals(requestedQtyById);
+        return existingMap.equals(req);
     }
 
 

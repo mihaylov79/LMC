@@ -27,7 +27,7 @@ public class ConfigurableUnitService {
 
 
     public ConfigurableUnit createUnit(CreateNewConfiguredUnitRequest request) {
-        if (request.getOptionIds() == null || request.getOptionIds().isEmpty()) {
+        if (request.getOptionSelections() == null || request.getOptionSelections().isEmpty()) {
             return simpleUnitService.createSimpleUnit(request);
         } else {
             return configuredUnitService.createConfiguredUnit(request);

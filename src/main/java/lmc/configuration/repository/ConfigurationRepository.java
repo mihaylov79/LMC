@@ -18,8 +18,8 @@ public interface ConfigurationRepository extends JpaRepository<Configuration, UU
             "left join fetch c.includedUnits iu " +
             "left join fetch iu.configurableUnit cu " +
             "left join fetch cu.unit u " +
-            "left join fetch TREAT(cu AS lmc.configurableUnit.model.ConfiguredUnit).options o " +
-            "left join fetch o.option opt " +
+            "left join fetch iu.options iuopt " +
+            "left join fetch iuopt.option opt " +
             "where c.active = true")
     List<Configuration> findAllWithUnits();
 
@@ -28,8 +28,8 @@ public interface ConfigurationRepository extends JpaRepository<Configuration, UU
             "left join fetch c.includedUnits iu " +
             "left join fetch iu.configurableUnit cu " +
             "left join fetch cu.unit u " +
-            "left join fetch TREAT(cu AS lmc.configurableUnit.model.ConfiguredUnit).options o " +
-            "left join fetch o.option opt " +
+            "left join fetch iu.options iuopt " +
+            "left join fetch iuopt.option opt " +
             "where c.id = :id")
     Optional<Configuration> findByIdWithUnits(@Param("id") UUID id);
 

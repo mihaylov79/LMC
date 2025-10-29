@@ -10,8 +10,10 @@ import lmc.security.CustomUserDetails;
 import lmc.unit.service.UnitService;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
+import lmc.web.dto.ConfigurationUnitRequest;
 import lmc.web.dto.CreateNewConfigurationRequest;
 
+import lmc.web.dto.OptionSelectionDTO;
 import lmc.web.dto.mapper.ConfigurationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,6 +22,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -116,24 +119,30 @@ public class ConfigurationController {
 
     @PostMapping("/{configurationId}/units/add")
     @ResponseBody
-    public Map<String, Object> addNewConfigurationUnit(@PathVariable UUID configurationId,@RequestBody Map<String,Object> body){
-        UUID cuId = UUID.fromString((String) body.get("configurableUnitId"));
-        int qty = ((Number) body.getOrDefault("quantity",1)).intValue();
-        Configuration updated = configurationService.addConfigurableUnit(configurationId,cuId,qty);
+    public Map<String, Object> addNewConfigurationUnit(@PathVariable UUID configurationId, @RequestBody ConfigurationUnitRequest request){
+        UUID cuId = request.getConfigurableUnitId();
+        int qty = Math.max(1, request.getQuantity());
+        List<OptionSelectionDTO> optionSelections = request.getOptionSelections();
+
+        Configuration updated = configurationService.addConfigurableUnit(configurationId, cuId, qty, optionSelections);
 
         return Map.of("totalPrice", updated.getTotalPrice(),
                       "priceUpdateDate", updated.getPriceUpdateDate());
     }
+
     @PostMapping("/{configurationId}/units/remove")
     @ResponseBody
-    public Map<String, Object> removeConfigurationUnit(@PathVariable UUID configurationId,@RequestBody Map<String,Object> body){
-        UUID cuId = UUID.fromString((String) body.get("configurableUnitId"));
-        int qty = ((Number) body.getOrDefault("quantity",1)).intValue();
+    public Map<String, Object> removeConfigurationUnit(@PathVariable UUID configurationId,
+                                                       @RequestBody ConfigurationUnitRequest request) {
 
-        Configuration updated = configurationService.removeConfigurableUnit(configurationId,cuId,qty);
+        UUID cuId = request.getConfigurableUnitId();
+        int qty = Math.max(1, request.getQuantity());
+        List<OptionSelectionDTO> optionSelections = request.getOptionSelections();
+
+        Configuration updated = configurationService.removeConfigurableUnit(configurationId, cuId, qty, optionSelections);
 
         return Map.of("totalPrice", updated.getTotalPrice(),
-                      "priceUpdateDate", updated.getPriceUpdateDate());
+                "priceUpdateDate", updated.getPriceUpdateDate());
     }
 
     @GetMapping("/create-from/{configurationId}")
