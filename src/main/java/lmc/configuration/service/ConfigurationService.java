@@ -353,4 +353,15 @@ public class ConfigurationService {
 
     }
 
+    @Transactional
+    public void disableConfiguration(UUID configurationId){
+        Configuration configuration = findConfigurationById(configurationId);
+
+        configuration = configuration.toBuilder()
+                .active(false)
+                .build();
+
+        configurationRepository.save(configuration);
+    }
+
 }
