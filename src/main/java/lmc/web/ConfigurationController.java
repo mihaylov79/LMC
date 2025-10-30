@@ -165,5 +165,16 @@ public class ConfigurationController {
         return new ModelAndView("redirect:/configurations/edit/" + created.getId());
     }
 
+    @PostMapping("/disable/{configurationId}")
+    public ModelAndView configurationDisable(@PathVariable UUID configurationId, @AuthenticationPrincipal CustomUserDetails details){
+        User user = userService.getUserById(details.getId());
+
+        configurationService.disableConfiguration(configurationId);
+
+        ModelAndView modelAndView = new ModelAndView("redirect:/home");
+        modelAndView.addObject("user", user);
+        return modelAndView;
+    }
+
 
 }
