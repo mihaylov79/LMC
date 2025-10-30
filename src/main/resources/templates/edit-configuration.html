@@ -433,82 +433,82 @@
     }
 
     // javascript
-    async function submitNewUnit() {
-        const unitId = document.getElementById('newUnitBase').value;
-        if (!unitId) { alert('Моля изберете базов продукт'); return; }
-
-        const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
-        const options = rows.map(row => {
-            const cb = row.querySelector('input[type="checkbox"]');
-            const qtyInput = row.querySelector('input[type="number"]');
-            return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
-        }).filter(x => x !== null);
-
-        try {
-            const res = await fetch('/products/configurable-units/create', {
-                method: 'POST',
-                headers: buildHeaders(), // includes CSRF header from meta
-                body: JSON.stringify({ unitId: unitId, optionSelections: options.length ? options : null })
-            });
-
-            // If network-level failure this block won't run and will fall to catch
-            if (!res.ok) {
-                const txt = await res.text();
-                throw new Error(txt || `Server returned ${res.status}`);
-            }
-
-            // Try to parse JSON response (if controller returns JSON with created unit)
-            const contentType = res.headers.get('Content-Type') || '';
-            if (contentType.includes('application/json')) {
-                const newUnit = await res.json();
-                // append to hidden template and to all selects
-                if (unitTemplate) {
-                    const opt = document.createElement('option');
-                    opt.value = newUnit.id;
-                    opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
-                    unitTemplate.appendChild(opt);
-                }
-                document.querySelectorAll('#units-container select').forEach(select => {
-                    const opt = document.createElement('option');
-                    opt.value = newUnit.id;
-                    opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
-                    select.appendChild(opt);
-                });
-
-                closeCreateUnitModal();
-                alert('Unit създаден успешно!');
-                return;
-            }
-
-            // If no JSON but OK (maybe server redirected), reload to reflect created unit
-            window.location.reload();
-        } catch (err) {
-            console.error('submitNewUnit error:', err);
-            // Show server message if available, otherwise fallback message
-            alert('Грешка при създаване: ' + (err.message || 'network'));
-
-            // Optional fallback: try a standard form POST if AJAX fails repeatedly.
-            // This fallback is commented — enable if server expects form-encoded request instead of JSON.
-            /*
-            try {
-                const f = document.createElement('form');
-                f.method = 'POST';
-                f.action = '/products/configurable-units/create';
-                // include CSRF token as header-based fallback may not work for form-submit;
-                // if your server exposes _csrf.parameterName in template, add hidden input with that name here.
-                const unitInput = document.createElement('input'); unitInput.type = 'hidden'; unitInput.name = 'unitId'; unitInput.value = unitId; f.appendChild(unitInput);
-                options.forEach((opt, i) => {
-                    const idInput = document.createElement('input'); idInput.type = 'hidden'; idInput.name = `optionSelections[${i}].optionId`; idInput.value = opt.optionId; f.appendChild(idInput);
-                    const qtyInput = document.createElement('input'); qtyInput.type = 'hidden'; qtyInput.name = `optionSelections[${i}].quantity`; qtyInput.value = String(opt.quantity); f.appendChild(qtyInput);
-                });
-                document.body.appendChild(f);
-                f.submit();
-            } catch (e) {
-                console.error('Fallback form submit failed', e);
-            }
-            */
-        }
-    }
+    // async function submitNewUnit() {
+    //     const unitId = document.getElementById('newUnitBase').value;
+    //     if (!unitId) { alert('Моля изберете базов продукт'); return; }
+    //
+    //     const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
+    //     const options = rows.map(row => {
+    //         const cb = row.querySelector('input[type="checkbox"]');
+    //         const qtyInput = row.querySelector('input[type="number"]');
+    //         return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
+    //     }).filter(x => x !== null);
+    //
+    //     try {
+    //         const res = await fetch('/products/configurable-units/create-new', {
+    //             method: 'POST',
+    //             headers: buildHeaders(), // includes CSRF header from meta
+    //             body: JSON.stringify({ unitId: unitId, optionSelections: options.length ? options : null })
+    //         });
+    //
+    //         // If network-level failure this block won't run and will fall to catch
+    //         if (!res.ok) {
+    //             const txt = await res.text();
+    //             throw new Error(txt || `Server returned ${res.status}`);
+    //         }
+    //
+    //         // Try to parse JSON response (if controller returns JSON with created unit)
+    //         const contentType = res.headers.get('Content-Type') || '';
+    //         if (contentType.includes('application/json')) {
+    //             const newUnit = await res.json();
+    //             // append to hidden template and to all selects
+    //             if (unitTemplate) {
+    //                 const opt = document.createElement('option');
+    //                 opt.value = newUnit.id;
+    //                 opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
+    //                 unitTemplate.appendChild(opt);
+    //             }
+    //             document.querySelectorAll('#units-container select').forEach(select => {
+    //                 const opt = document.createElement('option');
+    //                 opt.value = newUnit.id;
+    //                 opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
+    //                 select.appendChild(opt);
+    //             });
+    //
+    //             closeCreateUnitModal();
+    //             alert('Unit създаден успешно!');
+    //             return;
+    //         }
+    //
+    //         // If no JSON but OK (maybe server redirected), reload to reflect created unit
+    //         window.location.reload();
+    //     } catch (err) {
+    //         console.error('submitNewUnit error:', err);
+    //         // Show server message if available, otherwise fallback message
+    //         alert('Грешка при създаване: ' + (err.message || 'network'));
+    //
+    //         // Optional fallback: try a standard form POST if AJAX fails repeatedly.
+    //         // This fallback is commented — enable if server expects form-encoded request instead of JSON.
+    //         /*
+    //         try {
+    //             const f = document.createElement('form');
+    //             f.method = 'POST';
+    //             f.action = '/products/configurable-units/create';
+    //             // include CSRF token as header-based fallback may not work for form-submit;
+    //             // if your server exposes _csrf.parameterName in template, add hidden input with that name here.
+    //             const unitInput = document.createElement('input'); unitInput.type = 'hidden'; unitInput.name = 'unitId'; unitInput.value = unitId; f.appendChild(unitInput);
+    //             options.forEach((opt, i) => {
+    //                 const idInput = document.createElement('input'); idInput.type = 'hidden'; idInput.name = `optionSelections[${i}].optionId`; idInput.value = opt.optionId; f.appendChild(idInput);
+    //                 const qtyInput = document.createElement('input'); qtyInput.type = 'hidden'; qtyInput.name = `optionSelections[${i}].quantity`; qtyInput.value = String(opt.quantity); f.appendChild(qtyInput);
+    //             });
+    //             document.body.appendChild(f);
+    //             f.submit();
+    //         } catch (e) {
+    //             console.error('Fallback form submit failed', e);
+    //         }
+    //         */
+    //     }
+    // }
 
     // javascript
     function openCreateUnitModal() {
@@ -535,28 +535,24 @@
     }
 
     // javascript
-    // Replace the fetch call in submitNewUnit with this (use the path your controller expects)
+    // File: `src/main/resources/templates/edit-configuration.html`
     async function submitNewUnit() {
         const unitId = document.getElementById('newUnitBase').value;
         if (!unitId) { alert('Моля изберете базов продукт'); return; }
 
-        const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
-        const options = rows.map(row => {
+        // collect choices from modal (we will reuse these to populate unitOptionsMap)
+        const rows = Array.from(document.querySelectorAll('#newUnitOptions > div'));
+        const selections = rows.map(row => {
             const cb = row.querySelector('input[type="checkbox"]');
             const qtyInput = row.querySelector('input[type="number"]');
-            return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
+            return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1, label: (row.querySelector('label') ? row.querySelector('label').textContent.trim() : '') } : null;
         }).filter(x => x !== null);
 
-        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
-        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
-        const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : 'X-CSRF-TOKEN';
-
         try {
-            const res = await fetch('products/configurable-units/create-new', { // <-- update URL here
+            const res = await fetch('/products/configurable-units/create-new', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
-                body: JSON.stringify({ unitId: unitId, optionSelections: options.length ? options : null })
+                headers: buildHeaders(),
+                body: JSON.stringify({ unitId: unitId, optionSelections: selections.length ? selections.map(s => ({ optionId: s.optionId, quantity: s.quantity })) : null })
             });
 
             if (!res.ok) {
@@ -565,26 +561,76 @@
             }
 
             const contentType = res.headers.get('Content-Type') || '';
-            if (contentType.includes('application/json')) {
-                const newUnit = await res.json();
-                const label = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
-                if (unitTemplate) {
-                    const opt = document.createElement('option'); opt.value = newUnit.id; opt.textContent = label; unitTemplate.appendChild(opt);
-                }
-                document.querySelectorAll('#units-container select').forEach(select => {
-                    const opt = document.createElement('option'); opt.value = newUnit.id; opt.textContent = label; select.appendChild(opt);
-                });
-                closeCreateUnitModal();
-                alert('Unit създаден успешно!');
+            if (!contentType.includes('application/json')) {
+                window.location.reload(); // fallback if server redirected/returned HTML
                 return;
             }
 
-            window.location.reload(); // fallback
+            const newUnit = await res.json();
+            const newId = String(newUnit.id);
+
+            // Build normalized options array from modal selections (no controller change needed)
+            const opts = selections.map(s => {
+                // parse label "CODE - Name" when available
+                let code = null, name = null;
+                if (s.label) {
+                    const parts = s.label.split(' - ');
+                    code = parts.length ? parts[0].trim() : null;
+                    name = parts.length > 1 ? parts.slice(1).join(' - ').trim() : null;
+                }
+                return { optionId: String(s.optionId), code: code, name: name, price: null };
+            });
+
+            // update client-side map
+            unitOptionsMap[newId] = opts;
+
+            // add to hidden template
+            const label = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
+            if (unitTemplate) {
+                const optTemplateNode = document.createElement('option');
+                optTemplateNode.value = newId;
+                optTemplateNode.textContent = label;
+                unitTemplate.appendChild(optTemplateNode);
+            }
+
+            // append fresh option nodes to every select and render options for selects already set to newId
+            document.querySelectorAll('#units-container select').forEach(select => {
+                const opt = document.createElement('option');
+                opt.value = newId;
+                opt.textContent = label;
+                select.appendChild(opt);
+
+                if (String(select.value) === newId) {
+                    const row = select.closest('.unit-row');
+                    if (row) renderOptionsForRow(row, newId);
+                }
+            });
+
+            // also add server-data stub so server-data-based rebuilds can find it if needed
+            const serverData = document.getElementById('server-data');
+            if (serverData) {
+                const div = document.createElement('div');
+                div.setAttribute('data-unit-id', newId);
+                opts.forEach(o => {
+                    const io = document.createElement('div');
+                    io.className = 'unit-option';
+                    io.setAttribute('data-option-id', String(o.optionId));
+                    io.setAttribute('data-code', o.code || '');
+                    io.setAttribute('data-name', o.name || '');
+                    io.setAttribute('data-price', o.price == null ? '' : String(o.price));
+                    div.appendChild(io);
+                });
+                serverData.appendChild(div);
+            }
+
+            closeCreateUnitModal();
+            alert('Unit създаден успешно!');
         } catch (err) {
             console.error('submitNewUnit error:', err);
             alert('Грешка при създаване: ' + (err.message || 'network'));
         }
     }
+
 
 
 
