@@ -1,4 +1,4 @@
-<!-- html -->
+<!-- language: html -->
 <!DOCTYPE html>
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -35,128 +35,69 @@
 
     <h2 class="section-title">Детайли:</h2>
     <div class="details-grid">
-
-        <!-- imgUrl (text) -->
+        <!-- Code -->
         <div class="detail-field">
-            <label>URL на изображение:</label>
+            <label>Код</label>
             <div class="detail-row">
-                <span id="display-imgUrl" class="detail-value" th:text="*{imgUrl}">-</span>
-                <div style="display:flex;gap:0.5rem;">
-                    <button type="button" class="edit-field-btn" onclick="toggleInline('imgUrl')">Редактирай</button>
-                </div>
+                <span class="detail-value" id="code-value" th:text="*{code}">--</span>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('code')">Промени</button>
             </div>
-
-            <div id="inline-imgUrl" class="inline-field-form" style="display:none;">
-                <input type="url" id="input-imgUrl" class="inline-input" th:value="*{imgUrl}" placeholder="URL на изображение"/>
-                <button type="button" class="change-btn" onclick="submitField('imgUrl')">Промени</button>
-                <button type="button" class="finish-btn" onclick="toggleInline('imgUrl')">Откажи</button>
-                <div id="feedback-imgUrl" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            <div class="inline-field-form" id="inline-code">
+                <input id="inline-code-input" class="inline-input" type="text" />
+                <button type="button" class="change-btn" onclick="submitField('code')">Запази</button>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('code')">Откажи</button>
             </div>
         </div>
 
-        <!-- code (text) -->
+        <!-- Model -->
         <div class="detail-field">
-            <label>Код:</label>
+            <label>Модел</label>
             <div class="detail-row">
-                <span id="display-code" class="detail-value" th:text="*{code}">-</span>
-                <div style="display:flex;gap:0.5rem;">
-                    <button type="button" class="edit-field-btn" onclick="toggleInline('code')">Редактирай</button>
-                </div>
+                <span class="detail-value" id="model-value" th:text="*{model}">--</span>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('model')">Промени</button>
             </div>
-
-            <div id="inline-code" class="inline-field-form" style="display:none;">
-                <input type="text" id="input-code" class="inline-input" th:value="*{code}" placeholder="Код"/>
-                <button type="button" class="change-btn" onclick="submitField('code')">Промени</button>
-                <button type="button" class="finish-btn" onclick="toggleInline('code')">Откажи</button>
-                <div id="feedback-code" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            <div class="inline-field-form" id="inline-model">
+                <input id="inline-model-input" class="inline-input" type="text" />
+                <button type="button" class="change-btn" onclick="submitField('model')">Запази</button>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('model')">Откажи</button>
             </div>
         </div>
 
-        <!-- line (enum select) -->
+        <!-- Line -->
         <div class="detail-field">
-            <label>Линия:</label>
+            <label>Линия</label>
             <div class="detail-row">
-                <span id="display-line" class="detail-value" th:text="${configuration.line}">-</span>
-                <div style="display:flex;gap:0.5rem;">
-                    <button type="button" class="edit-field-btn" onclick="toggleInline('line')">Редактирай</button>
-                </div>
+                <span class="detail-value" id="line-value" th:text="*{line}">--</span>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('line')">Промени</button>
             </div>
-
-            <div id="inline-line" class="inline-field-form" style="display:none;">
-                <select id="input-line" class="inline-select">
-                    <option value="">Изберете линия</option>
-                    <option th:each="line : ${T(lmc.configuration.model.MachineLine).values()}"
-                            th:value="${line}" th:text="${line}" th:selected="${line == configuration.line}"></option>
+            <div class="inline-field-form" id="inline-line">
+                <select id="inline-line-select" class="inline-select">
+                    <option value="">(избери)</option>
+                    <option th:each="ln : ${T(lmc.configuration.model.MachineLine).values()}"
+                            th:value="${ln}" th:text="${ln}"></option>
                 </select>
-                <button type="button" class="change-btn" onclick="submitField('line')">Промени</button>
-                <button type="button" class="finish-btn" onclick="toggleInline('line')">Откажи</button>
-                <div id="feedback-line" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+                <button type="button" class="change-btn" onclick="submitField('line')">Запази</button>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('line')">Откажи</button>
             </div>
         </div>
 
-        <!-- type (enum select) -->
+        <!-- Description -->
         <div class="detail-field">
-            <label>Тип:</label>
+            <label>Описание</label>
             <div class="detail-row">
-                <span id="display-type" class="detail-value" th:text="${configuration.type}">-</span>
-                <div style="display:flex;gap:0.5rem;">
-                    <button type="button" class="edit-field-btn" onclick="toggleInline('type')">Редактирай</button>
-                </div>
+                <span class="detail-value" id="description-value" th:text="*{description}">--</span>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('description')">Промени</button>
             </div>
-
-            <div id="inline-type" class="inline-field-form" style="display:none;">
-                <select id="input-type" class="inline-select">
-                    <option value="">Изберете тип</option>
-                    <option th:each="type : ${T(lmc.configuration.model.MachineType).values()}"
-                            th:value="${type}" th:text="${type}" th:selected="${type == configuration.type}"></option>
-                </select>
-                <button type="button" class="change-btn" onclick="submitField('type')">Промени</button>
-                <button type="button" class="finish-btn" onclick="toggleInline('type')">Откажи</button>
-                <div id="feedback-type" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
+            <div class="inline-field-form" id="inline-description">
+                <textarea id="inline-description-input" class="inline-textarea"></textarea>
+                <button type="button" class="change-btn" onclick="submitField('description')">Запази</button>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('description')">Откажи</button>
             </div>
         </div>
-
-        <!-- description (text) -->
-        <div class="detail-field">
-            <label>Описание:</label>
-            <div class="detail-row">
-                <span id="display-description" class="detail-value" th:text="*{description}">-</span>
-                <div style="display:flex;gap:0.5rem;">
-                    <button type="button" class="edit-field-btn" onclick="toggleInline('description')">Редактирай</button>
-                </div>
-            </div>
-
-            <div id="inline-description" class="inline-field-form" style="display:none;">
-                <input type="text" id="input-description" class="inline-input" th:value="*{description}" placeholder="Описание"/>
-                <button type="button" class="change-btn" onclick="submitField('description')">Промени</button>
-                <button type="button" class="finish-btn" onclick="toggleInline('description')">Откажи</button>
-                <div id="feedback-description" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
-            </div>
-        </div>
-
-        <!-- model (text) -->
-        <div class="detail-field">
-            <label>Модел:</label>
-            <div class="detail-row">
-                <span id="display-model" class="detail-value" th:text="*{model}">-</span>
-                <div style="display:flex;gap:0.5rem;">
-                    <button type="button" class="edit-field-btn" onclick="toggleInline('model')">Редактирай</button>
-                </div>
-            </div>
-
-            <div id="inline-model" class="inline-field-form" style="display:none;">
-                <input type="text" id="input-model" class="inline-input" th:value="*{model}" placeholder="Модел"/>
-                <button type="button" class="change-btn" onclick="submitField('model')">Промени</button>
-                <button type="button" class="finish-btn" onclick="toggleInline('model')">Откажи</button>
-                <div id="feedback-model" style="color:var(--danger); font-size:0.9rem; display:none;"></div>
-            </div>
-        </div>
-
     </div>
 
     <h3 class="section-title section-spaced">Елементи на конфигурацията:</h3>
 
-    <!-- unit/templates/server-data and units container are kept identical to existing implementation -->
     <select id="unitOptionsTemplate" style="display:none">
         <option value="">Изберете unit</option>
         <option th:each="u : ${existingUnits}" th:value="${u.id}" th:text="${u.unit.code + ' - ' + u.unit.name }"></option>
@@ -201,7 +142,7 @@
     </script>
 
     <div id="units-container">
-        <div th:each="unit, stat : *{units}" class="unit-row">
+        <div th:each="unit, stat : *{units}" class="unit-row" data-persisted="true">
             <select th:field="*{units[__${stat.index}__].configurableUnitId}" class="unit-select" required>
                 <option value="">Изберете unit</option>
                 <option th:each="u : ${existingUnits}" th:value="${u.id}" th:text="${u.unit.code + ' - ' + u.unit.name }"></option>
@@ -232,7 +173,7 @@
     </div>
 </form>
 
-<!-- Create Unit Modal kept as before -->
+<!-- Create Unit Modal (unchanged) -->
 <div id="createUnitModal" style="display:none;">
     <div class="modal-content create-modal-content">
         <h3>Създай нов Configurable Unit</h3>
@@ -256,7 +197,7 @@
                 </div>
             </div>
             <div class="modal-buttons">
-                <button type="button" class="btn-create" onclick="submitNewUnit()">Създай и добави</button>
+                <button type="button" class="btn-create" onclick="submitNewUnit()">Създай</button>
                 <button type="button" class="btn-cancel" onclick="closeCreateUnitModal()">Откажи</button>
             </div>
         </form>
@@ -276,73 +217,118 @@
         return headers;
     }
 
-    // retrieve configurationId from form dataset
     const cfgForm = document.getElementById('details-form');
     const configurationId = window.configurationId || (cfgForm ? cfgForm.getAttribute('data-id') : null);
 
-    // inline edit helpers
+    // Inline edit helpers
     function toggleInline(field) {
-        const el = document.getElementById('inline-' + field);
-        if (!el) return;
-        const open = el.style.display !== 'none' && el.style.display !== '';
-        el.style.display = open ? 'none' : 'flex';
-        const fb = document.getElementById('feedback-' + field);
-        if (fb) { fb.style.display = 'none'; fb.textContent = ''; }
-    }
-
-    async function submitField(field) {
-        const container = document.getElementById('inline-' + field);
-        if (!container) return;
-        const input = document.getElementById('input-' + field) || container.querySelector('input, select, textarea');
-        if (!input) return;
-        const value = input.value;
-
-        try {
-            const res = await fetch(`/configurations/edit/${configurationId}/field-update`, {
-                method: 'POST',
-                headers: buildHeaders(),
-                body: JSON.stringify({ field: field, value: value })
-            });
-            const data = await res.json();
-            if (data.status === 'ok') {
-                const disp = document.getElementById('display-' + field);
-                if (disp) disp.textContent = value || '';
-                // update hidden binding input so full-form save remains coherent
-                const hidden = document.getElementById('hidden-' + field);
-                if (hidden) hidden.value = value || '';
-                toggleInline(field);
+        const wrapper = document.getElementById('inline-' + field);
+        if (!wrapper) return;
+        const isOpen = wrapper.classList.contains('open');
+        // close any open inline editors
+        document.querySelectorAll('.inline-field-form.open').forEach(el => el.classList.remove('open'));
+        if (!isOpen) {
+            // prefill from hidden binding inputs
+            const hidden = document.getElementById('hidden-' + field);
+            if (field === 'line') {
+                const sel = document.getElementById('inline-line-select');
+                if (sel && hidden) { sel.value = hidden.value || ''; }
             } else {
-                const fb = document.getElementById('feedback-' + field);
-                if (fb) { fb.style.display = 'block'; fb.textContent = data.message || 'Error'; }
+                const input = document.getElementById('inline-' + field + (field === 'description' ? '-input' : '-input'));
+                if (input && hidden) input.value = hidden.value || '';
             }
-        } catch (err) {
-            const fb = document.getElementById('feedback-' + field);
-            if (fb) { fb.style.display = 'block'; fb.textContent = err.message || 'Network error'; }
+            wrapper.classList.add('open');
+        } else {
+            wrapper.classList.remove('open');
         }
     }
 
-    // --- Units / configured units JS (kept from existing implementation) ---
+    function submitField(field) {
+        // copy inline value into hidden binding input and submit full form
+        const hidden = document.getElementById('hidden-' + field);
+        if (!hidden) return;
+        let value = '';
+        if (field === 'line') {
+            const sel = document.getElementById('inline-line-select');
+            if (sel) value = sel.value;
+        } else if (field === 'description') {
+            const ta = document.getElementById('inline-description-input');
+            if (ta) value = ta.value;
+        } else {
+            const inp = document.getElementById('inline-' + field + '-input');
+            if (inp) value = inp.value;
+        }
+        hidden.value = value;
+        // update visible span for immediate feedback
+        const span = document.getElementById(field + '-value');
+        if (span) span.textContent = value || '';
+        // submit full form (will trigger server mapping and validation)
+        cfgForm.submit();
+    }
+
+    // javascript
+    /* Paste into `src/main/resources/templates/edit-configuration.html` in place of the omitted Units JS */
+
     const unitTemplate = document.getElementById('unitOptionsTemplate');
     const unitsContainer = document.getElementById('units-container');
 
     function addUnit() {
         const div = document.createElement('div'); div.className = 'unit-row';
         const select = document.createElement('select'); select.className = 'unit-select'; select.required = true;
-        select.innerHTML = unitTemplate.innerHTML;
+        select.innerHTML = unitTemplate ? unitTemplate.innerHTML : '<option value="">Изберете unit</option>';
+
         const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.required = true; qty.placeholder = 'Бр.';
+
         const optionsWrapper = document.createElement('div'); optionsWrapper.className = 'inline-options';
         const optionsInner = document.createElement('div'); optionsInner.className = 'options-for-row'; optionsWrapper.appendChild(optionsInner);
-        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'remove-btn'; btn.textContent = 'Премахни';
-        btn.addEventListener('click', () => { div.remove(); reindexUnits(); });
-        div.appendChild(select); div.appendChild(qty); div.appendChild(optionsWrapper); div.appendChild(btn);
+
+        const addBtn = document.createElement('button'); addBtn.type = 'button'; addBtn.className = 'add-btn'; addBtn.textContent = 'Добави';
+        addBtn.addEventListener('click', () => persistRow(div));
+
+        const removeBtn = document.createElement('button'); removeBtn.type = 'button'; removeBtn.className = 'remove-btn'; removeBtn.textContent = 'Премахни';
+        removeBtn.addEventListener('click', () => removeUnitRow(removeBtn));
+
+        div.appendChild(select); div.appendChild(qty); div.appendChild(optionsWrapper); div.appendChild(addBtn); div.appendChild(removeBtn);
+
         select.addEventListener('change', () => renderOptionsForRow(div, select.value));
+
         unitsContainer.appendChild(div); reindexUnits();
+        select.focus();
     }
 
-    function removeUnitRow(btn) { const row = btn.closest('.unit-row'); if (row) { row.remove(); reindexUnits(); } }
+    async function removeUnitRow(btn) {
+        const row = btn.closest('.unit-row');
+        if (!row) return;
+
+        if (!row.dataset.persisted || row.dataset.persisted !== 'true') {
+            row.remove(); reindexUnits(); return;
+        }
+
+        try {
+            const select = row.querySelector('.unit-select');
+            const configurableUnitId = select ? select.value : null;
+            const qty = 1; // remove single unit by default
+            const optionSelections = collectOptionSelections(row);
+
+            const res = await ajaxRemoveUnit(configurationId, configurableUnitId, qty, optionSelections);
+
+            row.remove(); reindexUnits();
+
+            if (res && res.totalPrice !== undefined) {
+                const totalEl = document.getElementById('total-price');
+                if (totalEl) totalEl.textContent = res.totalPrice;
+                const dateEl = document.getElementById('price-update-date');
+                if (dateEl && res.priceUpdateDate) dateEl.textContent = res.priceUpdateDate;
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Грешка при премахване: ' + (err.message || 'network'));
+        }
+    }
 
     function renderOptionsForRow(rowElement, unitId) {
-        const container = rowElement.querySelector('.options-for-row'); container.innerHTML = '';
+        const container = rowElement.querySelector('.options-for-row'); if (!container) return;
+        container.innerHTML = '';
         if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) return;
         unitOptionsMap[unitId].forEach(opt => {
             const row = document.createElement('div'); row.style.display = 'flex'; row.style.alignItems = 'center'; row.style.gap = '0.4rem'; row.style.marginBottom = '0.25rem';
@@ -374,10 +360,8 @@
                 const cb = r.querySelector('.opt-cb'); return cb && cb.checked;
             });
             checkedRows.forEach((r, j) => {
-                const cb = r.querySelector('.opt-cb');
-                const q = r.querySelector('.opt-qty');
-                const optionId = cb.dataset.optionId;
-                const quantity = Math.max(1, parseInt(q.value || '1', 10));
+                const cb = r.querySelector('.opt-cb'); const q = r.querySelector('.opt-qty');
+                const optionId = cb.dataset.optionId; const quantity = Math.max(1, parseInt(q.value || '1', 10));
                 const hidOption = document.createElement('input'); hidOption.type = 'hidden'; hidOption.className = 'option-selection';
                 hidOption.name = `units[${i}].optionSelections[${j}].optionId`; hidOption.value = optionId;
                 const hidQty = document.createElement('input'); hidQty.type = 'hidden'; hidQty.className = 'option-selection';
@@ -387,9 +371,108 @@
         });
     }
 
+    function collectOptionSelections(row) {
+        const sels = [];
+        row.querySelectorAll('.options-for-row .opt-cb').forEach(cb => {
+            if (cb.checked) {
+                const optionId = cb.dataset.optionId;
+                const qtyEl = row.querySelector(`.opt-qty[data-option-id="${optionId}"]`);
+                const quantity = Math.max(1, parseInt(qtyEl ? qtyEl.value : '1', 10));
+                sels.push({ optionId: optionId, quantity: quantity });
+            }
+        });
+        return sels.length ? sels : null;
+    }
+
+    async function ajaxAddUnit(configurationId, configurableUnitId, quantity, optionSelections) {
+        const body = { configurableUnitId, quantity, optionSelections };
+        const res = await fetch(`/configurations/${configurationId}/units/add`, {
+            method: 'POST',
+            headers: buildHeaders(),
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            const txt = await res.text(); throw new Error(txt || 'Network error');
+        }
+        return await res.json();
+    }
+
+    async function ajaxRemoveUnit(configurationId, configurableUnitId, quantity, optionSelections) {
+        const body = { configurableUnitId, quantity, optionSelections };
+        const res = await fetch(`/configurations/${configurationId}/units/remove`, {
+            method: 'POST',
+            headers: buildHeaders(),
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            const txt = await res.text(); throw new Error(txt || 'Network error');
+        }
+        return await res.json();
+    }
+
+    async function persistRow(row) {
+        try {
+            const select = row.querySelector('.unit-select');
+            const qtyEl = row.querySelector('input[type="number"]:not(.opt-qty)');
+            const configurableUnitId = select ? select.value : null;
+            if (!configurableUnitId) { alert('Моля изберете Unit'); return; }
+            const qty = qtyEl ? Math.max(1, parseInt(qtyEl.value || '1', 10)) : 1;
+            const optionSelections = collectOptionSelections(row);
+
+            const data = await ajaxAddUnit(configurationId, configurableUnitId, qty, optionSelections);
+
+            row.dataset.persisted = 'true';
+            row.querySelectorAll('input, select').forEach(el => { el.disabled = true; });
+            const addBtn = row.querySelector('.add-btn'); if (addBtn) addBtn.remove();
+
+            const totalEl = document.getElementById('total-price'); if (totalEl && data.totalPrice !== undefined) totalEl.textContent = data.totalPrice;
+            const dateEl = document.getElementById('price-update-date'); if (dateEl && data.priceUpdateDate) dateEl.textContent = data.priceUpdateDate;
+        } catch (err) {
+            console.error(err); alert('Грешка при добавяне: ' + (err.message || 'network'));
+        }
+    }
+
+    async function submitNewUnit() {
+        const unitId = document.getElementById('newUnitBase').value;
+        if (!unitId) { alert('Моля изберете базов продукт'); return; }
+        const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
+        const options = rows.map(row => {
+            const cb = row.querySelector('input[type="checkbox"]');
+            const qtyInput = row.querySelector('input[type="number"]');
+            return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
+        }).filter(x => x !== null);
+
+        try {
+            const res = await fetch('/products/configurable-units/create', {
+                method: 'POST',
+                headers: buildHeaders(),
+                body: JSON.stringify({ unitId: unitId, optionSelections: options.length ? options : null })
+            });
+            if (!res.ok) throw new Error('Network error');
+            const newUnit = await res.json();
+
+            if (unitTemplate) {
+                const opt = document.createElement('option'); opt.value = newUnit.id;
+                opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
+                unitTemplate.appendChild(opt);
+            }
+            document.querySelectorAll('#units-container select').forEach(select => {
+                const opt = document.createElement('option'); opt.value = newUnit.id;
+                opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
+                select.appendChild(opt);
+            });
+
+            closeCreateUnitModal();
+            alert('Unit създаден успешно!');
+        } catch (err) {
+            console.error(err); alert('Грешка при създаване: ' + err.message);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
-        // initial units render and apply existing selections
+        // mark server-rendered rows as persisted and render options + selections
         document.querySelectorAll('#units-container .unit-row').forEach((row, index) => {
+            row.dataset.persisted = 'true';
             const select = row.querySelector('.unit-select');
             if (select) {
                 renderOptionsForRow(row, select.value);
@@ -407,50 +490,6 @@
         reindexUnits();
     });
 
-    // Create unit modal + submitNewUnit (keeps previous endpoints)
-    function openCreateUnitModal() { document.getElementById('createUnitModal').style.display = 'block'; }
-    function closeCreateUnitModal() { document.getElementById('createUnitModal').style.display = 'none'; document.getElementById('createUnitForm').reset(); }
-
-    async function submitNewUnit() {
-        const unitId = document.getElementById('newUnitBase').value;
-        if (!unitId) { alert('Моля изберете базов продукт'); return; }
-        const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
-        const options = rows.map(row => {
-            const cb = row.querySelector('input[type="checkbox"]');
-            const qtyInput = row.querySelector('input[type="number"]');
-            return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
-        }).filter(x => x !== null);
-
-        try {
-            const res = await fetch('/configurable-units/create', {
-                method: 'POST',
-                headers: buildHeaders(),
-                body: JSON.stringify({ unitId: unitId, optionSelections: options.length ? options : null })
-            });
-            if (!res.ok) throw new Error('Network error');
-            const newUnit = await res.json();
-
-            if (unitTemplate) {
-                const opt = document.createElement('option');
-                opt.value = newUnit.id;
-                opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
-                unitTemplate.appendChild(opt);
-            }
-            document.querySelectorAll('#units-container select').forEach(select => {
-                const opt = document.createElement('option');
-                opt.value = newUnit.id;
-                opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
-                select.appendChild(opt);
-            });
-
-            closeCreateUnitModal();
-            alert('Unit създаден успешно!');
-            window.location.reload();
-        } catch (err) {
-            console.error(err);
-            alert('Грешка при създаване: ' + err.message);
-        }
-    }
 </script>
 
 </body>
