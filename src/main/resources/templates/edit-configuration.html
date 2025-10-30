@@ -1,6 +1,5 @@
-<!-- language: html -->
-<!DOCTYPE html>
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
 <head>
     <meta charset="UTF-8"/>
     <meta name="_csrf" th:content="${_csrf.token}"/>
@@ -40,12 +39,11 @@
             <label>Код</label>
             <div class="detail-row">
                 <span class="detail-value" id="code-value" th:text="*{code}">--</span>
-                <button type="button" class="edit-field-btn" onclick="toggleInline('code')">Промени</button>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('code')">Редактирай</button>
             </div>
             <div class="inline-field-form" id="inline-code">
                 <input id="inline-code-input" class="inline-input" type="text" />
-                <button type="button" class="change-btn" onclick="submitField('code')">Запази</button>
-                <button type="button" class="edit-field-btn" onclick="toggleInline('code')">Откажи</button>
+                <button type="button" class="change-btn" onclick="submitField('code')">Промени</button>
             </div>
         </div>
 
@@ -54,12 +52,11 @@
             <label>Модел</label>
             <div class="detail-row">
                 <span class="detail-value" id="model-value" th:text="*{model}">--</span>
-                <button type="button" class="edit-field-btn" onclick="toggleInline('model')">Промени</button>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('model')">Редактирай</button>
             </div>
             <div class="inline-field-form" id="inline-model">
                 <input id="inline-model-input" class="inline-input" type="text" />
-                <button type="button" class="change-btn" onclick="submitField('model')">Запази</button>
-                <button type="button" class="edit-field-btn" onclick="toggleInline('model')">Откажи</button>
+                <button type="button" class="change-btn" onclick="submitField('model')">Промени</button>
             </div>
         </div>
 
@@ -68,7 +65,7 @@
             <label>Линия</label>
             <div class="detail-row">
                 <span class="detail-value" id="line-value" th:text="*{line}">--</span>
-                <button type="button" class="edit-field-btn" onclick="toggleInline('line')">Промени</button>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('line')">Редактирай</button>
             </div>
             <div class="inline-field-form" id="inline-line">
                 <select id="inline-line-select" class="inline-select">
@@ -76,8 +73,7 @@
                     <option th:each="ln : ${T(lmc.configuration.model.MachineLine).values()}"
                             th:value="${ln}" th:text="${ln}"></option>
                 </select>
-                <button type="button" class="change-btn" onclick="submitField('line')">Запази</button>
-                <button type="button" class="edit-field-btn" onclick="toggleInline('line')">Откажи</button>
+                <button type="button" class="change-btn" onclick="submitField('line')">Промени</button>
             </div>
         </div>
 
@@ -86,12 +82,11 @@
             <label>Описание</label>
             <div class="detail-row">
                 <span class="detail-value" id="description-value" th:text="*{description}">--</span>
-                <button type="button" class="edit-field-btn" onclick="toggleInline('description')">Промени</button>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('description')">Редактирай</button>
             </div>
             <div class="inline-field-form" id="inline-description">
                 <textarea id="inline-description-input" class="inline-textarea"></textarea>
-                <button type="button" class="change-btn" onclick="submitField('description')">Запази</button>
-                <button type="button" class="edit-field-btn" onclick="toggleInline('description')">Откажи</button>
+                <button type="button" class="change-btn" onclick="submitField('description')">Промени</button>
             </div>
         </div>
     </div>
@@ -125,17 +120,17 @@
         var unitOptionsMap = {}; var initialUnitSelections = {};
         (function buildMaps(){
             document.querySelectorAll('#server-data > div[data-unit-id]').forEach(u=>{
-                const id = u.getAttribute('data-unit-id');
+                const id = String(u.getAttribute('data-unit-id'));
                 const options = Array.from(u.querySelectorAll('.unit-option')).map(o=>{
                     const priceAttr = o.getAttribute('data-price');
                     const price = (priceAttr === null || priceAttr === 'null' || priceAttr === '') ? null : Number(priceAttr);
-                    return { optionId: o.getAttribute('data-option-id'), code: o.getAttribute('data-code'), name: o.getAttribute('data-name'), price: price };
+                    return { optionId: String(o.getAttribute('data-option-id')), code: o.getAttribute('data-code'), name: o.getAttribute('data-name'), price: price };
                 });
                 unitOptionsMap[id] = options;
             });
             document.querySelectorAll('#server-data div[data-unit-idx]').forEach(u=>{
                 const idx = u.getAttribute('data-unit-idx');
-                const sels = Array.from(u.querySelectorAll('.sel')).map(s=>({ optionId: s.getAttribute('data-option-id'), quantity: Math.max(1, parseInt(s.getAttribute('data-qty')||'1',10)) }));
+                const sels = Array.from(u.querySelectorAll('.sel')).map(s=>({ optionId: String(s.getAttribute('data-option-id')), quantity: Math.max(1, parseInt(s.getAttribute('data-qty')||'1',10)) }));
                 initialUnitSelections[idx] = sels;
             });
         })();
@@ -166,14 +161,13 @@
     <div style="margin-top:1rem;">
         <button type="button" onclick="addUnit()">Добави Unit</button>
         <button type="button" onclick="openCreateUnitModal()">Създай нов Unit</button>
-        <button type="submit">Запази</button>
         <a th:href="@{|/configurations/${configurationId}/details|}">
             <button type="button" class="finish-btn">Край</button>
         </a>
     </div>
 </form>
 
-<!-- Create Unit Modal (unchanged) -->
+<!-- Create Unit Modal -->
 <div id="createUnitModal" style="display:none;">
     <div class="modal-content create-modal-content">
         <h3>Създай нов Configurable Unit</h3>
@@ -225,10 +219,8 @@
         const wrapper = document.getElementById('inline-' + field);
         if (!wrapper) return;
         const isOpen = wrapper.classList.contains('open');
-        // close any open inline editors
         document.querySelectorAll('.inline-field-form.open').forEach(el => el.classList.remove('open'));
         if (!isOpen) {
-            // prefill from hidden binding inputs
             const hidden = document.getElementById('hidden-' + field);
             if (field === 'line') {
                 const sel = document.getElementById('inline-line-select');
@@ -244,7 +236,6 @@
     }
 
     function submitField(field) {
-        // copy inline value into hidden binding input and submit full form
         const hidden = document.getElementById('hidden-' + field);
         if (!hidden) return;
         let value = '';
@@ -259,16 +250,12 @@
             if (inp) value = inp.value;
         }
         hidden.value = value;
-        // update visible span for immediate feedback
         const span = document.getElementById(field + '-value');
         if (span) span.textContent = value || '';
-        // submit full form (will trigger server mapping and validation)
         cfgForm.submit();
     }
 
-    // javascript
-    /* Paste into `src/main/resources/templates/edit-configuration.html` in place of the omitted Units JS */
-
+    // Units JS
     const unitTemplate = document.getElementById('unitOptionsTemplate');
     const unitsContainer = document.getElementById('units-container');
 
@@ -307,7 +294,7 @@
         try {
             const select = row.querySelector('.unit-select');
             const configurableUnitId = select ? select.value : null;
-            const qty = 1; // remove single unit by default
+            const qty = 1;
             const optionSelections = collectOptionSelections(row);
 
             const res = await ajaxRemoveUnit(configurationId, configurableUnitId, qty, optionSelections);
@@ -332,9 +319,9 @@
         if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) return;
         unitOptionsMap[unitId].forEach(opt => {
             const row = document.createElement('div'); row.style.display = 'flex'; row.style.alignItems = 'center'; row.style.gap = '0.4rem'; row.style.marginBottom = '0.25rem';
-            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'opt-cb'; cb.dataset.optionId = opt.optionId;
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'opt-cb'; cb.dataset.optionId = String(opt.optionId);
             const label = document.createElement('label'); label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
-            const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.className = 'opt-qty'; qty.style.width = '70px'; qty.disabled = true; qty.dataset.optionId = opt.optionId;
+            const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.className = 'opt-qty'; qty.style.width = '70px'; qty.disabled = true; qty.dataset.optionId = String(opt.optionId);
             cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
             row.appendChild(cb); row.appendChild(label); row.appendChild(qty); container.appendChild(row);
         });
@@ -375,7 +362,7 @@
         const sels = [];
         row.querySelectorAll('.options-for-row .opt-cb').forEach(cb => {
             if (cb.checked) {
-                const optionId = cb.dataset.optionId;
+                const optionId = String(cb.dataset.optionId);
                 const qtyEl = row.querySelector(`.opt-qty[data-option-id="${optionId}"]`);
                 const quantity = Math.max(1, parseInt(qtyEl ? qtyEl.value : '1', 10));
                 sels.push({ optionId: optionId, quantity: quantity });
@@ -432,115 +419,11 @@
         }
     }
 
-    // javascript
-    // async function submitNewUnit() {
-    //     const unitId = document.getElementById('newUnitBase').value;
-    //     if (!unitId) { alert('Моля изберете базов продукт'); return; }
-    //
-    //     const rows = Array.from(document.querySelectorAll('#newUnitOptions div'));
-    //     const options = rows.map(row => {
-    //         const cb = row.querySelector('input[type="checkbox"]');
-    //         const qtyInput = row.querySelector('input[type="number"]');
-    //         return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
-    //     }).filter(x => x !== null);
-    //
-    //     try {
-    //         const res = await fetch('/products/configurable-units/create-new', {
-    //             method: 'POST',
-    //             headers: buildHeaders(), // includes CSRF header from meta
-    //             body: JSON.stringify({ unitId: unitId, optionSelections: options.length ? options : null })
-    //         });
-    //
-    //         // If network-level failure this block won't run and will fall to catch
-    //         if (!res.ok) {
-    //             const txt = await res.text();
-    //             throw new Error(txt || `Server returned ${res.status}`);
-    //         }
-    //
-    //         // Try to parse JSON response (if controller returns JSON with created unit)
-    //         const contentType = res.headers.get('Content-Type') || '';
-    //         if (contentType.includes('application/json')) {
-    //             const newUnit = await res.json();
-    //             // append to hidden template and to all selects
-    //             if (unitTemplate) {
-    //                 const opt = document.createElement('option');
-    //                 opt.value = newUnit.id;
-    //                 opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
-    //                 unitTemplate.appendChild(opt);
-    //             }
-    //             document.querySelectorAll('#units-container select').forEach(select => {
-    //                 const opt = document.createElement('option');
-    //                 opt.value = newUnit.id;
-    //                 opt.textContent = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
-    //                 select.appendChild(opt);
-    //             });
-    //
-    //             closeCreateUnitModal();
-    //             alert('Unit създаден успешно!');
-    //             return;
-    //         }
-    //
-    //         // If no JSON but OK (maybe server redirected), reload to reflect created unit
-    //         window.location.reload();
-    //     } catch (err) {
-    //         console.error('submitNewUnit error:', err);
-    //         // Show server message if available, otherwise fallback message
-    //         alert('Грешка при създаване: ' + (err.message || 'network'));
-    //
-    //         // Optional fallback: try a standard form POST if AJAX fails repeatedly.
-    //         // This fallback is commented — enable if server expects form-encoded request instead of JSON.
-    //         /*
-    //         try {
-    //             const f = document.createElement('form');
-    //             f.method = 'POST';
-    //             f.action = '/products/configurable-units/create';
-    //             // include CSRF token as header-based fallback may not work for form-submit;
-    //             // if your server exposes _csrf.parameterName in template, add hidden input with that name here.
-    //             const unitInput = document.createElement('input'); unitInput.type = 'hidden'; unitInput.name = 'unitId'; unitInput.value = unitId; f.appendChild(unitInput);
-    //             options.forEach((opt, i) => {
-    //                 const idInput = document.createElement('input'); idInput.type = 'hidden'; idInput.name = `optionSelections[${i}].optionId`; idInput.value = opt.optionId; f.appendChild(idInput);
-    //                 const qtyInput = document.createElement('input'); qtyInput.type = 'hidden'; qtyInput.name = `optionSelections[${i}].quantity`; qtyInput.value = String(opt.quantity); f.appendChild(qtyInput);
-    //             });
-    //             document.body.appendChild(f);
-    //             f.submit();
-    //         } catch (e) {
-    //             console.error('Fallback form submit failed', e);
-    //         }
-    //         */
-    //     }
-    // }
-
-    // javascript
-    function openCreateUnitModal() {
-        const modal = document.getElementById('createUnitModal');
-        if (!modal) return;
-        modal.style.display = 'block';
-        const first = modal.querySelector('#newUnitBase');
-        if (first) first.focus();
-        function onEsc(e) { if (e.key === 'Escape') closeCreateUnitModal(); }
-        modal._onEsc = onEsc;
-        document.addEventListener('keydown', onEsc);
-    }
-
-    function closeCreateUnitModal() {
-        const modal = document.getElementById('createUnitModal');
-        if (!modal) return;
-        modal.style.display = 'none';
-        const form = document.getElementById('createUnitForm');
-        if (form) form.reset();
-        if (modal._onEsc) {
-            document.removeEventListener('keydown', modal._onEsc);
-            delete modal._onEsc;
-        }
-    }
-
-    // javascript
-    // File: `src/main/resources/templates/edit-configuration.html`
+    // submitNewUnit: robust client-side refresh without controller change
     async function submitNewUnit() {
         const unitId = document.getElementById('newUnitBase').value;
         if (!unitId) { alert('Моля изберете базов продукт'); return; }
 
-        // collect choices from modal (we will reuse these to populate unitOptionsMap)
         const rows = Array.from(document.querySelectorAll('#newUnitOptions > div'));
         const selections = rows.map(row => {
             const cb = row.querySelector('input[type="checkbox"]');
@@ -562,16 +445,15 @@
 
             const contentType = res.headers.get('Content-Type') || '';
             if (!contentType.includes('application/json')) {
-                window.location.reload(); // fallback if server redirected/returned HTML
+                window.location.reload();
                 return;
             }
 
             const newUnit = await res.json();
             const newId = String(newUnit.id);
 
-            // Build normalized options array from modal selections (no controller change needed)
+            // build opts from modal selections (no controller change needed)
             const opts = selections.map(s => {
-                // parse label "CODE - Name" when available
                 let code = null, name = null;
                 if (s.label) {
                     const parts = s.label.split(' - ');
@@ -581,10 +463,10 @@
                 return { optionId: String(s.optionId), code: code, name: name, price: null };
             });
 
-            // update client-side map
+            // update client map
             unitOptionsMap[newId] = opts;
 
-            // add to hidden template
+            // update hidden template
             const label = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
             if (unitTemplate) {
                 const optTemplateNode = document.createElement('option');
@@ -593,20 +475,21 @@
                 unitTemplate.appendChild(optTemplateNode);
             }
 
-            // append fresh option nodes to every select and render options for selects already set to newId
+            // append fresh option nodes to every select (clone per-select)
             document.querySelectorAll('#units-container select').forEach(select => {
                 const opt = document.createElement('option');
                 opt.value = newId;
                 opt.textContent = label;
                 select.appendChild(opt);
 
+                // if a select already has this value selected, render options immediately
                 if (String(select.value) === newId) {
                     const row = select.closest('.unit-row');
                     if (row) renderOptionsForRow(row, newId);
                 }
             });
 
-            // also add server-data stub so server-data-based rebuilds can find it if needed
+            // add server-data stub for future rebuilds
             const serverData = document.getElementById('server-data');
             if (serverData) {
                 const div = document.createElement('div');
@@ -631,11 +514,30 @@
         }
     }
 
+    function openCreateUnitModal() {
+        const modal = document.getElementById('createUnitModal');
+        if (!modal) return;
+        modal.style.display = 'block';
+        const first = modal.querySelector('#newUnitBase');
+        if (first) first.focus();
+        function onEsc(e) { if (e.key === 'Escape') closeCreateUnitModal(); }
+        modal._onEsc = onEsc;
+        document.addEventListener('keydown', onEsc);
+    }
 
-
+    function closeCreateUnitModal() {
+        const modal = document.getElementById('createUnitModal');
+        if (!modal) return;
+        modal.style.display = 'none';
+        const form = document.getElementById('createUnitForm');
+        if (form) form.reset();
+        if (modal._onEsc) {
+            document.removeEventListener('keydown', modal._onEsc);
+            delete modal._onEsc;
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // mark server-rendered rows as persisted and render options + selections
         document.querySelectorAll('#units-container .unit-row').forEach((row, index) => {
             row.dataset.persisted = 'true';
             const select = row.querySelector('.unit-select');
@@ -654,7 +556,6 @@
         });
         reindexUnits();
     });
-
 </script>
 
 </body>
