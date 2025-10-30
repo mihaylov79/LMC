@@ -313,19 +313,83 @@
         }
     }
 
+
+    // File: src/main/resources/templates/edit-configuration.html
+    // JavaScript - replace the existing renderOptionsForRow and the DOMContentLoaded block's initial-selection part
+
     function renderOptionsForRow(rowElement, unitId) {
         const container = rowElement.querySelector('.options-for-row'); if (!container) return;
         container.innerHTML = '';
         if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) return;
+
+        // treat persisted rows as read-only
+        const isPersisted = rowElement.dataset.persisted === 'true';
+
         unitOptionsMap[unitId].forEach(opt => {
-            const row = document.createElement('div'); row.style.display = 'flex'; row.style.alignItems = 'center'; row.style.gap = '0.4rem'; row.style.marginBottom = '0.25rem';
-            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.className = 'opt-cb'; cb.dataset.optionId = String(opt.optionId);
-            const label = document.createElement('label'); label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
-            const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.className = 'opt-qty'; qty.style.width = '70px'; qty.disabled = true; qty.dataset.optionId = String(opt.optionId);
-            cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
-            row.appendChild(cb); row.appendChild(label); row.appendChild(qty); container.appendChild(row);
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.gap = '0.4rem';
+            row.style.marginBottom = '0.25rem';
+
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.className = 'opt-cb';
+            cb.dataset.optionId = String(opt.optionId);
+
+            const label = document.createElement('label');
+            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
+
+            const qty = document.createElement('input');
+            qty.type = 'number';
+            qty.min = '1';
+            qty.value = '1';
+            qty.className = 'opt-qty';
+            qty.style.width = '70px';
+            qty.disabled = true;
+            qty.dataset.optionId = String(opt.optionId);
+
+            // if row is not persisted, allow toggling qty via checkbox
+            if (!isPersisted) {
+                cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
+            } else {
+                // persisted: keep inputs disabled (read-only)
+                cb.disabled = true;
+                qty.disabled = true;
+            }
+
+            row.appendChild(cb);
+            row.appendChild(label);
+            row.appendChild(qty);
+            container.appendChild(row);
         });
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('#units-container .unit-row').forEach((row, index) => {
+            // mark server-provided rows as persisted
+            row.dataset.persisted = 'true';
+            const select = row.querySelector('.unit-select');
+            if (select) {
+                renderOptionsForRow(row, select.value);
+
+                // prefill selections from initialUnitSelections but keep them read-only
+                const sel = initialUnitSelections && initialUnitSelections[index];
+                if (Array.isArray(sel)) sel.forEach(s => {
+                    try {
+                        const cb = row.querySelector(`.options-for-row .opt-cb[data-option-id="${s.optionId}"]`);
+                        const q = row.querySelector(`.options-for-row .opt-qty[data-option-id="${s.optionId}"]`);
+                        if (cb) { cb.checked = true; cb.disabled = true; }
+                        if (q) { q.value = Math.max(1, Number(s.quantity) || 1); q.disabled = true; }
+                    } catch (e) {}
+                });
+
+                select.addEventListener('change', () => renderOptionsForRow(row, select.value));
+            }
+        });
+        reindexUnits();
+    });
+
 
     function reindexUnits() {
         const rows = Array.from(document.querySelectorAll('#units-container .unit-row'));
