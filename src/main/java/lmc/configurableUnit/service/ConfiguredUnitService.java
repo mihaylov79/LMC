@@ -43,7 +43,7 @@ public class ConfiguredUnitService {
                 .filter(s -> s != null && s.getOptionId() != null)
                 .collect(Collectors.toMap(
                         OptionSelectionDTO::getOptionId,
-                        s -> Math.max(1, s.getQuantity()),
+                        s -> 1, //Math.max(1, s.getQuantity()),
                         Integer::sum
                 ));
 
