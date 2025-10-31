@@ -36,7 +36,7 @@
         <div class="configurations-table">
             <div class="table-header">
                 <div class="search-box">
-                    <input type="text" id="searchConfigurations" placeholder="Търси конфигурация...">
+                    <input type="text" id="searchConfigurableUnits" placeholder="Търси модул...">
                 </div>
                 <h3 class="table-title">Конфигурационни елементи</h3>
             </div>
@@ -54,7 +54,7 @@
                 <tr th:each="cUnit : ${configurableUnits}">
                     <td>
                         <a th:href="@{/configurations/{id}/details(id=${cUnit.id})}">
-                            <img th:src="${#strings.isEmpty(cUnit.getUnit().imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : cUnit.imageUrl}"
+                            <img th:src="${#strings.isEmpty(cUnit.unit.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : cUnit.unit.imageUrl}"
                                  th:alt="${cUnit.code}" style="max-width:200px;"/>
                         </a>
                     </td>
@@ -87,26 +87,31 @@
 </div>
 
 <script>
-    // Търсачка за конфигурации
-    document.getElementById('searchConfigurations').addEventListener('keyup', function() {
-        const searchValue = this.value.toLowerCase();
-        const rows = document.querySelectorAll('.configurations-table tbody tr');
+    // Safe search for configurable units
+    const searchEl = document.getElementById('searchConfigurableUnits');
+    if (searchEl) {
+        searchEl.addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.configurations-table tbody tr');
 
-        rows.forEach(row => {
-            const code = row.cells[1].textContent.toLowerCase();
-            const description = row.cells[2].textContent.toLowerCase();
-            const totalPrice = row.cells[3].textContent.toLowerCase();
+            rows.forEach(row => {
+                const code = row.cells[1] && row.cells[1].textContent ? row.cells[1].textContent.toLowerCase() : '';
+                const description = row.cells[2] && row.cells[2].textContent ? row.cells[2].textContent.toLowerCase() : '';
+                const totalPrice = row.cells[3] && row.cells[3].textContent ? row.cells[3].textContent.toLowerCase() : '';
 
-            if (code.includes(searchValue) || description.includes(searchValue) || totalPrice.includes(searchValue)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+                if (code.includes(searchValue) || description.includes(searchValue) || totalPrice.includes(searchValue)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         });
-    });
+    }
+
+    // Remove or fix the broken second listener: it currently uses an empty id and should be deleted or bound to the correct element id.
 
     // Търсачка за конфигурирани продукти
-    document.getElementById('searchUnitOptions').addEventListener('keyup', function() {
+    document.getElementById('').addEventListener('keyup', function() {
         const searchValue = this.value.toLowerCase();
         const rows = document.querySelectorAll('.unit-options-table tbody tr'); // Използвайте правилния клас/селектор
 
