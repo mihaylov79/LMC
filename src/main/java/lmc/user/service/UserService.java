@@ -4,7 +4,7 @@ import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.model.UserStatus;
 import lmc.user.repository.UserRepository;
-import lmc.web.dto.newUserRequest;
+import lmc.web.dto.NewUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,7 +39,7 @@ public class UserService implements UserDetailsService {
                         .formatted(email)));
     }
 
-    public User addNewUser(newUserRequest request){
+    public User addNewUser(NewUserRequest request){
         Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
         if (existingUser.isPresent()){

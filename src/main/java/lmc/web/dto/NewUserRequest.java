@@ -10,7 +10,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 @Data
-public class newUserRequest {
+public class NewUserRequest {
 
     @Length(min = 3, max = 15 , message = "Името трябва да съдържа само букви и да бъде между 3 и 15 символа")
     @Pattern(regexp = "^[a-zA-Zа-яА-Я]+$", message = "Името трябва да съдържа само букви (кирилица и латиница)")

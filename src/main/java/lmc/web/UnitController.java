@@ -56,6 +56,17 @@ public class UnitController {
         return modelAndView;
     }
 
+    @GetMapping("/configurable-units")
+    public ModelAndView getConfigurableItems(@AuthenticationPrincipal CustomUserDetails details){
+        User user = userService.getUserById(details.getId());
+        List<ConfigurableUnit> configurableUnits = configurableUnitService.getAllUnits();
+        ModelAndView modelAndView = new ModelAndView("configurable-units");
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("configurableUnits", configurableUnits);
+
+        return modelAndView;
+    }
+
     @GetMapping("/base-units/new")
     public ModelAndView showCreateUnitForm(){
         ModelAndView modelAndView = new ModelAndView("new-base-unit");
