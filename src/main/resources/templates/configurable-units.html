@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Конфигурационни елементи</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/units.css">
+</head>
+<body>
+<div class="header-container">
+
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
+</div>
+<div class="front-container">
+    <div class="user-container">
+        <p th:text="'Активен потребител: ' + ${user.email}"></p>
+    </div>
+</div>
+
+<div class="tabs">
+    <div class="offers">
+        <p>Offers HERE!</p>
+    </div>
+
+    <div class="configurations">
+
+        <div class="menu">
+            <ul>
+                <li><a th:href="@{/configurations/create/new}">Създай нов елемент</a></li>
+            </ul>
+
+        </div>
+
+        <div class="configurations-table">
+            <div class="table-header">
+                <div class="search-box">
+                    <input type="text" id="searchConfigurations" placeholder="Търси конфигурация...">
+                </div>
+                <h3 class="table-title">Конфигурационни елементи</h3>
+            </div>
+            <table>
+                <thead>
+
+                <tr>
+                    <th>Снимка</th>
+                    <th>Код</th>
+                    <th>Наименование</th>
+                    <th>Базова цена</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cUnit : ${configurableUnits}">
+                    <td>
+                        <a th:href="@{/configurations/{id}/details(id=${cUnit.id})}">
+                            <img th:src="${#strings.isEmpty(cUnit.getUnit().imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : cUnit.imageUrl}"
+                                 th:alt="${cUnit.code}" style="max-width:200px;"/>
+                        </a>
+                    </td>
+                    <td th:text="${cUnit.getCode()}"></td>
+                    <td>
+                        <div th:text="${cUnit.unit.name}"></div>
+
+
+                        <div class="included-modules" th:if="${optionsByCuId[cUnit.id] != null}">
+                            <ul class="modules-list">
+                                <li th:each="opt : ${optionsByCuId[cUnit.id]}">
+                                    <span th:text="${opt.option != null ? opt.option.code : '—'}">OPT_CODE</span>
+                                    <span th:text="${opt.option != null ? opt.option.name : ''}">OPT_NAME</span>
+                                </li>
+                                <li th:if="${#lists.isEmpty(optionsByCuId[cUnit.id])}">
+                                    <span>Няма опции</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+<!--                    <td th:text="${cUnit.totalPrice} + ' EUR'"></td>-->
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    // Търсачка за конфигурации
+    document.getElementById('searchConfigurations').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.configurations-table tbody tr');
+
+        rows.forEach(row => {
+            const code = row.cells[1].textContent.toLowerCase();
+            const description = row.cells[2].textContent.toLowerCase();
+            const totalPrice = row.cells[3].textContent.toLowerCase();
+
+            if (code.includes(searchValue) || description.includes(searchValue) || totalPrice.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Търсачка за конфигурирани продукти
+    document.getElementById('searchUnitOptions').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.unit-options-table tbody tr'); // Използвайте правилния клас/селектор
+
+        rows.forEach(row => {
+            const code = row.cells[0].textContent.toLowerCase();
+            const name = row.cells[1].textContent.toLowerCase();
+            // Добавете други колони по необходимост
+
+            if (code.includes(searchValue) || name.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>

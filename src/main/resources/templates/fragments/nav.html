@@ -11,7 +11,8 @@
         <ul>
 <!--            <li><a th:href="@{/}">Начало</a></li>-->
             <li sec:authorize="isAuthenticated()"><a th:href="@{/home}">Начало</a></li>
-            <li sec:authorize="hasAnyRole('ADMIN')"><a th:href="@{/products}">Елементи</a></li>
+            <li sec:authorize="hasAnyRole('ADMIN')"><a th:href="@{/products}">Продукти</a></li>
+            <li sec:authorize="hasAnyRole('ADMIN')"><a th:href="@{/products/configurable-units}">Модули</a></li>
             <li sec:authorize="isAnonymous()"><a th:href="@{/login}">Вход</a></li>
             <li sec:authorize="isAuthenticated()">
                 <form th:action="@{/logout}" method="post" class="logout-form" style="display: inline;">

@@ -1,7 +1,10 @@
 package lmc.web;
 
 import jakarta.validation.Valid;
+import lmc.configurableUnit.model.ConfiguredUnit;
+import lmc.configurableUnit.model.ConfiguredUnitOption;
 import lmc.configurableUnit.service.ConfigurableUnitService;
+import lmc.configurableUnit.service.ConfiguredUnitService;
 import lmc.option.model.Option;
 import lmc.option.service.OptionService;
 import lmc.security.CustomUserDetails;
@@ -21,6 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
 import lmc.configurableUnit.model.ConfigurableUnit;
 
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,13 +38,15 @@ public class UnitController {
     private final OptionService optionService;
     private final ConfigurableUnitService configurableUnitService;
     private final CustomMapper customMapper;
+    private final ConfiguredUnitService configuredUnitService;
 
-    public UnitController(UserService userService, UnitService unitService, OptionService optionService, ConfigurableUnitService configurableUnitService, CustomMapper customMapper) {
+    public UnitController(UserService userService, UnitService unitService, OptionService optionService, ConfigurableUnitService configurableUnitService, CustomMapper customMapper, ConfiguredUnitService configuredUnitService) {
         this.userService = userService;
         this.unitService = unitService;
         this.optionService = optionService;
         this.configurableUnitService = configurableUnitService;
         this.customMapper = customMapper;
+        this.configuredUnitService = configuredUnitService;
     }
 
     @GetMapping
@@ -60,9 +66,21 @@ public class UnitController {
     public ModelAndView getConfigurableItems(@AuthenticationPrincipal CustomUserDetails details){
         User user = userService.getUserById(details.getId());
         List<ConfigurableUnit> configurableUnits = configurableUnitService.getAllUnits();
+
+        Map<UUID, List<ConfiguredUnitOption>> optionsByCuId = new HashMap<>();
+
+        for (ConfigurableUnit unit : configurableUnits) {
+            if (unit instanceof ConfiguredUnit cu) {
+                optionsByCuId.put(unit.getId(), cu.getOptions() == null ? List.of():cu.getOptions());
+            }else {
+                optionsByCuId.put(unit.getId(), List.of());
+            }
+        }
+
         ModelAndView modelAndView = new ModelAndView("configurable-units");
         modelAndView.addObject("user", user);
         modelAndView.addObject("configurableUnits", configurableUnits);
+        modelAndView.addObject("optionsByCuId", optionsByCuId);
 
         return modelAndView;
     }
