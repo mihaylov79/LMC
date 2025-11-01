@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<div class="header-container">
+
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
+</div>
+
+<div class="form">
+    <form class="login" th:action="@{/users/create/new}" th:method="POST" th:object="${newUserRequest}">
+<!--        <div th:if="${successMessage}" class="alert-info">-->
+<!--            <p th:text="${successMessage}"></p>-->
+<!--        </div>-->
+<!--        <span th:text="${emailAlreadyInUse}" class="errors"></span>-->
+        <h2>Нов потребител</h2>
+        <span class="separator"></span>
+
+        <div class="field">
+            <label for="field-email">Електронна поща</label>
+            <input type="email" name="username" id="field-email" placeholder="Email" th:field="*{email}">
+            <span class="helper info">например: john.doe@gmail.com</span>
+        </div>
+
+<!--        <div class="field">-->
+<!--            <label for="field-password">Парола</label>-->
+<!--            <input type="password" name="password" id="field-password" placeholder="Password" th:field="*{password}">-->
+<!--            <span class="helper info">паролата трябва да бъде между 6 и 20 символа</span>-->
+<!--            <p></p>-->
+<!--            <span th:if="${errorMessage}" th:text="${errorMessage}" class="credentials-error"></span>-->
+<!--        </div>-->
+
+        <div class="field">
+            <label for="field-firstName">Име</label>
+            <input type="text" name="firstName" id="field-firstName" placeholder="Име" th:field="*{firstName}">
+            <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>
+            <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+
+        </div>
+
+        <div class="field">
+            <label for="field-lastName">Фамиля</label>
+            <input type="text" name="lastName" id="field-lastName" placeholder="Име" th:field="*{firstName}">
+            <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>
+            <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+        </div>
+
+        <div class="field">
+            <label for="field-role">Роля</label>
+            <select id="field-role" th:field="*{role}">
+                <option th:each="role : ${T(lmc.user.model.UserRole).values()}" th:value="${role}"
+                        th:text="${role.description}" value="USER"></option>
+            </select>
+        </div>
+
+
+        <div id="loading-message" style="display:none; color: red; text-align: center; margin-bottom: 0.5em;">
+            Моля, изчакайте...... <br>Създаваме на нов потребител
+        </div>
+        <input type="submit" class="button login" value="Запиши">
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form.login');
+        const loadingMsg = document.getElementById('loading-message');
+        const submitBtn = form.querySelector('input[type="submit"]');
+        if (form && loadingMsg && submitBtn) {
+            form.addEventListener('submit', function() {
+                loadingMsg.style.display = 'block';
+                submitBtn.style.display = 'none';
+            });
+        }
+    });
+</script>
+</body>
+</html>
