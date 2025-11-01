@@ -62,7 +62,7 @@ public class UserService implements UserDetailsService {
         //TODO паролата трябва да се криптира и да се добавят още проверки!
     }
 
-    public void changePassword(NewPasswordRequest request) {
+    public User changePassword(NewPasswordRequest request) {
 
         if (!request.getPassword().equals(request.getConfirmPassword())){
             throw new RuntimeException("Потвърждението на паролата не съвпада!");
@@ -75,7 +75,23 @@ public class UserService implements UserDetailsService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
-        userRepository.save(currentUser);
+        return userRepository.save(currentUser);
+
+    }
+
+    public User resetUserPassword(UUID userId, NewPasswordRequest request){
+        User user = getUserById(userId);
+
+        if (!request.getPassword().equals(request.getConfirmPassword())){
+            throw new RuntimeException("Потвърждението на паролата не съвпада!");
+        }
+
+        user = user.toBuilder()
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+
+        return userRepository.save(user);
+
     }
 
     @Override
