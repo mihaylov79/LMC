@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Getter
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")

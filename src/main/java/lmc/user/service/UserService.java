@@ -4,8 +4,10 @@ import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.model.UserStatus;
 import lmc.user.repository.UserRepository;
+import lmc.web.dto.NewPasswordRequest;
 import lmc.web.dto.NewUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -58,6 +60,22 @@ public class UserService implements UserDetailsService {
         return userRepository.save(newUser);
 
         //TODO паролата трябва да се криптира и да се добавят още проверки!
+    }
+
+    public void changePassword(NewPasswordRequest request) {
+
+        if (!request.getPassword().equals(request.getConfirmPassword())){
+            throw new RuntimeException("Потвърждението на паролата не съвпада!");
+        }
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = getUserByEmail(email);
+
+        currentUser = currentUser.toBuilder()
+                .password(passwordEncoder.encode(request.getPassword()))
+                .build();
+
+        userRepository.save(currentUser);
     }
 
     @Override
