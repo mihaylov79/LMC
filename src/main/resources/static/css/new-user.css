@@ -1,0 +1,30 @@
+.user-container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: left;
+    text-align: left;
+    margin-bottom: 2em;
+
+}
+
+.header-container {
+    margin: 0;
+}
+
+.user-container p {
+    font-weight: bold;
+    color: #3771c8ff;
+    padding: 0.5em 1em;
+    border-radius: 0.4em;
+    box-shadow: 0 0.2em 0.5em #3771c8ff ;
+}
+
+.menu ul li button,
+.menu ul li .logout-btn {
+    display: inline-block; /* keep buttons inline inside the menu */
+    width: auto;
+    padding: 0.3em 0.6em; /* match `menu.css` */
+    margin: 0;
+    vertical-align: middle;
+}
+
