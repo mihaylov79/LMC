@@ -14,75 +14,87 @@
 
 </div>
 <div class="front-container">
-    <div class="user-container">
-        <p th:text="'Активен потребител: ' + ${user.email}"></p>
-    </div>
-</div>
 
-<div class="tabs">
-    <div class="offers">
-        <p>Offers HERE!</p>
-    </div>
-
-    <div class="configurations">
-
-        <div class="menu">
-            <ul>
-                <li><a th:href="@{/configurations/create/new}">Добави Конфигурация</a></li>
-            </ul>
-
-        </div>
-
-        <div class="configurations-table">
-            <div class="table-header">
-                <div class="search-box">
-                    <input type="text" id="searchConfigurations" placeholder="Търси конфигурация...">
-                </div>
-                <h3 class="table-title">Конфигурации</h3>
+    <details class="user-container" >
+        <summary class="user-summary"> <span th:text="'Активен потребител: ' + ${user.email}">email@example.com</span></summary>
+        <div class="user-details">
+            <p><strong th:text="'Име: '+ ${user.firstName} + ' ' + ${user.lastName}">Име</strong></p>
+            <p th:text="'Роля: ' + ${user.userRole.description}">Роля</p>
+            <p th:text="'Статус: ' + ${user.status.description}">Статус</p>
+            <div class="menu">
+                <ul>
+                <li><a class="menu-link" th:href="@{/users/{id}/edit(id=${user.id})}">Редактирай</a></li>
+                <li><a class="menu-link" th:href="@{/users/{id}/change-password(id=${user.id})}">Смяна на паролата</a></li>
+                </ul>
             </div>
-            <table>
-                <thead>
-
-                <tr>
-                    <th>Снимка</th>
-                    <th>Код</th>
-                    <th>Наименование</th>
-                    <th>Базова цена</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="configuration : ${configurations}">
-                    <td>
-                        <a th:href="@{/configurations/{id}/details(id=${configuration.id})}">
-                            <img th:src="${#strings.isEmpty(configuration.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:200px;"/>
-                        </a>
-                    </td>
-                    <td th:text="${configuration.code}"></td>
-                    <td>
-                        <div th:text="${configuration.description}"></div>
-                        <div class="desc">
-                            <span th:text="'модел: ' + ${configuration.model}"></span>,
-                            <span th:text="'линия: ' + ${configuration.line}"></span>
-                        </div>
-                        <div class="included-modules">
-                            <ul class="modules-list">
-                                <li th:each="unit : ${configuration.includedUnits}">
-                                    <!-- navigate entity: ConfigurationUnit -> configurableUnit -> code / unit.name -->
-                                    <span th:text="${unit.configurableUnit.code}">CODE</span>
-                                    <span th:text="' (' + ${unit.configurableUnit.unit.name} + ')'"> (base)</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </td>
-                    <td th:text="${configuration.totalPrice} + ' EUR'"></td>
-                </tr>
-
-                </tbody>
-            </table>
         </div>
+    </details>
+
+
+    <div class="tabs">
+        <div class="offers">
+            <p>Offers HERE!</p>
+        </div>
+
+        <div class="configurations">
+
+            <div class="menu">
+                <ul>
+                    <li><a th:href="@{/configurations/create/new}">Добави Конфигурация</a></li>
+                </ul>
+
+            </div>
+
+            <div class="configurations-table">
+                <div class="table-header">
+                    <div class="search-box">
+                        <input type="text" id="searchConfigurations" placeholder="Търси конфигурация...">
+                    </div>
+                    <h3 class="table-title">Конфигурации</h3>
+                </div>
+                <table>
+                    <thead>
+
+                    <tr>
+                        <th>Снимка</th>
+                        <th>Код</th>
+                        <th>Наименование</th>
+                        <th>Базова цена</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="configuration : ${configurations}">
+                        <td>
+                            <a th:href="@{/configurations/{id}/details(id=${configuration.id})}">
+                                <img th:src="${#strings.isEmpty(configuration.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configuration.imageUrl}" th:alt="${configuration.code}" style="max-width:200px;"/>
+                            </a>
+                        </td>
+                        <td th:text="${configuration.code}"></td>
+                        <td>
+                            <div th:text="${configuration.description}"></div>
+                            <div class="desc">
+                                <span th:text="'модел: ' + ${configuration.model}"></span>,
+                                <span th:text="'линия: ' + ${configuration.line}"></span>
+                            </div>
+                            <div class="included-modules">
+                                <ul class="modules-list">
+                                    <li th:each="unit : ${configuration.includedUnits}">
+                                        <!-- navigate entity: ConfigurationUnit -> configurableUnit -> code / unit.name -->
+                                        <span th:text="${unit.configurableUnit.code}">CODE</span>
+                                        <span th:text="' (' + ${unit.configurableUnit.unit.name} + ')'"> (base)</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td th:text="${configuration.totalPrice} + ' EUR'"></td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
-
-
 </div>
 
 <script>

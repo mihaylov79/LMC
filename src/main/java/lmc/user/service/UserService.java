@@ -7,6 +7,7 @@ import lmc.user.repository.UserRepository;
 import lmc.web.dto.NewPasswordRequest;
 import lmc.web.dto.NewUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -92,6 +94,10 @@ public class UserService implements UserDetailsService {
 
         return userRepository.save(user);
 
+    }
+
+    public List<User> getAllActiveUsers(){
+        return userRepository.findAllByStatus(UserStatus.ACTIVE, Sort.by("firstName", "lastName"));
     }
 
     @Override

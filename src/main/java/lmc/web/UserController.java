@@ -72,4 +72,15 @@ public class UserController {
         modelAndView.addObject("email", email);
         return modelAndView;
     }
+
+    @GetMapping("/list")
+    public ModelAndView getActiveUsers(@AuthenticationPrincipal CustomUserDetails details) {
+        User user = userService.getUserById(details.getId());
+
+        ModelAndView modelAndView = new ModelAndView("users-list");
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("users", userService.getAllActiveUsers());
+
+        return modelAndView;
+    }
 }

@@ -14,15 +14,17 @@ body {
 /*    padding-top: 5rem;*/
 /*}*/
 
-.user-container {
-    display: flex;
-    align-items: flex-start;
-    justify-content: left;
-    text-align: left;
+/*.user-container {*/
+/*    display: flex;*/
+/*    align-items: flex-start;*/
+/*    justify-content: left;*/
+/*    text-align: left;*/
 
-}
 
-.user-container p {
+/*}*/
+
+.user-container span,
+.user-container p{
     font-weight: bold;
     color: #3771c8ff;
     padding: 0.5em 1em;
@@ -51,4 +53,53 @@ body {
     padding: 1em;
     margin-bottom: 2rem;
     box-shadow: 0 0.2em 0.5em #3771c8ff ;
+}
+
+.user-container {
+    /* make details a positioned inline block so the dropdown can be anchored */
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0; /* adjust as needed to move the whole control */
+}
+
+/* summary styling (keeps clickable area consistent) */
+.user-summary {
+    cursor: pointer;
+    color: #3771c8ff;
+    font-weight: 600;
+    padding: 1em;
+    border-radius: 0.4em;
+    list-style: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+}
+
+.user-summary::after {
+    content: "▾";
+    margin-left: 0.25em;
+    font-size: 0.9em;
+    line-height: 1;
+    transition: transform 140ms ease;
+    display: inline-block;
+}
+
+/* hidden by default, becomes visible and positioned when details is open */
+.user-details {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;               /* align right edge of dropdown with control */
+    min-width: 220px;
+    background: #fff;
+    box-shadow: 0 0.4em 0.9em #3771c8ff;
+    border-radius: 0.4em;
+    padding: 0.5em 0.5em 0.1em;
+    display: none;
+    z-index: 50;
+}
+
+/* show when <details> is open */
+details[open] > .user-details {
+    display: block;
 }

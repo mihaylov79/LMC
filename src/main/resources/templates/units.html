@@ -14,10 +14,20 @@
 
 </div>
 <div class="front-container">
-    <div class="user-container">
-        <p th:text="'Активен потребител: ' + ${user.email}"></p>
-    </div>
-</div>
+    <details class="user-container" >
+        <summary class="user-summary"> <span th:text="'Активен потребител: ' + ${user.email}">email@example.com</span></summary>
+        <div class="user-details">
+            <p><strong th:text="'Име: '+ ${user.firstName} + ' ' + ${user.lastName}">Име</strong></p>
+            <p th:text="'Роля: ' + ${user.userRole.description}">Роля</p>
+            <p th:text="'Статус: ' + ${user.status.description}">Статус</p>
+            <div class="menu">
+                <ul>
+                    <li><a class="menu-link" th:href="@{/users/{id}/edit(id=${user.id})}">Редактирай</a></li>
+                    <li><a class="menu-link" th:href="@{/users/{id}/change-password(id=${user.id})}">Смяна на паролата</a></li>
+                </ul>
+            </div>
+        </div>
+    </details>
 
 <div class="tabs">
     <div class="base-units">
@@ -111,6 +121,7 @@
         </div>
 
 
+</div>
 </div>
 
 <script>
