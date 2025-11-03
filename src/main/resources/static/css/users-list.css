@@ -1,0 +1,28 @@
+/* css */
+button.action-btn,
+input.action-btn {
+    background-color: transparent;
+    color: #3771c8ff;
+    border: 1px solid #3771c8ff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 0.5em;
+}
+
+/*!* stronger selector if something overrides it *!*/
+/*.configurations-table button.action-btn {*/
+/*    background-color: #2b6cb0;*/
+/*}*/
+
+/* hover */
+button.action-btn:hover {
+    font-weight: 600;
+    box-shadow: 0 0.2em 0.5em #3771c8ff
+}
+
+/* only use !important as last resort */
+button.action-btn {
+    /* color: #fff !important; */
+}

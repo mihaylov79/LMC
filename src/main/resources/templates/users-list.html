@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Потребители</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/units.css">
+    <link rel="stylesheet" href="/css/users-list.css">
+</head>
+<body>
+<div class="header-container">
+
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
+</div>
+<div class="front-container">
+
+    <details class="user-container" >
+        <summary class="user-summary"> <span th:text="'Активен потребител: ' + ${user.email}">email@example.com</span></summary>
+        <div class="user-details">
+            <p><strong th:text="'Име: '+ ${user.firstName} + ' ' + ${user.lastName}">Име</strong></p>
+            <p th:text="'Роля: ' + ${user.userRole.description}">Роля</p>
+            <p th:text="'Статус: ' + ${user.status.description}">Статус</p>
+            <div class="menu">
+                <ul>
+                    <li><a class="menu-link" th:href="@{/users/{id}/edit(id=${user.id})}">Редактирай</a></li>
+                    <li><a class="menu-link" th:href="@{/users/{id}/change-password(id=${user.id})}">Смяна на паролата</a></li>
+                </ul>
+            </div>
+        </div>
+    </details>
+
+
+    <div class="tabs">
+<!--        <div class="offers">-->
+<!--            <p>Offers HERE!</p>-->
+<!--        </div>-->
+
+        <div class="configurations">
+
+            <div class="menu">
+                <ul>
+                    <li><a th:href="@{/users/create/new}">Създай нов потребител</a></li>
+                </ul>
+
+            </div>
+
+            <div class="configurations-table">
+                <div class="table-header">
+                    <div class="search-box">
+                        <input type="text" id="searchConfigurations" placeholder="Търси потребител...">
+                    </div>
+                    <h3 class="table-title">Потребители</h3>
+                </div>
+                <table>
+                    <thead>
+
+                    <tr>
+
+                        <th>Поща</th>
+                        <th>Име</th>
+                        <th>Фамилия</th>
+                        <th>Роля</th>
+                        <th>Статус</th>
+                        <th>Действие</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="listUser : ${users}">
+                        <td th:text="${listUser.email}"></td>
+                        <td th:text="${listUser.firstName}"></td>
+                        <td th:text="${listUser.lastName}"></td>
+                        <td th:text="${listUser.userRole.description}"></td>
+                        <td th:text="${listUser.status.description}"></td>
+                        <td>
+                            <form th:action="@{/users/{id}/deactivate(id=${listUser.id})}" method="post" style="display:inline;" onsubmit="return confirm('Сигурни ли сте, че искате да деактивирате потребителя?');">
+<!--                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>-->
+                                <button type="submit" class="action-btn">Деактивиране</button>
+                            </form>
+
+                            <form th:action="@{/users/{id}/reset-password(id=${listUser.id})}" method="post" style="display:inline;" onsubmit="return confirm('Ще бъде генерирана нова парола за потребителя. Продължавате ли?');">
+<!--                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>-->
+                                <button type="submit" class="action-btn">Нулиране на парола</button>
+                            </form>
+
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Търсачка за конфигурации
+    document.getElementById('searchConfigurations').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.configurations-table tbody tr');
+
+        rows.forEach(row => {
+            const email = row.cells[0].textContent.toLowerCase();
+            const firstName = row.cells[1].textContent.toLowerCase();
+            const lastName = row.cells[2].textContent.toLowerCase();
+            const userRole = row.cells[3].textContent.toLowerCase();
+            const status = row.cells[4].textContent.toLowerCase();
+
+            if (email.includes(searchValue) || firstName.includes(searchValue) || lastName.includes(searchValue) || userRole.includes(searchValue) || status.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // // Търсачка за конфигурирани продукти
+    // document.getElementById('searchUnitOptions').addEventListener('keyup', function() {
+    //     const searchValue = this.value.toLowerCase();
+    //     const rows = document.querySelectorAll('.unit-options-table tbody tr'); // Използвайте правилния клас/селектор
+    //
+    //     rows.forEach(row => {
+    //         const code = row.cells[0].textContent.toLowerCase();
+    //         const name = row.cells[1].textContent.toLowerCase();
+    //         // Добавете други колони по необходимост
+    //
+    //         if (code.includes(searchValue) || name.includes(searchValue)) {
+    //             row.style.display = '';
+    //         } else {
+    //             row.style.display = 'none';
+    //         }
+    //     });
+    // });
+
+</script>
+
+</body>
+</html>

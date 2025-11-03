@@ -100,6 +100,10 @@ public class UserService implements UserDetailsService {
         return userRepository.findAllByStatus(UserStatus.ACTIVE, Sort.by("firstName", "lastName"));
     }
 
+    public List<User> getAllUsers() {
+        return userRepository.findAll(Sort.by("status", "firstName", "lastName"));
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username).orElseThrow(()->

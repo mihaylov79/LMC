@@ -79,7 +79,7 @@ public class UserController {
 
         ModelAndView modelAndView = new ModelAndView("users-list");
         modelAndView.addObject("user", user);
-        modelAndView.addObject("users", userService.getAllActiveUsers());
+        modelAndView.addObject("users", userService.getAllUsers());
 
         return modelAndView;
     }
