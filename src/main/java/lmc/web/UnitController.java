@@ -24,10 +24,8 @@ import org.springframework.web.servlet.ModelAndView;
 import lmc.configurableUnit.model.ConfigurableUnit;
 
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/products")
@@ -65,7 +63,8 @@ public class UnitController {
     @GetMapping("/configurable-units")
     public ModelAndView getConfigurableItems(@AuthenticationPrincipal CustomUserDetails details){
         User user = userService.getUserById(details.getId());
-        List<ConfigurableUnit> configurableUnits = configurableUnitService.getAllUnits();
+        List<ConfigurableUnit> configurableUnits = configurableUnitService.getAllUnits().stream()
+                .sorted(Comparator.comparing(ConfigurableUnit::getCode)).collect(Collectors.toList());
 
         Map<UUID, List<ConfiguredUnitOption>> optionsByCuId = new HashMap<>();
 
