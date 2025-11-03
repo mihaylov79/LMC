@@ -32,7 +32,7 @@
 
         <div class="field">
             <label for="field-email">Електронна поща</label>
-            <input type="email" name="username" id="field-email" placeholder="Email" th:field="*{email}">
+            <input type="email" name="email" id="field-email" placeholder="Email" th:field="*{email}">
             <span class="helper info">например: john.doe@gmail.com</span>
         </div>
 
@@ -54,7 +54,7 @@
 
         <div class="field">
             <label for="field-lastName">Фамиля</label>
-            <input type="text" name="lastName" id="field-lastName" placeholder="Име" th:field="*{firstName}">
+            <input type="text" name="lastName" id="field-lastName" placeholder="Име" th:field="*{lastName}">
             <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>
             <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
         </div>

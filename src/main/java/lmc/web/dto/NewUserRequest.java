@@ -24,7 +24,7 @@ public class NewUserRequest {
     @Email(message = "Моля въведете валидем мейл!")
     private String email;
 
-    @NotBlank
+//    @NotBlank
     @Length(min = 6, max = 20, message = "Паролата трябва да бъде минимум 6 и максимум 20 символа")
     private String password;
 

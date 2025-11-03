@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("create/new")
-    public ModelAndView createNewUser(@Valid NewUserRequest request, @AuthenticationPrincipal CustomUserDetails details, BindingResult result, RedirectAttributes redirectAttributes){
+    public ModelAndView createNewUser(@Valid NewUserRequest request, BindingResult result, @AuthenticationPrincipal CustomUserDetails details, RedirectAttributes redirectAttributes){
         User user = userService.getUserById(details.getId());
 
         if (result.hasErrors()){
