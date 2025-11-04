@@ -1,5 +1,6 @@
 package lmc.user.service;
 
+import lmc.exceptions.WrongPasswordException;
 import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.model.UserStatus;
@@ -67,11 +68,16 @@ public class UserService implements UserDetailsService {
     public User changePassword(NewPasswordRequest request) {
 
         if (!request.getPassword().equals(request.getConfirmPassword())){
-            throw new RuntimeException("Потвърждението на паролата не съвпада!");
+            throw new WrongPasswordException("Потвърждението на паролата не съвпада!");
         }
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = getUserByEmail(email);
+
+        if (currentUser.getPassword().equals(passwordEncoder.encode(request.getPassword()))){
+
+            throw new WrongPasswordException("Новата парола не може да съвпада с настоящата!");
+        }
 
         currentUser = currentUser.toBuilder()
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -85,7 +91,7 @@ public class UserService implements UserDetailsService {
         User user = getUserById(userId);
 
         if (!request.getPassword().equals(request.getConfirmPassword())){
-            throw new RuntimeException("Потвърждението на паролата не съвпада!");
+            throw new WrongPasswordException("Потвърждението на паролата не съвпада!");
         }
 
         user = user.toBuilder()

@@ -5,17 +5,17 @@ import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
 import lmc.utils.PasswordGenerator;
+import lmc.web.dto.NewPasswordRequest;
 import lmc.web.dto.NewUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 
 @Controller
 @RequestMapping ("/users")
@@ -42,7 +42,8 @@ public class UserController {
     }
 
     @PostMapping("create/new")
-    public ModelAndView createNewUser(@Valid NewUserRequest request, BindingResult result, @AuthenticationPrincipal CustomUserDetails details, RedirectAttributes redirectAttributes){
+    public ModelAndView createNewUser(@Valid NewUserRequest request, BindingResult result,
+                                      @AuthenticationPrincipal CustomUserDetails details){
         User user = userService.getUserById(details.getId());
 
         if (result.hasErrors()){
@@ -55,22 +56,55 @@ public class UserController {
         request.setPassword(password);
         userService.addNewUser(request);
 
-        redirectAttributes.addFlashAttribute("password", password);
-        redirectAttributes.addFlashAttribute("email", request.getEmail());
-
-        return new ModelAndView("redirect:/users/create/success");
-
-    }
-
-    @GetMapping("/create/success")
-    public ModelAndView showCreateUserSuccessPage(@AuthenticationPrincipal CustomUserDetails details, @ModelAttribute("password") String password, @ModelAttribute("email") String email){
-        User user = userService.getUserById(details.getId());
 
         ModelAndView modelAndView = new ModelAndView("create-success");
         modelAndView.addObject("user", user);
         modelAndView.addObject("password", password);
-        modelAndView.addObject("email", email);
+        modelAndView.addObject("email", request.getEmail());
+
         return modelAndView;
+
+    }
+
+//    @GetMapping("/create/success")
+//    public ModelAndView showCreateUserSuccessPage(@AuthenticationPrincipal CustomUserDetails details,
+//                                                  @ModelAttribute("password") String password,
+//                                                  @ModelAttribute("email") String email){
+//        User user = userService.getUserById(details.getId());
+//
+//        ModelAndView modelAndView = new ModelAndView("create-success");
+//        modelAndView.addObject("user", user);
+//        modelAndView.addObject("password", password);
+//        modelAndView.addObject("email", email);
+//        return modelAndView;
+//    }
+
+    @GetMapping("/change-password")
+    public ModelAndView getPasswordChangePage(@AuthenticationPrincipal CustomUserDetails details){
+        User user = userService.getUserById(details.getId());
+
+        ModelAndView modelAndView = new ModelAndView("password-reset");
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("newPasswordRequest", new NewPasswordRequest());
+
+        return modelAndView;
+    }
+
+    @PostMapping("/change-password")
+    public ModelAndView passwordChange(@Valid NewPasswordRequest request,
+                                       BindingResult result,
+                                       @AuthenticationPrincipal CustomUserDetails details){
+
+        User user = userService.getUserById(details.getId());
+
+        if (result.hasErrors()){
+            ModelAndView modelAndView = new ModelAndView("password-reset");
+            modelAndView.addObject("user", user);
+        }
+
+        userService.changePassword(request);
+
+        return new ModelAndView("redirect:/home");
     }
 
     @GetMapping("/list")
