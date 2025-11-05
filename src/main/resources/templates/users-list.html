@@ -1,3 +1,4 @@
+<!-- html -->
 <!DOCTYPE html>
 <html lang="bg">
 <head>
@@ -10,16 +11,17 @@
 </head>
 <body>
 <div class="header-container">
-
     <th:block th:insert="~{fragments/nav :: nav}"></th:block>
-
 </div>
+
 <div class="front-container">
 
-    <details class="user-container" >
-        <summary class="user-summary"> <span th:text="'Активен потребител: ' + ${user.email}">email@example.com</span></summary>
+    <details class="user-container">
+        <summary class="user-summary">
+            <span th:text="'Активен потребител: ' + ${user.email}">email@example.com</span>
+        </summary>
         <div class="user-details">
-            <p><strong th:text="'Име: '+ ${user.firstName} + ' ' + ${user.lastName}">Име</strong></p>
+            <p><strong th:text="'Име: ' + ${user.firstName} + ' ' + ${user.lastName}">Име</strong></p>
             <p th:text="'Роля: ' + ${user.userRole.description}">Роля</p>
             <p th:text="'Статус: ' + ${user.status.description}">Статус</p>
             <div class="menu">
@@ -31,19 +33,12 @@
         </div>
     </details>
 
-
     <div class="tabs">
-<!--        <div class="offers">-->
-<!--            <p>Offers HERE!</p>-->
-<!--        </div>-->
-
         <div class="configurations">
-
             <div class="menu">
                 <ul>
                     <li><a th:href="@{/users/create/new}">Създай нов потребител</a></li>
                 </ul>
-
             </div>
 
             <div class="configurations-table">
@@ -53,11 +48,10 @@
                     </div>
                     <h3 class="table-title">Потребители</h3>
                 </div>
+
                 <table>
                     <thead>
-
                     <tr>
-
                         <th>Поща</th>
                         <th>Име</th>
                         <th>Фамилия</th>
@@ -71,10 +65,39 @@
                         <td th:text="${listUser.email}"></td>
                         <td th:text="${listUser.firstName}"></td>
                         <td th:text="${listUser.lastName}"></td>
-                        <td th:text="${listUser.userRole.description}"></td>
+
+                        <!-- Role selector + update form -->
+                        <td>
+                            <form th:action="@{/users/update-role/{userId}(userId=${listUser.id})}"
+                                  th:method="PUT"
+                                  style="display:inline;"
+                                  class="role-form">
+                                <select class="role-select"
+                                        th:data-original-role="${listUser.userRole.name()}"
+                                        th:id="'role-' + ${listUser.id}"
+                                        name="role">
+                                    <option th:each="role : ${T(lmc.user.model.UserRole).values()}"
+                                            th:value="${role.name()}"
+                                            th:text="${role.description}"
+                                            th:selected="${role.name() == listUser.userRole.name()}">
+                                    </option>
+                                </select>
+
+                                <button type="submit"
+                                        class="action-btn tick-btn"
+                                        th:attr="id=${'tick-' + listUser.id}"
+                                        disabled
+                                        title="Запазване на новата роля">
+                                    ✓
+                                </button>
+                            </form>
+                        </td>
+
                         <td th:text="${listUser.status.description}"></td>
                         <td>
-                            <form th:action="@{/users/change-status/{userId}(userId=${listUser.id})}" th:method="PUT" style="display:inline;"
+                            <form th:action="@{/users/change-status/{userId}(userId=${listUser.id})}"
+                                  th:method="put"
+                                  style="display:inline;"
                                   onsubmit="return confirm('Сигурни ли сте, че искате да промените статуса на потребителя?');">
                                 <button type="submit" class="action-btn"
                                         th:text="${listUser.status.name() == 'ACTIVE' ? 'Деактивирай' : 'Активирай'}">
@@ -82,62 +105,70 @@
                                 </button>
                             </form>
 
-                            <form th:action="@{/users/{id}/reset-password(id=${listUser.id})}" method="post" style="display:inline;" onsubmit="return confirm('Ще бъде генерирана нова парола за потребителя. Продължавате ли?');">
-<!--                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>-->
+                            <form th:action="@{/users/{id}/reset-password(id=${listUser.id})}"
+                                  th:method="post"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Ще бъде генерирана нова парола за потребителя. Продължавате ли?');">
                                 <button type="submit" class="action-btn">Нулиране на парола</button>
                             </form>
-
                         </td>
                     </tr>
-
                     </tbody>
                 </table>
+
             </div>
         </div>
-
     </div>
 </div>
 
 <script>
-    // Търсачка за конфигурации
-    document.getElementById('searchConfigurations').addEventListener('keyup', function() {
-        const searchValue = this.value.toLowerCase();
-        const rows = document.querySelectorAll('.configurations-table tbody tr');
+    document.addEventListener('DOMContentLoaded', function () {
+        // enable/disable tick button only when role changed
+        document.querySelectorAll('.role-form').forEach(function (form) {
+            const select = form.querySelector('.role-select');
+            const tick = form.querySelector('.tick-btn');
 
-        rows.forEach(row => {
-            const email = row.cells[0].textContent.toLowerCase();
-            const firstName = row.cells[1].textContent.toLowerCase();
-            const lastName = row.cells[2].textContent.toLowerCase();
-            const userRole = row.cells[3].textContent.toLowerCase();
-            const status = row.cells[4].textContent.toLowerCase();
+            const original = (select.dataset.originalRole || '').trim();
+            const current = () => (select.value || '').trim();
 
-            if (email.includes(searchValue) || firstName.includes(searchValue) || lastName.includes(searchValue) || userRole.includes(searchValue) || status.includes(searchValue)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+            // initialize button state
+            tick.disabled = (current() === original);
+
+            select.addEventListener('change', function () {
+                tick.disabled = (current() === original);
+            });
+
+            // prevent submit when nothing changed (safety)
+            form.addEventListener('submit', function (e) {
+                if (current() === original) {
+                    e.preventDefault();
+                }
+            });
         });
+
+        // Search box
+        const searchInput = document.getElementById('searchConfigurations');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function () {
+                const searchValue = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.configurations-table tbody tr');
+
+                rows.forEach(row => {
+                    const email = (row.cells[0]?.textContent || '').toLowerCase();
+                    const firstName = (row.cells[1]?.textContent || '').toLowerCase();
+                    const lastName = (row.cells[2]?.textContent || '').toLowerCase();
+                    const userRole = (row.cells[3]?.textContent || '').toLowerCase();
+                    const status = (row.cells[4]?.textContent || '').toLowerCase();
+
+                    if (email.includes(searchValue) || firstName.includes(searchValue) || lastName.includes(searchValue) || userRole.includes(searchValue) || status.includes(searchValue)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
     });
-
-    // // Търсачка за конфигурирани продукти
-    // document.getElementById('searchUnitOptions').addEventListener('keyup', function() {
-    //     const searchValue = this.value.toLowerCase();
-    //     const rows = document.querySelectorAll('.unit-options-table tbody tr'); // Използвайте правилния клас/селектор
-    //
-    //     rows.forEach(row => {
-    //         const code = row.cells[0].textContent.toLowerCase();
-    //         const name = row.cells[1].textContent.toLowerCase();
-    //         // Добавете други колони по необходимост
-    //
-    //         if (code.includes(searchValue) || name.includes(searchValue)) {
-    //             row.style.display = '';
-    //         } else {
-    //             row.style.display = 'none';
-    //         }
-    //     });
-    // });
-
 </script>
-
 </body>
 </html>

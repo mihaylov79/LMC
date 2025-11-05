@@ -3,6 +3,7 @@ package lmc.web;
 import jakarta.validation.Valid;
 import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
+import lmc.user.model.UserRole;
 import lmc.user.service.UserService;
 import lmc.utils.PasswordGenerator;
 import lmc.web.dto.NewPasswordRequest;
@@ -126,5 +127,13 @@ public class UserController {
         modelAndView.addObject("users", userService.getAllUsers());
 
         return modelAndView;
+    }
+
+    @PutMapping("/update-role/{userId}")
+    public String userRoleUpdate (@PathVariable UUID userId, @RequestParam UserRole role){
+
+        userService.updateUserRole(role, userId);
+
+        return "redirect:/users/list";
     }
 }

@@ -3,6 +3,7 @@ package lmc.user.service;
 import lmc.exceptions.WrongPasswordException;
 import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
+import lmc.user.model.UserRole;
 import lmc.user.model.UserStatus;
 import lmc.user.repository.UserRepository;
 import lmc.web.dto.NewPasswordRequest;
@@ -114,6 +115,20 @@ public class UserService implements UserDetailsService {
                     .status(UserStatus.ACTIVE)
                     .build();
         }
+
+        userRepository.save(user);
+    }
+
+    public void updateUserRole(UserRole role, UUID userId){
+        User user = getUserById(userId);
+
+        if (role.equals(user.getUserRole())){
+            return;
+        }
+
+        user = user.toBuilder()
+                .userRole(role)
+                .build();
 
         userRepository.save(user);
     }
