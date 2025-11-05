@@ -95,7 +95,7 @@
 
     <select id="unitOptionsTemplate" style="display:none">
         <option value="">Изберете unit</option>
-        <option th:each="u : ${existingUnits}" th:value="${u.id}" th:text="${u.unit.code + ' - ' + u.unit.name }"></option>
+        <option th:each="u : ${existingUnits}" th:value="${u.id}" th:text="${u.code + ' - ' + u.unit.name }"></option>
     </select>
 
     <div id="server-data" style="display:none">
@@ -140,7 +140,7 @@
         <div th:each="unit, stat : *{units}" class="unit-row" data-persisted="true">
             <select th:field="*{units[__${stat.index}__].configurableUnitId}" class="unit-select" required>
                 <option value="">Изберете unit</option>
-                <option th:each="u : ${existingUnits}" th:value="${u.id}" th:text="${u.unit.code + ' - ' + u.unit.name }"></option>
+                <option th:each="u : ${existingUnits}" th:value="${u.id}" th:text="${u.code + ' - ' + u.unit.name }"></option>
             </select>
 
             <input type="number"
