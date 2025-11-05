@@ -33,3 +33,46 @@ button.tick-btn[disabled] {
     cursor: not-allowed;
     box-shadow: none;
 }
+
+/* Role select styling */
+.role-select {
+    background-color: #ffffff;
+    color: #3771c8ff; /* blue text */
+    border: 1px solid #3771c8ff; /* thin blue border */
+    padding: 6px 36px 6px 10px; /* room for custom arrow on the right */
+    border-radius: 6px;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    cursor: pointer;
+    outline: none;
+
+    /* remove native arrow on most browsers so custom arrow shows */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* custom arrow (SVG) positioned on the right */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%231f6feb' d='M6 8L0 0h12z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px 8px;
+}
+
+/* focus/hover states */
+.role-select:focus {
+    box-shadow: 0 0 0 4px rgba(31,111,235,0.12);
+    border-color: #3771c8ff;
+}
+
+/* options inside dropdown (appearance varies by browser) */
+.role-select option {
+    color: #3771c8ff;
+    background-color: #ffffff;
+}
+
+/* small responsive tweak so the select fits table cells */
+.configurations-table td .role-select {
+    min-width: 140px;
+    max-width: 220px;
+}
+
