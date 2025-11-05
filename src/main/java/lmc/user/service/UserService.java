@@ -102,6 +102,23 @@ public class UserService implements UserDetailsService {
 
     }
 
+    public void changeUserStatus(UUID userId){
+        User user = getUserById(userId);
+
+        if (user.getStatus().name().equals("ACTIVE")){
+            user = user.toBuilder()
+                    .status(UserStatus.INACTIVE)
+                    .build();
+        }else {
+            user = user.toBuilder()
+                    .status(UserStatus.ACTIVE)
+                    .build();
+        }
+
+        userRepository.save(user);
+    }
+
+
     public List<User> getAllActiveUsers(){
         return userRepository.findAllByStatus(UserStatus.ACTIVE, Sort.by("firstName", "lastName"));
     }
