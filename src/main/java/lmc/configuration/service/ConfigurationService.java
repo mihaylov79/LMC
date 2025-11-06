@@ -2,6 +2,8 @@ package lmc.configuration.service;
 
 
 import lmc.configurableUnit.model.ConfigurableUnit;
+import lmc.configurableUnit.model.ConfiguredUnit;
+import lmc.configurableUnit.model.ConfiguredUnitOption;
 import lmc.configurableUnit.service.ConfigurableUnitService;
 import lmc.configurableUnit.service.PriceCalculationService;
 import lmc.configuration.model.Configuration;
@@ -174,7 +176,7 @@ public class ConfigurationService {
                             .build();
 
                     optionSelections.forEach(s -> {
-                        var opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
+                        Option opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
                                 .findFirst()
                                 .orElseThrow(() -> new IllegalArgumentException("Option not found: " + s.getOptionId()));
                         ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
@@ -190,7 +192,7 @@ public class ConfigurationService {
                         if (templateOptions != null) {
                             templateOptions.stream()
                                     .filter(Objects::nonNull)
-                                    .map(tco -> tco.getOption())
+                                    .map(ConfiguredUnitOption::getOption)
                                     .filter(Objects::nonNull)
                                     .forEach(opt -> {
                                         ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
@@ -225,25 +227,24 @@ public class ConfigurationService {
                 });
             } else {
                 // copy template options from ConfiguredUnit when no explicit selections provided
-                if (cu instanceof lmc.configurableUnit.model.ConfiguredUnit) {
-                    var templateOptions = ((lmc.configurableUnit.model.ConfiguredUnit) cu).getOptions();
+                if (cu instanceof ConfiguredUnit) {
+                    List<ConfiguredUnitOption> templateOptions = ((ConfiguredUnit) cu).getOptions();
                     if (templateOptions != null) {
                         templateOptions.stream()
                                 .filter(Objects::nonNull)
-                                .map(tco -> tco.getOption())
+                                .map(ConfiguredUnitOption::getOption)
                                 .filter(Objects::nonNull)
-                                .forEach(opt -> {
-                                    ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
+                                .map(opt -> ConfigurationUnitOption.builder()
                                             .option(opt)
                                             .quantity(1)
-                                            .build();
-                                    newUnit.addOption(cuo);
-                                });
+                                            .build())
+                                        .forEach(newUnit::addOption);
+                                }
                     }
-                }
-            }
 
-            configuration.addIncludedUnit(newUnit);
+                }
+
+           configuration.addIncludedUnit(newUnit);
         }
 
         BigDecimal totalPrice = calculationService.calculateConfigurationTotalPrice(configuration);
@@ -284,7 +285,7 @@ public class ConfigurationService {
                     Map<UUID, Integer> templateMap = (templateOptions == null ? Map.of() :
                             templateOptions.stream()
                                     .filter(Objects::nonNull)
-                                    .map(tco -> tco.getOption())
+                                    .map(ConfiguredUnitOption::getOption)
                                     .filter(Objects::nonNull)
                                     .collect(Collectors.toMap(o -> o.getId(), o -> 1, Integer::sum))
                     );
