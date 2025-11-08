@@ -102,6 +102,7 @@ public class UserController {
         if (result.hasErrors()){
             ModelAndView modelAndView = new ModelAndView("password-reset");
             modelAndView.addObject("user", user);
+            return modelAndView;
         }
 
         userService.changePassword(request);
