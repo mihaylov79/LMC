@@ -29,7 +29,11 @@ public class SimpleUnitService {
         Unit unit = unitService.getUnitById(request.getUnitId());
         String code = unit.getCode();
 
-        return repository.findByCodeAndActiveTrue(code).orElseGet(() -> {
+        if (repository.findByCode(code).isPresent()){
+            throw new IllegalArgumentException("Модул с този код вече съществува!");
+        }
+
+
             SimpleUnit simpleUnit = SimpleUnit.builder()
                     .code(code)
                     .unit(unit)
@@ -38,7 +42,7 @@ public class SimpleUnitService {
                     .build();
 
             return repository.save(simpleUnit);
-        });
+
 
     }
 

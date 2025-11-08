@@ -1,4 +1,3 @@
-<!-- language: html -->
 <!DOCTYPE html>
 <html lang="bg" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -62,18 +61,15 @@
 
         <h3>Units</h3>
 
-        <!-- Hidden template for units select options -->
         <select id="unitOptionsTemplate" style="display:none">
             <option value="">Изберете unit</option>
             <option th:each="u : ${existingUnits}"
                     th:value="${u.id}"
-                    th:text="${u.unit.code + ' - ' + u.unit.name }">
+                    th:text="${u.code + ' - ' + u.unit.name }">
             </option>
         </select>
 
-        <!-- Server-rendered hidden DOM used to build JS maps (safe Thymeleaf usage) -->
         <div id="server-data" style="display:none">
-            <!-- iterate only configured units (they have `options`) -->
             <div th:each="cu : ${configuredUnits}" th:attr="data-unit-id=${cu.id}">
                 <div th:each="co : ${cu.options}"
                      class="unit-option"
@@ -91,13 +87,11 @@
             </div>
         </div>
 
-        <!-- Build JS maps from the hidden DOM (no thymeleaf inlined JS) -->
         <script>
             var unitOptionsMap = {};
             var initialUnitSelections = {};
 
             (function buildMaps() {
-                // units -> options
                 document.querySelectorAll('#server-data > div[data-unit-id]').forEach(u => {
                     const id = u.getAttribute('data-unit-id');
                     const options = Array.from(u.querySelectorAll('.unit-option')).map(o => {
@@ -113,7 +107,6 @@
                     unitOptionsMap[id] = options;
                 });
 
-                // initial selections for edit/prefill
                 document.querySelectorAll('#server-data div[data-unit-idx]').forEach(u => {
                     const idx = u.getAttribute('data-unit-idx');
                     const sels = Array.from(u.querySelectorAll('.sel')).map(s => ({
@@ -125,14 +118,13 @@
             })();
         </script>
 
-        <!-- Units container -->
         <div id="units-container">
             <div th:each="unit, stat : *{units}" class="unit-row">
                 <select th:field="*{units[__${stat.index}__].configurableUnitId}" class="unit-select" required>
                     <option value="">Изберете unit</option>
                     <option th:each="u : ${existingUnits}"
                             th:value="${u.id}"
-                            th:text="${u.unit.code + ' - ' + u.unit.name}">
+                            th:text="${u.code + ' - ' + u.unit.name}">
                     </option>
                 </select>
 
@@ -143,7 +135,6 @@
                        required
                        placeholder="Бр."/>
 
-                <!-- options panel for this row (will be filled by JS) -->
                 <div class="inline-options" style="margin-left:1rem;">
                     <div class="options-for-row"></div>
                 </div>
@@ -158,7 +149,6 @@
     </form>
 </div>
 
-<!-- Modal for creating a new configurable unit -->
 <div id="createUnitModal" style="display:none;">
     <div class="modal-content">
         <h3>Създай нов Configurable Unit</h3>
@@ -179,7 +169,7 @@
                     <div th:each="option : ${allOptions}">
                         <input type="checkbox" th:id="'newOpt_' + ${option.id}" th:value="${option.id}" class="modal-opt"/>
                         <label th:for="'newOpt_' + ${option.id}" th:text="${option.code + ' - ' + option.name}"></label>
-                        <input type="number" min="1" value="1" class="modal-opt-qty" style="width:60px"/>
+                        <input type="number" min="1" value="1" class="modal-opt-qty" style="width:60px" disabled/>
                     </div>
                 </div>
             </div>
@@ -194,6 +184,10 @@
 <script>
     const unitTemplate = document.getElementById('unitOptionsTemplate');
     const unitsContainer = document.getElementById('units-container');
+    const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+    const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : 'X-CSRF-TOKEN';
 
     function addUnit() {
         const div = document.createElement('div');
@@ -267,7 +261,6 @@
             qty.className = 'opt-qty';
             qty.style.width = '70px';
             qty.disabled = true;
-
             qty.dataset.optionId = opt.optionId;
 
             cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
@@ -276,50 +269,6 @@
             row.appendChild(label);
             row.appendChild(qty);
             container.appendChild(row);
-        });
-    }
-
-    function renderOptionsForUnit(unitId) {
-        const optionsList = document.getElementById('options-list');
-        if (!optionsList) return;
-        optionsList.innerHTML = '';
-        if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) {
-            document.getElementById('options-panel').style.display = 'none';
-            return;
-        }
-        document.getElementById('options-panel').style.display = 'block';
-        unitOptionsMap[unitId].forEach(opt => {
-            const row = document.createElement('div');
-            row.className = 'option-row';
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.gap = '0.5rem';
-            row.style.marginBottom = '0.4rem';
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'option-checkbox';
-            checkbox.dataset.optionId = opt.optionId;
-
-            const label = document.createElement('label');
-            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price ? ' (' + opt.price + ' EUR)' : '');
-
-            const qty = document.createElement('input');
-            qty.type = 'number';
-            qty.min = '1';
-            qty.value = '1';
-            qty.className = 'option-qty';
-            qty.style.width = '70px';
-            qty.style.marginLeft = 'auto';
-            qty.dataset.optionId = opt.optionId;
-
-            row.appendChild(checkbox);
-            row.appendChild(label);
-            row.appendChild(qty);
-            optionsList.appendChild(row);
-
-            checkbox.addEventListener('change', () => { qty.disabled = !checkbox.checked; });
-            qty.disabled = true;
         });
     }
 
@@ -387,7 +336,7 @@
                                 cb.checked = true;
                                 if (q) { q.value = Math.max(1, Number(s.quantity) || 1); q.disabled = false; }
                             }
-                        } catch (e) { /* ignore invalid/missing entries */ }
+                        } catch (e) { }
                     });
                 }
 
@@ -399,7 +348,18 @@
 
     window.openCreateUnitModal = function () {
         document.getElementById('createUnitModal').style.display = 'block';
+        document.querySelectorAll('#newUnitOptions .modal-opt-qty').forEach(qty => {
+            const cb = qty.previousElementSibling?.previousElementSibling;
+            qty.disabled = !cb || !cb.checked;
+        });
+        document.querySelectorAll('#newUnitOptions .modal-opt').forEach(cb => {
+            cb.addEventListener('change', () => {
+                const qty = cb.parentElement.querySelector('.modal-opt-qty');
+                if (qty) qty.disabled = !cb.checked;
+            });
+        });
     };
+
     window.closeCreateUnitModal = function () {
         document.getElementById('createUnitModal').style.display = 'none';
         document.getElementById('createUnitForm').reset();
@@ -411,7 +371,11 @@
         const options = rows.map(row => {
             const cb = row.querySelector('input[type="checkbox"]');
             const qtyInput = row.querySelector('input[type="number"]');
-            return cb && cb.checked ? { optionId: cb.value, quantity: Number(qtyInput.value) || 1 } : null;
+            return cb && cb.checked ? {
+                optionId: cb.value,
+                quantity: Number(qtyInput.value) || 1,
+                label: row.querySelector('label')?.textContent.trim() || ''
+            } : null;
         }).filter(x => x !== null);
 
         if (!unitId) {
@@ -419,17 +383,12 @@
             return;
         }
 
-        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
-        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
-        const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : 'X-CSRF-TOKEN';
-
         fetch('/products/configurable-units/create-new', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
             body: JSON.stringify({
                 unitId: unitId,
-                optionSelections: options.length ? options : null
+                optionSelections: options.length ? options.map(o => ({ optionId: o.optionId, quantity: o.quantity })) : null
             })
         })
             .then(response => {
@@ -437,18 +396,50 @@
                 return response.json();
             })
             .then(newUnit => {
+                const newId = String(newUnit.id);
+                const label = (newUnit.unit?.code || '') + ' - ' + (newUnit.unit?.name || '');
+
+                const opts = options.map(s => {
+                    let code = null, name = null;
+                    if (s.label) {
+                        const parts = s.label.split(' - ');
+                        code = parts.length ? parts[0].trim() : null;
+                        name = parts.length > 1 ? parts.slice(1).join(' - ').trim() : null;
+                    }
+                    return { optionId: String(s.optionId), code: code, name: name, price: null };
+                });
+
+                unitOptionsMap[newId] = opts;
+
                 if (unitTemplate) {
                     const opt = document.createElement('option');
-                    opt.value = newUnit.id;
-                    opt.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
+                    opt.value = newId;
+                    opt.textContent = label;
                     unitTemplate.appendChild(opt);
                 }
+
                 document.querySelectorAll('#units-container select').forEach(select => {
                     const opt = document.createElement('option');
-                    opt.value = newUnit.id;
-                    opt.textContent = newUnit.unit.code + ' - ' + newUnit.unit.name;
+                    opt.value = newId;
+                    opt.textContent = label;
                     select.appendChild(opt);
                 });
+
+                const serverData = document.getElementById('server-data');
+                if (serverData) {
+                    const div = document.createElement('div');
+                    div.setAttribute('data-unit-id', newId);
+                    opts.forEach(o => {
+                        const io = document.createElement('div');
+                        io.className = 'unit-option';
+                        io.setAttribute('data-option-id', String(o.optionId));
+                        io.setAttribute('data-code', o.code || '');
+                        io.setAttribute('data-name', o.name || '');
+                        io.setAttribute('data-price', o.price == null ? '' : String(o.price));
+                        div.appendChild(io);
+                    });
+                    serverData.appendChild(div);
+                }
 
                 closeCreateUnitModal();
                 alert('Unit създаден успешно!');

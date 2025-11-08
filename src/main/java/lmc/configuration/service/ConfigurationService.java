@@ -170,81 +170,14 @@ public class ConfigurationService {
                 } else {
                     // different option composition => create new configuration unit instance
                     ConfigurableUnit cu = configurableUnitService.findUnitById(configurableUnitId);
-                    ConfigurationUnit newUnit = ConfigurationUnit.builder()
-                            .configurableUnit(cu)
-                            .quantity(quantity)
-                            .build();
-
-                    optionSelections.forEach(s -> {
-                        Option opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
-                                .findFirst()
-                                .orElseThrow(() -> new IllegalArgumentException("Option not found: " + s.getOptionId()));
-                        ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
-                                .option(opt)
-                                .quantity(Math.max(1, s.getQuantity()))
-                                .build();
-                        newUnit.addOption(cuo);
-                    });
-
-                    // If no explicit selections provided but the template unit has default options, copy them
-                    if ((optionSelections == null || optionSelections.isEmpty()) && cu instanceof lmc.configurableUnit.model.ConfiguredUnit) {
-                        var templateOptions = ((lmc.configurableUnit.model.ConfiguredUnit) cu).getOptions();
-                        if (templateOptions != null) {
-                            templateOptions.stream()
-                                    .filter(Objects::nonNull)
-                                    .map(ConfiguredUnitOption::getOption)
-                                    .filter(Objects::nonNull)
-                                    .forEach(opt -> {
-                                        ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
-                                                .option(opt)
-                                                .quantity(1)
-                                                .build();
-                                        newUnit.addOption(cuo);
-                                    });
-                        }
-                    }
-
+                    ConfigurationUnit newUnit = createConfigurationUnit(cu, quantity, optionSelections);
                     configuration.addIncludedUnit(newUnit);
                 }
             }
         } else {
             ConfigurableUnit cu = configurableUnitService.findUnitById(configurableUnitId);
-            ConfigurationUnit newUnit = ConfigurationUnit.builder()
-                    .configurableUnit(cu)
-                    .quantity(quantity)
-                    .build();
-
-            if (optionSelections != null) {
-                optionSelections.forEach(s -> {
-                    var opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
-                            .findFirst()
-                            .orElseThrow(() -> new IllegalArgumentException("Option not found: " + s.getOptionId()));
-                    ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
-                            .option(opt)
-                            .quantity(Math.max(1, s.getQuantity()))
-                            .build();
-                    newUnit.addOption(cuo);
-                });
-            } else {
-                // copy template options from ConfiguredUnit when no explicit selections provided
-                if (cu instanceof ConfiguredUnit) {
-                    List<ConfiguredUnitOption> templateOptions = ((ConfiguredUnit) cu).getOptions();
-                    if (templateOptions != null) {
-                        templateOptions.stream()
-                                .filter(Objects::nonNull)
-                                .map(ConfiguredUnitOption::getOption)
-                                .filter(Objects::nonNull)
-                                .map(opt -> ConfigurationUnitOption.builder()
-                                            .option(opt)
-                                            .quantity(1)
-                                            .build())
-                                        .forEach(newUnit::addOption);
-                                }
-                    }
-
-                }
-
-           configuration.addIncludedUnit(newUnit);
+            ConfigurationUnit newUnit = createConfigurationUnit(cu, quantity, optionSelections);
+            configuration.addIncludedUnit(newUnit);
         }
 
         BigDecimal totalPrice = calculationService.calculateConfigurationTotalPrice(configuration);
@@ -262,44 +195,24 @@ public class ConfigurationService {
         Optional<ConfigurationUnit> match = Optional.empty();
 
         if (optionSelections != null && !optionSelections.isEmpty()) {
-            Map<UUID,Integer> req = optionSelections.stream()
-                    .filter(s -> s != null && s.getOptionId() != null)
-                    .collect(Collectors.toMap(OptionSelectionDTO::getOptionId, s -> Math.max(1, s.getQuantity()), Integer::sum));
+            Map<UUID,Integer> req = buildMapFromSelections(optionSelections);
 
             match = configuration.getIncludedUnits().stream()
                     .filter(u -> u.getConfigurableUnit() != null && configurableUnitId.equals(u.getConfigurableUnit().getId()))
-                    .filter(u -> {
-                        Map<UUID,Integer> existingMap = (u.getOptions() == null ? List.<ConfigurationUnitOption>of() : u.getOptions())
-                                .stream()
-                                .filter(o -> o.getOption() != null && o.getOption().getId() != null)
-                                .collect(Collectors.toMap(o -> o.getOption().getId(), ConfigurationUnitOption::getQuantity, Integer::sum));
-                        return existingMap.equals(req);
-                    })
+                    .filter(u -> buildMapFromConfigUnitOptions(u.getOptions()).equals(req))
                     .findFirst();
         } else {
             // No selections provided: prefer a unit that matches the ConfiguredUnit template options (quantity = 1)
             try {
                 ConfigurableUnit cu = configurableUnitService.findUnitById(configurableUnitId);
-                if (cu instanceof lmc.configurableUnit.model.ConfiguredUnit) {
-                    var templateOptions = ((lmc.configurableUnit.model.ConfiguredUnit) cu).getOptions();
-                    Map<UUID, Integer> templateMap = (templateOptions == null ? Map.of() :
-                            templateOptions.stream()
-                                    .filter(Objects::nonNull)
-                                    .map(ConfiguredUnitOption::getOption)
-                                    .filter(Objects::nonNull)
-                                    .collect(Collectors.toMap(o -> o.getId(), o -> 1, Integer::sum))
-                    );
+                if (cu instanceof ConfiguredUnit) {
+                    var templateOptions = ((ConfiguredUnit) cu).getOptions();
+                    Map<UUID, Integer> templateMap = buildMapFromConfiguredUnitOptions(templateOptions);
 
                     if (!templateMap.isEmpty()) {
                         match = configuration.getIncludedUnits().stream()
                                 .filter(u -> u.getConfigurableUnit() != null && configurableUnitId.equals(u.getConfigurableUnit().getId()))
-                                .filter(u -> {
-                                    Map<UUID,Integer> existingMap = (u.getOptions() == null ? List.<ConfigurationUnitOption>of() : u.getOptions())
-                                            .stream()
-                                            .filter(o -> o.getOption() != null && o.getOption().getId() != null)
-                                            .collect(Collectors.toMap(o -> o.getOption().getId(), ConfigurationUnitOption::getQuantity, Integer::sum));
-                                    return existingMap.equals(templateMap);
-                                })
+                                .filter(u -> buildMapFromConfigUnitOptions(u.getOptions()).equals(templateMap))
                                 .findFirst();
                     }
                 }
@@ -363,6 +276,88 @@ public class ConfigurationService {
                 .build();
 
         configurationRepository.save(configuration);
+    }
+
+
+    private ConfigurationUnit createConfigurationUnit(ConfigurableUnit cu, int quantity, List<OptionSelectionDTO> optionSelections) {
+        ConfigurationUnit newUnit = ConfigurationUnit.builder()
+                .configurableUnit(cu)
+                .quantity(quantity)
+                .build();
+
+        if (optionSelections != null && !optionSelections.isEmpty()) {
+            addOptionsFromSelections(newUnit, optionSelections);
+        } else {
+            addTemplateOptionsIfNeeded(newUnit, cu);
+        }
+
+        return newUnit;
+    }
+
+    private void addOptionsFromSelections(ConfigurationUnit unit, List<OptionSelectionDTO> selections) {
+        selections.stream()
+                .filter(s -> s != null && s.getOptionId() != null)
+                .forEach(s -> {
+                    Option opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Option not found: " + s.getOptionId()));
+                    ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
+                            .option(opt)
+                            .quantity(Math.max(1, s.getQuantity()))
+                            .build();
+                    unit.addOption(cuo);
+                });
+    }
+
+    private void addTemplateOptionsIfNeeded(ConfigurationUnit unit, ConfigurableUnit cu) {
+        if (!(cu instanceof ConfiguredUnit)) return;
+        List<ConfiguredUnitOption> templateOptions = ((ConfiguredUnit) cu).getOptions();
+        if (templateOptions == null || templateOptions.isEmpty()) return;
+
+        templateOptions.stream()
+                .filter(Objects::nonNull)
+                .map(ConfiguredUnitOption::getOption)
+                .filter(Objects::nonNull)
+                .map(opt -> ConfigurationUnitOption.builder()
+                        .option(opt)
+                        .quantity(1)
+                        .build())
+                .forEach(unit::addOption);
+    }
+
+    private Map<UUID, Integer> buildMapFromSelections(List<OptionSelectionDTO> selections) {
+        if (selections == null || selections.isEmpty()) return Map.of();
+        return selections.stream()
+                .filter(s -> s != null && s.getOptionId() != null)
+                .collect(Collectors.toMap(
+                        OptionSelectionDTO::getOptionId,
+                        s -> Math.max(1, s.getQuantity()),
+                        Integer::sum
+                ));
+    }
+
+    private Map<UUID, Integer> buildMapFromConfigUnitOptions(List<ConfigurationUnitOption> options) {
+        if (options == null || options.isEmpty()) return Map.of();
+        return options.stream()
+                .filter(o -> o != null && o.getOption() != null && o.getOption().getId() != null)
+                .collect(Collectors.toMap(
+                        o -> o.getOption().getId(),
+                        ConfigurationUnitOption::getQuantity,
+                        Integer::sum
+                ));
+    }
+
+    private Map<UUID, Integer> buildMapFromConfiguredUnitOptions(List<ConfiguredUnitOption> templateOptions) {
+        if (templateOptions == null || templateOptions.isEmpty()) return Map.of();
+        return templateOptions.stream()
+                .filter(Objects::nonNull)
+                .map(ConfiguredUnitOption::getOption)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        Option::getId,
+                        o -> 1,
+                        Integer::sum
+                ));
     }
 
 }

@@ -37,10 +37,16 @@
         </div>
 
         <div class="configurations">
+            <div th:if="${message != null}" class="alert alert-success" th:text="${message}"></div>
 
             <div class="menu">
                 <ul>
                     <li><a th:href="@{/configurations/create/new}">Добави Конфигурация</a></li>
+                    <li>
+                        <form th:action="@{/configurations/update/all-prices}" th:method="POST" class="logout-form" style="display: inline">
+                            <button type="submit" class="logout-btn">Обнови всички цени</button>
+                        </form>
+                    </li>
                 </ul>
 
             </div>

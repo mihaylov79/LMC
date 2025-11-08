@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface SimpleUnitRepository extends JpaRepository<SimpleUnit, UUID> {
 
     Optional<SimpleUnit> findByCodeAndActiveTrue(String code);
+
+    Optional<SimpleUnit> findByCode(String code);
 }
