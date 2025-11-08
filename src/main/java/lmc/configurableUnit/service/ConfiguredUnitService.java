@@ -85,41 +85,81 @@ public class ConfiguredUnitService {
         return repository.save(newUnit);
     }
 
-    private String generateCode(Unit unit, List<ConfiguredUnitOption> configuredOptions) {
-        if (unit == null) throw new IllegalArgumentException("unit must not be null");
-        if (configuredOptions == null || configuredOptions.isEmpty()) return unit.getCode();
+//    private String generateCode(Unit unit, List<ConfiguredUnitOption> configuredOptions) {
+//        if (unit == null) throw new IllegalArgumentException("unit must not be null");
+//        if (configuredOptions == null || configuredOptions.isEmpty()) return unit.getCode();
+//
+//        String optionPart = configuredOptions.stream()
+//                .map(co -> co.getOption() != null && co.getOption().getCode() != null
+//                        ? co.getOption().getCode().trim().toUpperCase()
+//                        : co.getOption() != null ? co.getOption().getId().toString() : "")
+//                .filter(s -> !s.isEmpty())
+//                .sorted()
+//                .collect(Collectors.joining("_"));
+//
+//        return optionPart.isEmpty() ? unit.getCode() : unit.getCode() + "_" + optionPart;
+//    }
 
-        String optionPart = configuredOptions.stream()
-                .map(co -> co.getOption() != null && co.getOption().getCode() != null
-                        ? co.getOption().getCode().trim().toUpperCase()
-                        : co.getOption() != null ? co.getOption().getId().toString() : "")
-                .filter(s -> !s.isEmpty())
+    private String generateCode(Unit unit, List<ConfiguredUnitOption> configuredOptions) {
+        String baseCode = unit.getCode();
+        if (configuredOptions == null || configuredOptions.isEmpty()) {
+            return baseCode;
+        }
+
+        String optionsCodes = configuredOptions.stream()
+                .filter(Objects::nonNull)
+                .map(ConfiguredUnitOption::getOption)
+                .filter(Objects::nonNull)
+                .map(Option::getCode)
                 .sorted()
                 .collect(Collectors.joining("_"));
 
-        return optionPart.isEmpty() ? unit.getCode() : unit.getCode() + "_" + optionPart;
+        return baseCode + "_" + optionsCodes;
     }
 
+
+
+//    private boolean optionsMatch(List<ConfiguredUnitOption> existingOptions, Map<UUID, Integer> requestedQtyById) {
+//        // normalize requested map to avoid null checks
+//        Map<UUID, Integer> req = requestedQtyById == null ? Map.of() : requestedQtyById;
+//
+//        // if there are no existing template options, match only when request is empty
+//        if (existingOptions == null || existingOptions.isEmpty()) {
+//            return req.isEmpty();
+//        }
+//
+//        Map<UUID, Integer> existingMap = existingOptions.stream()
+//                .filter(Objects::nonNull)
+//                .filter(co -> co.getOption() != null && co.getOption().getId() != null)
+//                .collect(Collectors.toMap(
+//                        co -> co.getOption().getId(),
+//                        co -> 1,            // template option counts as 1
+//                        Integer::sum        // aggregate duplicates defensively
+//                ));
+//
+//        return existingMap.equals(req);
+//    }
+
     private boolean optionsMatch(List<ConfiguredUnitOption> existingOptions, Map<UUID, Integer> requestedQtyById) {
-        // normalize requested map to avoid null checks
         Map<UUID, Integer> req = requestedQtyById == null ? Map.of() : requestedQtyById;
 
-        // if there are no existing template options, match only when request is empty
         if (existingOptions == null || existingOptions.isEmpty()) {
             return req.isEmpty();
         }
 
-        Map<UUID, Integer> existingMap = existingOptions.stream()
+        // Extract only option IDs from existing template (ignore quantity)
+        Set<UUID> existingIds = existingOptions.stream()
                 .filter(Objects::nonNull)
                 .filter(co -> co.getOption() != null && co.getOption().getId() != null)
-                .collect(Collectors.toMap(
-                        co -> co.getOption().getId(),
-                        co -> 1,            // template option counts as 1
-                        Integer::sum        // aggregate duplicates defensively
-                ));
+                .map(co -> co.getOption().getId())
+                .collect(Collectors.toSet());
 
-        return existingMap.equals(req);
+        // Extract only option IDs from request (ignore quantity)
+        Set<UUID> requestedIds = req.keySet();
+
+        return existingIds.equals(requestedIds);
     }
+
 
     @Transactional(readOnly = true)
     public List<ConfiguredUnit> getAllWithOptions() {
