@@ -16,22 +16,7 @@
 
 <div class="front-container">
 
-    <details class="user-container">
-        <summary class="user-summary">
-            <span th:text="'Активен потребител: ' + ${user.email}">email@example.com</span>
-        </summary>
-        <div class="user-details">
-            <p><strong th:text="'Име: ' + ${user.firstName} + ' ' + ${user.lastName}">Име</strong></p>
-            <p th:text="'Роля: ' + ${user.userRole.description}">Роля</p>
-            <p th:text="'Статус: ' + ${user.status.description}">Статус</p>
-            <div class="menu">
-                <ul>
-                    <li><a class="menu-link" th:href="@{/users/{id}/edit(id=${user.id})}">Редактирай</a></li>
-                    <li><a class="menu-link" th:href="@{/users/change-password}">Смяна на паролата</a></li>
-                </ul>
-            </div>
-        </div>
-    </details>
+    <th:block th:insert="~{fragments/user-info :: userInfo}"></th:block>
 
     <div class="tabs">
         <div class="configurations">

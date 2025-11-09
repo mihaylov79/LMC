@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Активен потребител</title>
+</head>
+
+<body>
+
+<details th:fragment="userInfo" class="user-container">
+    <summary class="user-summary"> <span th:text="'Активен потребител: ' + ${user.email}">email@example.com</span></summary>
+    <div class="user-details">
+        <p><strong th:text="'Име: '+ ${user.firstName} + ' ' + ${user.lastName}">Име</strong></p>
+        <p th:text="'Роля: ' + ${user.userRole.description}">Роля</p>
+        <p th:text="'Статус: ' + ${user.status.description}">Статус</p>
+        <div class="menu">
+            <ul>
+                <li><a class="menu-link" th:href="@{/users/{id}/edit(id=${user.id})}">Редактирай</a></li>
+                <li><a class="menu-link" th:href="@{/users/change-password}">Смяна на паролата</a></li>
+            </ul>
+        </div>
+    </div>
+</details>
+
+</body>
+</html>
