@@ -1,10 +1,16 @@
 package lmc.company.model;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "companies")
 public class Company {
@@ -39,5 +45,8 @@ public class Company {
 
     @Column
     private String email;
+
+    @Column
+    private boolean active;
 
 }

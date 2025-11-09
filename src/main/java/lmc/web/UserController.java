@@ -68,18 +68,6 @@ public class UserController {
 
     }
 
-//    @GetMapping("/create/success")
-//    public ModelAndView showCreateUserSuccessPage(@AuthenticationPrincipal CustomUserDetails details,
-//                                                  @ModelAttribute("password") String password,
-//                                                  @ModelAttribute("email") String email){
-//        User user = userService.getUserById(details.getId());
-//
-//        ModelAndView modelAndView = new ModelAndView("create-success");
-//        modelAndView.addObject("user", user);
-//        modelAndView.addObject("password", password);
-//        modelAndView.addObject("email", email);
-//        return modelAndView;
-//    }
 
     @GetMapping("/change-password")
     public ModelAndView getPasswordChangePage(@AuthenticationPrincipal CustomUserDetails details){
@@ -130,6 +118,7 @@ public class UserController {
         return modelAndView;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/update-role/{userId}")
     public String userRoleUpdate (@PathVariable UUID userId, @RequestParam UserRole role){
 
