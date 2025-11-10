@@ -4,9 +4,16 @@ package lmc.web.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class CreateCompanyRequest {
 
@@ -15,6 +22,10 @@ public class CreateCompanyRequest {
 
     @NotBlank(message = "Това поле не може да бъде празно")
     private String companyEIK;
+
+
+    @Size(min=12, max = 12, message = "Това поле не може да бъде по-дълго от 12 символа")
+    private String VAT;
 
 
     private String country;

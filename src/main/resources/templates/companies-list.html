@@ -1,0 +1,138 @@
+<!-- html -->
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Потребители</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/units.css">
+    <link rel="stylesheet" href="/css/users-list.css">
+</head>
+<body>
+<div class="header-container">
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+</div>
+
+<div class="front-container">
+
+    <th:block th:insert="~{fragments/user-info :: userInfo}"></th:block>
+
+    <div class="tabs">
+        <div class="configurations">
+            <div class="menu">
+                <ul>
+                    <li><a th:href="@{/companies/create/new}">Създай нова фирма</a></li>
+                </ul>
+            </div>
+
+            <div class="configurations-table">
+                <div class="table-header">
+                    <div class="search-box">
+                        <input type="text" id="searchConfigurations" placeholder="Търси компания...">
+                    </div>
+                    <h3 class="table-title">Компании</h3>
+                </div>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Име</th>
+                        <th>ЕИК</th>
+                        <th>ДДС Регистрация</th>
+                        <th>МОЛ</th>
+                        <th>Телефон</th>
+                        <th>Мейл</th>
+                        <th>Статус</th>
+                        <th>Действие</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="company : ${companies}">
+                        <td th:text="${company.companyName}"></td>
+                        <td th:text="${company.companyEIK}"></td>
+                        <td th:text="${company.VAT} ?: 'няма'"></td>
+                        <td th:text="${company.manager}"></td>
+                        <td th:text="${company.phone} ?: '-'"></td>
+                        <td th:text="${company.email} ?: '-'"></td>
+                        <td th:text="${company.isActive()} ? 'активна' : 'деактивирана'"></td>
+
+                        <td>
+                            <form th:action="@{/companies/change-status/{companyId}(companyId=${company.id})}"
+                                  th:method="PUT"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Сигурни ли сте, че искате да промените статуса на компанията?');">
+                                <button type="submit" class="action-btn"
+                                        th:text="${company.isActive() ? 'Деактивирай' : 'Активирай'}">
+                                    Деактивирай
+                                </button>
+                            </form>
+
+                            <form th:action="@{/companies/edit/{id}(id=${company.id})}"
+                                  th:method="PUT"
+                                  style="display:inline;"
+                                  onsubmit="return confirm('Искате ли да редактирате данните за компанията ?');">
+                                <button type="submit" class="action-btn">Редактирай</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // enable/disable tick button only when role changed
+        document.querySelectorAll('.role-form').forEach(function (form) {
+            const select = form.querySelector('.role-select');
+            const tick = form.querySelector('.tick-btn');
+
+            const original = (select.dataset.originalRole || '').trim();
+            const current = () => (select.value || '').trim();
+
+            // initialize button state
+            tick.disabled = (current() === original);
+
+            select.addEventListener('change', function () {
+                tick.disabled = (current() === original);
+            });
+
+            // prevent submit when nothing changed (safety)
+            form.addEventListener('submit', function (e) {
+                if (current() === original) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // javascript
+        const searchInput = document.getElementById('searchConfigurations');
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const searchValue = (this.value || '').trim().toLowerCase();
+                const rows = document.querySelectorAll('.configurations-table tbody tr');
+
+                rows.forEach(row => {
+                    const name = (row.cells[0]?.textContent || '').toLowerCase();
+                    const eik = (row.cells[1]?.textContent || '').toLowerCase();
+                    const vat = (row.cells[2]?.textContent || '').toLowerCase();
+                    const manager = (row.cells[3]?.textContent || '').toLowerCase();
+                    const phone = (row.cells[4]?.textContent || '').toLowerCase();
+                    const email = (row.cells[5]?.textContent || '').toLowerCase();
+                    const status = (row.cells[6]?.textContent || '').toLowerCase();
+
+                    const haystack = `${name} ${eik} ${vat} ${manager} ${phone} ${email} ${status}`;
+
+                    row.style.display = searchValue === '' || haystack.includes(searchValue) ? '' : 'none';
+                });
+            });
+        }
+
+    });
+</script>
+</body>
+</html>

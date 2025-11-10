@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -24,6 +24,9 @@ public class Company {
 
     @Column(nullable = false, unique = true, name = "EIK")
     private String companyEIK;
+
+    @Column
+    private String VAT;
 
     @Column
     private String country;
