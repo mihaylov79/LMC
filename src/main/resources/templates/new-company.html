@@ -48,7 +48,7 @@
 
     <div class="field">
       <label for="field-companyEIK">ЕИК</label>
-      <input type="number" name="companyEIK" id="field-companyEIK" placeholder="ЕИК" th:field="*{companyEIK}">
+      <input type="text" name="companyEIK" id="field-companyEIK" placeholder="ЕИК" th:field="*{companyEIK}">
 <!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
       <span th:if="${#fields.hasErrors('companyEIK')}" th:errors="*{companyEIK}"></span>
     </div>
