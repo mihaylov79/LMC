@@ -3,6 +3,8 @@ package lmc.offer.model;
 import jakarta.persistence.*;
 import lmc.company.model.Company;
 import lmc.configuration.model.Configuration;
+import lmc.unit.model.CurrencyType;
+import lmc.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +24,9 @@ public class Offer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(unique = true)
+    private String offerNumber;
+
 
     @ManyToOne
     @JoinColumn(name = "company_id")
@@ -31,6 +36,9 @@ public class Offer {
     @ManyToOne
     @JoinColumn(name = "configuration_id")
     private Configuration configuration;
+
+    @Column
+    private CurrencyType currency;
 
     @Column
     private BigDecimal discount;
@@ -44,8 +52,12 @@ public class Offer {
     @Column
     private LocalDate expires;
 
+    @ManyToOne
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
+
     @Column
-    private boolean succeeded;
+    private boolean accepted;
 
 
 }
