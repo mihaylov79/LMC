@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+  <meta charset="UTF-8">
+  <title>Създаване на нова фирма</title>
+  <link rel="stylesheet" href="/css/menu.css">
+  <link rel="stylesheet" href="/css/login.css">
+  <link rel="stylesheet" href="/css/new-user.css">
+
+</head>
+<body>
+<div class="header-container">
+
+  <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
+</div>
+<div class="front-container">
+  <div class="user-container">
+    <p th:text="'Активен потребител: ' + ${user.email}"></p>
+  </div>
+</div>
+<!--<div class="tabs">-->
+<!--<div class="wrapper">-->
+<div class="form">
+  <form class="login" th:action="@{/companies/create/new}" th:method="POST" th:object="${createCompanyRequest}">
+    <!--        <div th:if="${successMessage}" class="alert-info">-->
+    <!--            <p th:text="${successMessage}"></p>-->
+    <!--        </div>-->
+    <!--        <span th:text="${emailAlreadyInUse}" class="errors"></span>-->
+    <h2>Нова компания</h2>
+    <span class="separator"></span>
+
+    <!--        <div class="field">-->
+    <!--            <label for="field-password">Парола</label>-->
+    <!--            <input type="password" name="password" id="field-password" placeholder="Password" th:field="*{password}">-->
+    <!--            <span class="helper info">паролата трябва да бъде между 6 и 20 символа</span>-->
+    <!--            <p></p>-->
+    <!--            <span th:if="${errorMessage}" th:text="${errorMessage}" class="credentials-error"></span>-->
+    <!--        </div>-->
+
+    <div class="field">
+      <label for="field-companyName">Име</label>
+      <input type="text" name="companyName" id="field-companyName" placeholder="Име" th:field="*{companyName}">
+<!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}"></span>
+
+    </div>
+
+    <div class="field">
+      <label for="field-companyEIK">ЕИК</label>
+      <input type="number" name="companyEIK" id="field-companyEIK" placeholder="ЕИК" th:field="*{companyEIK}">
+<!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('companyEIK')}" th:errors="*{companyEIK}"></span>
+    </div>
+
+    <div class="field">
+      <label for="field-VAT">ДДС Регистрация</label>
+      <input type="text" name="VAT" id="field-VAT" placeholder="ДДС Регистация" th:field="*{VAT}">
+<!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('VAT')}" th:errors="*{VAT}"></span>
+    </div>
+
+    <div class="field">
+      <label for="field-country">Държава</label>
+      <input type="text" name="country" id="field-country" placeholder="Държава" th:field="*{country}">
+      <!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('country')}" th:errors="*{country}"></span>
+    </div>
+
+    <div class="field">
+      <label for="field-town">Град</label>
+      <input type="text" name="country" id="field-town" placeholder="Град" th:field="*{town}">
+      <!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('town')}" th:errors="*{town}"></span>
+    </div>
+
+    <div class="field">
+      <label for="field-address">Адрес</label>
+      <input type="text" name="country" id="field-address" placeholder="Адрес" th:field="*{address}">
+      <!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></span>
+    </div>
+
+    <div class="field">
+      <label for="field-manager">МОЛ</label>
+      <input type="text" name="manager" id="field-manager" placeholder="Адрес" th:field="*{manager}">
+      <!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('manager')}" th:errors="*{manager}"></span>
+    </div>
+
+    <div class="field">
+      <label for="field-contactPerson">Лице за контакт</label>
+      <input type="text" name="contactPerson" id="field-contactPerson" placeholder="Лице за контакт" th:field="*{contactPerson}">
+      <!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('contactPerson')}" th:errors="*{contactPerson}"></span>
+    </div>
+
+    <div class="field">
+      <label for="field-email">Електронна поща</label>
+      <input type="email" name="email" id="field-email" placeholder="Email" th:field="*{email}">
+      <span class="helper info">например: john.doe@gmail.com</span>
+    </div>
+
+    <div class="field">
+      <label for="field-phone">Телефон</label>
+      <input type="text" name="phone" id="field-phone" placeholder="Телефон" th:field="*{phone}">
+<!--      <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>-->
+      <span th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+    </div>
+
+
+<!--    <div class="field">-->
+<!--      <label for="field-role">Роля</label>-->
+<!--      <select id="field-role" th:field="*{role}">-->
+<!--        <option th:each="role : ${T(lmc.user.model.UserRole).values()}" th:value="${role}"-->
+<!--                th:text="${role.description}" value="USER"></option>-->
+<!--      </select>-->
+<!--    </div>-->
+
+
+    <div id="loading-message" style="display:none; color: red; text-align: center; margin-bottom: 0.5em;">
+      Моля, изчакайте...... <br>Създаваме на нова компания
+    </div>
+    <input type="submit" class="button login" value="Запиши">
+  </form>
+</div>
+<!--</div>-->
+<!--</div>-->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form.login');
+    const loadingMsg = document.getElementById('loading-message');
+    const submitBtn = form.querySelector('input[type="submit"]');
+    if (form && loadingMsg && submitBtn) {
+      form.addEventListener('submit', function() {
+        loadingMsg.style.display = 'block';
+        submitBtn.style.display = 'none';
+      });
+    }
+  });
+</script>
+</body>
+</html>

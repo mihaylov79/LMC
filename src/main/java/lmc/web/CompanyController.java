@@ -44,7 +44,7 @@ public class CompanyController {
 
     }
 
-    @PutMapping("/change-starus/{companyId}")
+    @PutMapping("/change-status/{companyId}")
     public String changeStatus(@PathVariable UUID companyId){
         Company company = companyService.getCompanyById(companyId);
         companyService.changeCompanyActiveStatus(company);
@@ -53,24 +53,33 @@ public class CompanyController {
     }
 
     @GetMapping("/create/new")
-    public ModelAndView showCreateNewCompanyPage(){
-        ModelAndView modelAndView = new ModelAndView("create-company");
+    public ModelAndView showCreateNewCompanyPage(@AuthenticationPrincipal CustomUserDetails details){
+        User user = userService.getUserById(details.getId());
+
+        ModelAndView modelAndView = new ModelAndView("new-company");
+        modelAndView.addObject("user", user);
         modelAndView.addObject("createCompanyRequest", new CreateCompanyRequest());
 
         return modelAndView;
     }
 
     @PostMapping("/create/new")
-    public ModelAndView createCompany(@Valid CreateCompanyRequest request, BindingResult result){
+    public ModelAndView createCompany(@AuthenticationPrincipal CustomUserDetails details,
+                                      @Valid CreateCompanyRequest request, BindingResult result){
+
+        User user = userService.getUserById(details.getId());
 
         if (result.hasErrors()){
-            return new ModelAndView("create-company");
+            ModelAndView modelAndView = new ModelAndView("new-company");
+            modelAndView.addObject("user", user);
+            modelAndView.addObject("createCompanyRequest", request);
+            return modelAndView;
 
         }
 
         companyService.createNewCompany(request);
 
-        return new ModelAndView("rdirect:/company");
+        return new ModelAndView("redirect:/companies");
     }
 
 
