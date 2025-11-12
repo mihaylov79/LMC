@@ -26,16 +26,18 @@ public class CreateCompanyRequest {
     @Size(min= 11, max = 15, message = "Това поле трявбва да съдържа между 11 и 15 символа")
     private String VAT;
 
-    @Length(max = 15 , message = "Това поле  не може да надвишава 15 символа")
+    @NotBlank(message = "Това поле не може да бъде празно")
+    @Length(max = 20 , message = "Това поле  не може да надвишава 20 символа")
     private String country;
 
-    @Length(max = 15 , message = "Това поле  не може да надвишава 15 символа")
+    @NotBlank(message = "Това поле не може да бъде празни")
+    @Length(max = 20 , message = "Това поле  не може да надвишава 20 символа")
     private String town;
 
-    @Length(max = 50 , message = "Това поле  не може да надвишава 50 символа")
+    @Length(max = 60 , message = "Това поле  не може да надвишава 60 символа")
     private String address;
 
-    @Length(max = 30, message = "Това поле не може да надвишава 30 символа")
+    @Length(max = 50, message = "Това поле не може да надвишава 50 символа")
     @Pattern(regexp = "^[А-Яа-яA-Za-z\\s'-]+$", message = "Името може да съдържа само букви, интервали, тире и апостроф")
     private String manager;
 

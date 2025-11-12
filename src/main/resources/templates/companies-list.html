@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/units.css">
     <link rel="stylesheet" href="/css/users-list.css">
+    <link rel="stylesheet" href="/css/companies-list.css">
 </head>
 <body>
 <div class="header-container">
@@ -29,9 +30,28 @@
             <div class="configurations-table">
                 <div class="table-header">
                     <div class="search-box">
+                        <label for="searchConfigurations" class="sr-only">Търси компания</label>
                         <input type="text" id="searchConfigurations" placeholder="Търси компания...">
                     </div>
                     <h3 class="table-title">Компании</h3>
+                </div>
+
+                <!-- Pagination controls -->
+                <div class="table-controls" style="display:flex; align-items:center; gap:10px; margin:0.5em 0;">
+                    <label>Редове на страница:
+                        <select id="pageSizeSelect">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </label>
+                    <div id="pageInfo" style="margin-left:1em"></div>
+                    <div style="margin-left:auto">
+                        <button id="prevPage">Предишна</button>
+                        <span id="pageNumbers"></span>
+                        <button id="nextPage">Следваща</button>
+                    </div>
                 </div>
 
                 <table>
@@ -41,41 +61,58 @@
                         <th>ЕИК</th>
                         <th>ДДС Регистрация</th>
                         <th>МОЛ</th>
-                        <th>Телефон</th>
-                        <th>Мейл</th>
                         <th>Статус</th>
                         <th>Действие</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    <tr th:each="company : ${companies}">
+                    <tbody th:each="company, iterStat : ${companies}">
+                    <!-- render a main row + a hidden detail row per company -->
+                    <tr class="company-row">
                         <td th:text="${company.companyName}"></td>
                         <td th:text="${company.companyEIK}"></td>
                         <td th:text="${company.VAT} ?: 'няма'"></td>
                         <td th:text="${company.manager}"></td>
-                        <td th:text="${company.phone} ?: '-'"></td>
-                        <td th:text="${company.email} ?: '-'"></td>
-                        <td th:text="${company.isActive()} ? 'активна' : 'деактивирана'"></td>
+                        <td>
+                            <span th:classappend="${company.active} ? 'status-active' : 'status-inactive'"
+                                  th:text="${company.active} ? 'активна' : 'деактивирана'">-</span>
+                        </td>
 
                         <td>
+                            <!-- Action buttons -->
                             <form th:action="@{/companies/change-status/{companyId}(companyId=${company.id})}"
                                   th:method="PUT"
-                                  style="display:inline;"
+                                  style="display:inline; margin-left:0.4em;"
                                   onsubmit="return confirm('Сигурни ли сте, че искате да промените статуса на компанията?');">
                                 <button type="submit" class="action-btn"
-                                        th:text="${company.isActive() ? 'Деактивирай' : 'Активирай'}">
-                                    Деактивирай
-                                </button>
+                                        th:text="${company.isActive() ? 'Деактивирай' : 'Активирай'}">Деактивирай</button>
                             </form>
 
                             <form th:action="@{/companies/edit/{id}(id=${company.id})}"
-                                  th:method="PUT"
-                                  style="display:inline;"
+                                  th:method="GET"
+                                  style="display:inline; margin-left:0.4em;"
                                   onsubmit="return confirm('Искате ли да редактирате данните за компанията ?');">
                                 <button type="submit" class="action-btn">Редактирай</button>
                             </form>
+
+                            <!-- Info icon to toggle details (textual 'i' icon) -->
+                            <button type="button" class="info-btn" th:attr="data-index=${iterStat.index}" aria-label="Покажи подробности" title="Подробности">
+                                <span class="info-icon" aria-hidden="true">i</span>
+                            </button>
                         </td>
                     </tr>
+
+                    <tr class="company-detail" style="display: none;">
+                        <td colspan="6">
+                            <div style="display:flex; gap:1.2em; flex-wrap:wrap; padding:0.5em 0;">
+                                <div><strong>Град:</strong> <span th:text="${company.town} ?: '-'">-</span></div>
+                                <div><strong>Адрес:</strong> <span th:text="${company.address} ?: ' - '">-</span></div>
+                                <div><strong>Лице за контакт:</strong> <span th:text="${company.contactPerson == null or company.contactPerson.trim() == '' ? ' няма ' : company.contactPerson}">-</span></div>
+                                <div><strong>Телефон:</strong> <span th:text="${company.phone == null or company.phone.trim() == '' ? ' няма ' : company.phone} ?: '-'">-</span></div>
+                                <div><strong>Мейл:</strong> <span th:text="${company.email == null or  company.email.trim() == '' ? ' няма ' : company.email} ?: '-'">-</span></div>
+                            </div>
+                        </td>
+                    </tr>
+
                     </tbody>
                 </table>
 
@@ -86,52 +123,114 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // enable/disable tick button only when role changed
-        document.querySelectorAll('.role-form').forEach(function (form) {
-            const select = form.querySelector('.role-select');
-            const tick = form.querySelector('.tick-btn');
-
-            const original = (select.dataset.originalRole || '').trim();
-            const current = () => (select.value || '').trim();
-
-            // initialize button state
-            tick.disabled = (current() === original);
-
-            select.addEventListener('change', function () {
-                tick.disabled = (current() === original);
-            });
-
-            // prevent submit when nothing changed (safety)
-            form.addEventListener('submit', function (e) {
-                if (current() === original) {
-                    e.preventDefault();
-                }
-            });
-        });
-
-        // javascript
+        // Use only main rows (company-row) for pagination and filtering
+        const mainRows = Array.from(document.querySelectorAll('.configurations-table tbody tr.company-row'));
         const searchInput = document.getElementById('searchConfigurations');
-        if (searchInput) {
-            searchInput.addEventListener('input', function () {
-                const searchValue = (this.value || '').trim().toLowerCase();
-                const rows = document.querySelectorAll('.configurations-table tbody tr');
+        const pageSizeSelect = document.getElementById('pageSizeSelect');
+        const prevBtn = document.getElementById('prevPage');
+        const nextBtn = document.getElementById('nextPage');
+        const pageNumbers = document.getElementById('pageNumbers');
+        const pageInfo = document.getElementById('pageInfo');
 
-                rows.forEach(row => {
-                    const name = (row.cells[0]?.textContent || '').toLowerCase();
-                    const eik = (row.cells[1]?.textContent || '').toLowerCase();
-                    const vat = (row.cells[2]?.textContent || '').toLowerCase();
-                    const manager = (row.cells[3]?.textContent || '').toLowerCase();
-                    const phone = (row.cells[4]?.textContent || '').toLowerCase();
-                    const email = (row.cells[5]?.textContent || '').toLowerCase();
-                    const status = (row.cells[6]?.textContent || '').toLowerCase();
+        let currentPage = 1;
+        function getPageSize(){ return parseInt(pageSizeSelect.value, 10) || 10; }
 
-                    const haystack = `${name} ${eik} ${vat} ${manager} ${phone} ${email} ${status}`;
+        function rowHaystack(mainRow){
+            // include main row cells and the corresponding detail row text (if present)
+            const cells = mainRow.cells;
+            let hay = Array.from(cells).map(c => (c.textContent || '').toLowerCase()).join(' ');
+            const detailRow = mainRow.nextElementSibling;
+            if (detailRow && detailRow.classList.contains('company-detail')){
+                hay += ' ' + (detailRow.innerText || '').toLowerCase();
+            }
+            return hay;
+        }
 
-                    row.style.display = searchValue === '' || haystack.includes(searchValue) ? '' : 'none';
-                });
+        function filterRows() {
+            const searchValue = (searchInput?.value || '').trim().toLowerCase();
+            return mainRows.filter(row => {
+                const haystack = rowHaystack(row);
+                return searchValue === '' || haystack.includes(searchValue);
             });
         }
 
+        function hideAll(){
+            // hide all main and detail rows
+            mainRows.forEach(r => {
+                r.style.display = 'none';
+                // ensure expanded class cleared when rows are hidden
+                r.classList.remove('expanded');
+                const d = r.nextElementSibling;
+                if (d && d.classList.contains('company-detail')) d.style.display = 'none';
+            });
+        }
+
+        function render() {
+            const filtered = filterRows();
+            const pageSize = getPageSize();
+            const total = filtered.length;
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            hideAll();
+
+            const start = (currentPage - 1) * pageSize;
+            const end = start + pageSize;
+            filtered.slice(start, end).forEach(r => r.style.display = '');
+
+            // ensure detail rows of visible main rows remain hidden by default
+            filtered.slice(start, end).forEach(r => {
+                const d = r.nextElementSibling;
+                if (d && d.classList.contains('company-detail')) d.style.display = 'none';
+            });
+
+            // update controls
+            pageInfo.textContent = `Показани ${Math.min(end, total)} от ${total}`;
+            pageNumbers.innerHTML = '';
+            const range = 3;
+            const first = Math.max(1, currentPage - range);
+            const last = Math.min(totalPages, currentPage + range);
+            for (let p = first; p <= last; p++){
+                const btn = document.createElement('button');
+                btn.textContent = p;
+                btn.disabled = (p === currentPage);
+                btn.addEventListener('click', () => { currentPage = p; render(); });
+                pageNumbers.appendChild(btn);
+            }
+
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+        }
+
+        // Toggle detail rows on info icon click
+        document.querySelectorAll('.info-btn').forEach(btn => {
+            btn.addEventListener('click', function(){
+                const mainRow = this.closest('tr.company-row');
+                if (!mainRow) return;
+                const detail = mainRow.nextElementSibling;
+                if (detail && detail.classList.contains('company-detail')){
+                    const isHidden = (detail.style.display === 'none' || detail.style.display === '');
+                    detail.style.display = isHidden ? 'table-row' : 'none';
+                    // toggle expanded class to control border between main and detail
+                    if (isHidden) {
+                        mainRow.classList.add('expanded');
+                    } else {
+                        mainRow.classList.remove('expanded');
+                    }
+                 }
+             });
+        });
+
+        // events
+        if (searchInput) {
+            searchInput.addEventListener('input', function () { currentPage = 1; render(); });
+        }
+        pageSizeSelect.addEventListener('change', function () { currentPage = 1; render(); });
+        prevBtn.addEventListener('click', function(){ if (currentPage>1) { currentPage--; render(); } });
+        nextBtn.addEventListener('click', function(){ currentPage++; render(); });
+
+        // initial render
+        render();
     });
 </script>
 </body>

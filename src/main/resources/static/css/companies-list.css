@@ -1,0 +1,144 @@
+/* Table row separators and expanded/detail styling */
+.configurations-table tbody tr.company-row {
+    border-bottom: 1px solid #e2e8f0; /* subtle separator between companies */
+}
+
+/* When a main row is expanded, remove its bottom border so the detail appears connected */
+.configurations-table tbody tr.company-row.expanded {
+    border-bottom: none;
+}
+
+/* Ensure the detail row doesn't add an extra top border */
+.configurations-table tbody tr.company-row + tr.company-detail {
+    border-top: none;
+}
+
+/* Styling for the detail row: smaller font, muted color and subtle background/shadow */
+.configurations-table tbody tr.company-detail td {
+    font-size: 0.95rem;
+    color: #4a5568; /* muted gray-blue */
+    background: rgba(55, 113, 200, 0.03);
+    box-shadow: inset 0 1px 0 rgba(0,0,0,0.02);
+    padding: 0.75em 1em;
+    text-align: left;
+}
+
+/* Info icon button */
+.info-btn {
+    background: transparent;
+    border: 1px solid #3771c8ff; /* match action-btn border */
+    color: #3771c8ff;
+    cursor: pointer;
+    padding: 6px 10px; /* same feel as other buttons */
+    border-radius: 4px; /* rounded corners */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    line-height: 1;
+    margin: 0.5em; /* match action-btn spacing */
+    box-sizing: border-box; /* consistent sizing */
+    vertical-align: middle; /* align with neighbouring inline buttons */
+}
+
+.info-btn .info-icon {
+    display: inline-block;
+    font-weight: 700; /* a bit bolder */
+    font-size: 0.95rem;
+    color: inherit;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+}
+
+/* inline svg inside info-icon */
+.info-icon .info-svg {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* make svg shapes inherit text color */
+.info-icon .info-svg circle,
+.info-icon .info-svg rect,
+.info-icon .info-svg path {
+    stroke: currentColor;
+    fill: currentColor;
+}
+
+.info-btn:hover {
+    font-weight: 600;
+    box-shadow: 0 0.2em 0.5em #3771c8ff;
+    background: rgba(55,113,200,0.04);
+}
+
+/* slightly bolder color on hover (inherits .info-btn:hover) */
+.info-btn:hover .info-svg {
+    opacity: 0.98;
+}
+
+/* Status labels */
+.status-active {
+    color: #198754; /* green */
+    font-weight: 600;
+}
+
+.status-inactive {
+    color: #6b7280; /* gray */
+    font-weight: 600;
+}
+
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Info icon button */
+.info-btn {
+    background: transparent;
+    border: 1px solid #3771c8ff; /* match action-btn border */
+    color: #3771c8ff;
+    cursor: pointer;
+    padding: 6px 10px; /* same feel as other buttons */
+    border-radius: 4px; /* rounded corners */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    line-height: 1;
+    margin: 0.5em; /* match action-btn spacing */
+    box-sizing: border-box; /* consistent sizing */
+    vertical-align: middle; /* align with neighbouring inline buttons */
+}
+
+/* inner 'i' styling - bold and centered, no extra circle */
+.info-btn .info-icon {
+    display: inline-block;
+    font-weight: 700; /* a bit bolder */
+    font-size: 0.95rem;
+    color: inherit;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+}
+
+/* hover state matches .action-btn hover */
+.info-btn:hover {
+    font-weight: 600;
+    box-shadow: 0 0.2em 0.5em #3771c8ff;
+    background: rgba(55,113,200,0.04);
+}
+
+/* focus accessibility */
+.info-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(55,113,200,0.08);
+}
