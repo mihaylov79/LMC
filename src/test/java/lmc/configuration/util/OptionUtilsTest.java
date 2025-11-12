@@ -5,6 +5,7 @@ import lmc.web.dto.OptionSelectionDTO;
 import lmc.option.model.Option;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,12 +19,18 @@ public class OptionUtilsTest {
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
 
-        OptionSelectionDTO s1 = new OptionSelectionDTO(id1, 2);
-        OptionSelectionDTO s2 = new OptionSelectionDTO(id1, 3);
-        OptionSelectionDTO s3 = new OptionSelectionDTO(id2, 1);
+        OptionSelectionDTO s1 = new OptionSelectionDTO();
+        s1.setOptionId(id1);
+        s1.setQuantity(2);
+        OptionSelectionDTO s2 = new OptionSelectionDTO();
+        s2.setOptionId(id1);
+        s2.setQuantity(3);
+        OptionSelectionDTO s3 = new OptionSelectionDTO();
+        s3.setOptionId(id2);
+        s3.setQuantity(1);
         OptionSelectionDTO sNull = null;
 
-        Map<UUID, Integer> map = OptionUtils.toMapFromSelections(List.of(s1, s2, s3, sNull));
+        Map<java.util.UUID, Integer> map = OptionUtils.toMapFromSelections(Arrays.asList(s1, s2, s3, sNull));
         assertEquals(2, map.size());
         assertEquals(5, map.get(id1));
         assertEquals(1, map.get(id2));
@@ -48,4 +55,3 @@ public class OptionUtilsTest {
         assertEquals(sig, sig2);
     }
 }
-
