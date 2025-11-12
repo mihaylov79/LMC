@@ -8,6 +8,7 @@ import lmc.user.model.User;
 import lmc.user.service.UserService;
 import lmc.web.dto.CreateCompanyRequest;
 import lmc.web.dto.mapper.CustomMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -46,7 +47,7 @@ public class CompanyController {
         return modelAndView;
 
     }
-
+    @PreAuthorize( "hasRole('ADMIN')")
     @PutMapping("/change-status/{companyId}")
     public String changeStatus(@PathVariable UUID companyId){
         Company company = companyService.getCompanyById(companyId);
@@ -85,6 +86,7 @@ public class CompanyController {
         return new ModelAndView("redirect:/companies");
     }
 
+    @PreAuthorize( "hasRole('ADMIN')")
     @GetMapping("/edit/{companyId}")
     public ModelAndView showEditCompanyPage(@PathVariable UUID companyId, @AuthenticationPrincipal CustomUserDetails details){
         User user = userService.getUserById(details.getId());
@@ -96,7 +98,7 @@ public class CompanyController {
         modelAndView.addObject("newCompanyRequest", customMapper.fromCompany(company));
         return modelAndView;
     }
-
+    @PreAuthorize( "hasRole('ADMIN')")
     @PutMapping("/edit/{companyId}")
     public ModelAndView editCompany(@PathVariable UUID companyId,
                                     @AuthenticationPrincipal CustomUserDetails details,
