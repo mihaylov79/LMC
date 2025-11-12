@@ -7,6 +7,7 @@ import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
 import lmc.web.dto.CreateCompanyRequest;
+import lmc.web.dto.mapper.CustomMapper;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -23,10 +24,12 @@ public class CompanyController {
     private final UserService userService;
 
     private final CompanyService companyService;
+    private final CustomMapper customMapper;
 
-    public CompanyController(UserService userService, CompanyService companyService) {
+    public CompanyController(UserService userService, CompanyService companyService, CustomMapper customMapper) {
         this.userService = userService;
         this.companyService = companyService;
+        this.customMapper = customMapper;
     }
 
     @GetMapping
@@ -78,6 +81,35 @@ public class CompanyController {
         }
 
         companyService.createNewCompany(request);
+
+        return new ModelAndView("redirect:/companies");
+    }
+
+    @GetMapping("/edit/{companyId}")
+    public ModelAndView showEditCompanyPage(@PathVariable UUID companyId, @AuthenticationPrincipal CustomUserDetails details){
+        User user = userService.getUserById(details.getId());
+        Company company = companyService.getCompanyById(companyId);
+
+        ModelAndView modelAndView = new ModelAndView("edit-company");
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("company", company);
+        modelAndView.addObject("newCompanyRequest", customMapper.fromCompany(company));
+        return modelAndView;
+    }
+
+    @PutMapping("/edit/{companyId}")
+    public ModelAndView editCompany(@PathVariable UUID companyId,
+                                    @AuthenticationPrincipal CustomUserDetails details,
+                                    @Valid CreateCompanyRequest request, BindingResult result) {
+        User user = userService.getUserById(details.getId());
+
+        if (result.hasErrors()){
+            ModelAndView modelAndView = new ModelAndView("edit-company");
+            modelAndView.addObject("user", user);
+            modelAndView.addObject("newCompanyRequest", request);
+            return modelAndView;
+        }
+        companyService.editCompanyDetails(request,companyId);
 
         return new ModelAndView("redirect:/companies");
     }
