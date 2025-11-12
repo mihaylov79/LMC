@@ -3,7 +3,6 @@ package lmc.company.service;
 import lmc.company.model.Company;
 import lmc.company.repository.CompanyRepository;
 import lmc.exceptions.CompanyAlreadyExistException;
-import lmc.user.model.User;
 import lmc.web.dto.CreateCompanyRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -16,7 +15,7 @@ import java.util.UUID;
 @Service
 public class CompanyService {
 
-    private CompanyRepository repository;
+    private final CompanyRepository repository;
 
     @Autowired
     public CompanyService(CompanyRepository repository) {
@@ -100,6 +99,9 @@ public class CompanyService {
     }
 
     public List<Company> getAllCompanies(){
-       return repository.findAll(Sort.by("companyName","active"));
+       return repository.findAll(Sort.by(
+               Sort.Order.desc("active"),
+               Sort.Order.asc("companyName")
+       ));
     }
 }
