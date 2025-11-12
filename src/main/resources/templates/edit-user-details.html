@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактиране на потребител</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="/css/new-user.css">
+
+</head>
+<body>
+<div class="header-container">
+
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+
+</div>
+<div class="front-container">
+    <div class="user-container">
+        <p th:text="'Активен потребител: ' + ${user.email}"></p>
+    </div>
+</div>
+<!--<div class="tabs">-->
+<!--<div class="wrapper">-->
+<div class="form">
+    <form class="login" th:action="@{/users/edit-details}" th:method="PUT" th:object="${updateUserDetailsRequest}">
+        <!--        <div th:if="${successMessage}" class="alert-info">-->
+        <!--            <p th:text="${successMessage}"></p>-->
+        <!--        </div>-->
+        <!--        <span th:text="${emailAlreadyInUse}" class="errors"></span>-->
+        <h2 th:text="'Потребител: ' + ${user.getEmail()} "></h2>
+        <span class="separator"></span>
+
+        <div class="field">
+            <label for="field-firstName">Име</label>
+            <input type="text" name="firstName" id="field-firstName" placeholder="Име" th:field="*{firstName}">
+            <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>
+            <span th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+
+        </div>
+
+        <div class="field">
+            <label for="field-lastName">Фамиля</label>
+            <input type="text" name="lastName" id="field-lastName" placeholder="Име" th:field="*{lastName}">
+            <span class="helper info">Полето може да съдържа само букви и да бъде с дължина между 3-15 символа</span>
+            <span th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+        </div>
+
+
+        <div id="loading-message" style="display:none; color: red; text-align: center; margin-bottom: 0.5em;">
+            Моля, изчакайте...... <br>Обновяване на данни за потребител
+        </div>
+        <input type="submit" class="button login" value="Запиши">
+    </form>
+</div>
+<!--</div>-->
+<!--</div>-->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form.login');
+        const loadingMsg = document.getElementById('loading-message');
+        const submitBtn = form.querySelector('input[type="submit"]');
+        if (form && loadingMsg && submitBtn) {
+            form.addEventListener('submit', function() {
+                loadingMsg.style.display = 'block';
+                submitBtn.style.display = 'none';
+            });
+        }
+    });
+</script>
+</body>
+</html>

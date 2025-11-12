@@ -2,8 +2,10 @@ package lmc.web.dto.mapper;
 
 import lmc.company.model.Company;
 import lmc.unit.model.Unit;
+import lmc.user.model.User;
 import lmc.web.dto.CreateCompanyRequest;
 import lmc.web.dto.CreateNewUnitRequest;
+import lmc.web.dto.UpdateUserDetailsRequest;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,6 +36,14 @@ public class CustomMapper {
                 .contactPerson(company.getContactPerson())
                 .phone(company.getPhone())
                 .email(company.getEmail())
+                .build();
+    }
+
+    public UpdateUserDetailsRequest DetailsRequestFromUser(User user){
+
+        return UpdateUserDetailsRequest.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .build();
     }
 

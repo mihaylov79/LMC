@@ -8,6 +8,8 @@ import lmc.user.service.UserService;
 import lmc.utils.PasswordGenerator;
 import lmc.web.dto.NewPasswordRequest;
 import lmc.web.dto.NewUserRequest;
+import lmc.web.dto.UpdateUserDetailsRequest;
+import lmc.web.dto.mapper.CustomMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,10 +28,13 @@ public class UserController {
     private final UserService userService;
     private final PasswordGenerator passwordGenerator;
 
+    private final CustomMapper customMapper;
+
     @Autowired
-    public UserController(UserService userService, PasswordGenerator passwordGenerator) {
+    public UserController(UserService userService, PasswordGenerator passwordGenerator, CustomMapper customMapper) {
         this.userService = userService;
         this.passwordGenerator = passwordGenerator;
+        this.customMapper = customMapper;
     }
 
     @GetMapping("/create/new")
@@ -125,5 +130,33 @@ public class UserController {
         userService.updateUserRole(role, userId);
 
         return "redirect:/users/list";
+    }
+
+    @GetMapping("/edit-details")
+    public ModelAndView getEditUserDetailsPage(@AuthenticationPrincipal CustomUserDetails details){
+        User user = userService.getUserById(details.getId());
+        ModelAndView modelAndView = new ModelAndView("edit-user-details");
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("updateUserDetailsRequest", customMapper.DetailsRequestFromUser(user));
+        return modelAndView;
+    }
+
+    @PutMapping("/edit-details")
+    public ModelAndView updateActiveUserDetails(@Valid UpdateUserDetailsRequest request, BindingResult result,
+                                                @AuthenticationPrincipal CustomUserDetails details){
+        User user = userService.getUserById(details.getId());
+
+        if (result.hasErrors()) {
+
+            ModelAndView modelAndView = new ModelAndView("edit-user-details");
+            modelAndView.addObject("user", user);
+            return  modelAndView;
+        }
+
+        userService.editUserDetails(request);
+
+        return new ModelAndView("redirect:/home");
+
+
     }
 }

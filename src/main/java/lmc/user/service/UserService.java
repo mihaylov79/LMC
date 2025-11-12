@@ -8,6 +8,7 @@ import lmc.user.model.UserStatus;
 import lmc.user.repository.UserRepository;
 import lmc.web.dto.NewPasswordRequest;
 import lmc.web.dto.NewUserRequest;
+import lmc.web.dto.UpdateUserDetailsRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -100,6 +101,20 @@ public class UserService implements UserDetailsService {
                 .build();
 
         return userRepository.save(user);
+
+    }
+
+    public User editUserDetails(UpdateUserDetailsRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User currentUser = getUserByEmail(email);
+
+        currentUser = currentUser.toBuilder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .build();
+
+        return userRepository.save(currentUser);
 
     }
 

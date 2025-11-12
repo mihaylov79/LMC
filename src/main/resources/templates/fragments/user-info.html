@@ -15,7 +15,7 @@
         <p th:text="'Статус: ' + ${user.status.description}">Статус</p>
         <div class="menu">
             <ul>
-                <li><a class="menu-link" th:href="@{/users/{id}/edit(id=${user.id})}">Редактирай</a></li>
+                <li><a class="menu-link" th:href="@{/users/edit-details}">Редактирай</a></li>
                 <li><a class="menu-link" th:href="@{/users/change-password}">Смяна на паролата</a></li>
             </ul>
         </div>
