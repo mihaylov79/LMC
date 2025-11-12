@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
     List<User> findAllByStatus(UserStatus status, Sort sort);
+
+    List<User> findAllByIdIsNot(UUID id, Sort sort);
 }

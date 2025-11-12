@@ -142,6 +142,10 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll(Sort.by("status", "firstName", "lastName"));
     }
 
+    public List<User> getaAllWithoutLoggedUser(User loggedUser){
+        return userRepository.findAllByIdIsNot(loggedUser.getId(), Sort.by("firstName", "lastName"));
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username).orElseThrow(()->
