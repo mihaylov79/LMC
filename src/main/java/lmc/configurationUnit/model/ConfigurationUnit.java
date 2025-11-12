@@ -41,6 +41,14 @@ public class ConfigurationUnit {
     @OrderColumn(name = "option_index")
     private List<ConfigurationUnitOption> options = new ArrayList<>();
 
+    // canonical signature of the options composition (e.g. "id1:1;id2:2") used for fast lookup
+    @Column(name = "options_signature", nullable = true, length = 1024)
+    private String optionsSignature;
+
+    public void setOptionsSignature(String optionsSignature) {
+        this.optionsSignature = optionsSignature;
+    }
+
     public void addOption(ConfigurationUnitOption cuo) {
         if (cuo == null) return;
         cuo.setConfigurationUnit(this);

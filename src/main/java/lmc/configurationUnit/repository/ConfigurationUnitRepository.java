@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface ConfigurationUnitRepository extends JpaRepository<ConfigurationUnit, UUID> {
     Optional<ConfigurationUnit> findByConfigurationIdAndConfigurableUnitId(UUID configurationId, UUID configurableUnitId);
+
+    Optional<ConfigurationUnit> findByConfigurationIdAndConfigurableUnitIdAndOptionsSignature(UUID configurationId, UUID configurableUnitId, String optionsSignature);
 }

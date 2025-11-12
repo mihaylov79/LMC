@@ -20,4 +20,9 @@ public class ConfigurationUnitService {
     public Optional<ConfigurationUnit> findConfigurationUnitByConfigurationIdAndConfigurableUnitId(UUID configurationId, UUID configurableUnitId){
          return repository.findByConfigurationIdAndConfigurableUnitId(configurationId,configurableUnitId);
     }
+
+    public Optional<ConfigurationUnit> findConfigurationUnitByConfigurationIdAndConfigurableUnitIdAndSignature(UUID configurationId, UUID configurableUnitId, String signature) {
+        if (signature == null || signature.isEmpty()) return Optional.empty();
+        return repository.findByConfigurationIdAndConfigurableUnitIdAndOptionsSignature(configurationId, configurableUnitId, signature);
+    }
 }
