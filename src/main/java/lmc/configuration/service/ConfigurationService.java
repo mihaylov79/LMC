@@ -297,22 +297,26 @@ public class ConfigurationService {
     }
 
     private void addOptionsFromSelections(ConfigurationUnit unit, List<OptionSelectionDTO> selections, Map<UUID, Option> optionMap) {
-        selections.stream()
-                .filter(s -> s != null && s.getOptionId() != null)
-                .forEach(s -> {
-                    Option opt = optionMap.get(s.getOptionId());
-                    if (opt == null) {
-                        // fallback to service single-load if not available in map
-                        opt = optionService.getOptionsByIds(List.of(s.getOptionId())).stream()
-                                .findFirst()
-                                .orElseThrow(() -> new IllegalArgumentException("Option not found: " + s.getOptionId()));
-                    }
-                    ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
-                            .option(opt)
-                            .quantity(Math.max(1, s.getQuantity()))
-                            .build();
-                    unit.addOption(cuo);
-                });
+        if (selections == null || selections.isEmpty()) return;
+
+        // aggregate duplicate selections into a single entry per optionId
+        Map<UUID, Integer> aggregated = OptionUtils.toMapFromSelections(selections);
+
+        for (Map.Entry<UUID, Integer> entry : aggregated.entrySet()) {
+            UUID optionId = entry.getKey();
+            int qty = Math.max(1, entry.getValue());
+            Option opt = optionMap != null ? optionMap.get(optionId) : null;
+            if (opt == null) {
+                opt = optionService.getOptionsByIds(List.of(optionId)).stream()
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Option not found: " + optionId));
+            }
+            ConfigurationUnitOption cuo = ConfigurationUnitOption.builder()
+                    .option(opt)
+                    .quantity(qty)
+                    .build();
+            unit.addOption(cuo);
+        }
     }
 
     // keep original method but delegate to new method with empty map
