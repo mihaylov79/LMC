@@ -324,6 +324,10 @@ public class ConfigurationService {
         addOptionsFromSelections(unit, selections, Collections.emptyMap());
     }
 
+    /**
+     * Копира template опциите от ConfiguredUnit в ConfigurationUnit с quantity=1.
+     * Използва се когато не са подадени конкретни selections, но unit-ът има предефинирани опции.
+     */
     private void addTemplateOptionsIfNeeded(ConfigurationUnit unit, ConfigurableUnit cu) {
         if (!(cu instanceof ConfiguredUnit)) return;
         List<ConfiguredUnitOption> templateOptions = ((ConfiguredUnit) cu).getOptions();
