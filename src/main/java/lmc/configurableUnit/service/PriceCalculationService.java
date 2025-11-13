@@ -7,15 +7,27 @@ import lmc.configurableUnit.model.SimpleUnit;
 import lmc.configuration.model.Configuration;
 import lmc.configurationUnit.model.ConfigurationUnit;
 import lmc.configurationUnitOption.model.ConfigurationUnitOption;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Transactional(readOnly = true)
 @Service
 public class PriceCalculationService {
+
+    private final ConfigurableUnitService configurableUnitService;
+
+    @Autowired
+    public PriceCalculationService(ConfigurableUnitService configurableUnitService) {
+        this.configurableUnitService = configurableUnitService;
+    }
 
     @Transactional
     public BigDecimal calculateConfigurableUnitPrice(ConfigurableUnit unit){
@@ -60,6 +72,21 @@ public class PriceCalculationService {
                 .map(cu -> calculateConfigurationUnitPrice(cu)
                         .multiply(new BigDecimal(cu.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Изчислява реални цени за всички ConfigurableUnits (включва template опции).
+     * Използва се за визуализация на Configuration в UI (например edit-configuration форми).
+     *
+     * @return Map с ID на ConfigurableUnit като ключ и изчислената цена като стойност
+     */
+    public Map<UUID, BigDecimal> calculateConfigurationConfigurableUnitsPrices() {
+        List<ConfigurableUnit> allUnits = configurableUnitService.getAllUnits();
+        return allUnits.stream()
+                .collect(Collectors.toMap(
+                        ConfigurableUnit::getId,
+                        this::calculateConfigurableUnitPrice
+                ));
     }
 
 

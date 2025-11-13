@@ -70,11 +70,15 @@
         </select>
 
         <div id="server-data" style="display:none">
-            <div th:each="cu : ${configuredUnits}" th:attr="data-unit-id=${cu.id}">
-                <div th:each="co : ${cu.options}"
-                     class="unit-option"
-                     th:attr="data-option-id=${co.option.id}, data-code=${co.option.code}, data-name=${co.option.name}, data-price=${co.option.price}">
-                </div>
+            <!-- ВСИЧКИ ConfigurableUnits с техните опции -->
+            <div th:each="u : ${existingUnits}" th:attr="data-unit-id=${u.id}">
+                <!-- Ако unit-ът е ConfiguredUnit, показваме опциите -->
+                <th:block th:if="${#strings.contains(u.getClass().getName(), 'ConfiguredUnit')}">
+                    <div th:each="co : ${u.options}"
+                         class="unit-option"
+                         th:attr="data-option-id=${co.option.id}, data-code=${co.option.code}, data-name=${co.option.name}, data-price=${co.option.price}">
+                    </div>
+                </th:block>
             </div>
 
             <div th:if="${configuration != null and configuration.units != null}">

@@ -99,11 +99,15 @@
     </select>
 
     <div id="server-data" style="display:none">
-        <div th:each="cu : ${configuredUnits}" th:attr="data-unit-id=${cu.id}">
-            <div th:each="co : ${cu.options}"
-                 class="unit-option"
-                 th:attr="data-option-id=${co.option.id},data-code=${co.option.code},data-name=${co.option.name},data-price=${co.option.price}">
-            </div>
+        <!-- ВСИЧКИ ConfigurableUnits (SimpleUnit + ConfiguredUnit) с техните опции -->
+        <div th:each="u : ${existingUnits}" th:attr="data-unit-id=${u.id},data-base-price=${unitPrices[u.id]}">
+            <!-- Ако unit-ът е ConfiguredUnit, показваме опциите -->
+            <th:block th:if="${#strings.contains(u.getClass().getName(), 'ConfiguredUnit')}">
+                <div th:each="co : ${u.options}"
+                     class="unit-option"
+                     th:attr="data-option-id=${co.option.id},data-code=${co.option.code},data-name=${co.option.name},data-price=${co.option.price}">
+                </div>
+            </th:block>
         </div>
 
         <div th:if="${configuration != null and configuration.units != null}">
@@ -121,12 +125,15 @@
         (function buildMaps(){
             document.querySelectorAll('#server-data > div[data-unit-id]').forEach(u=>{
                 const id = String(u.getAttribute('data-unit-id'));
+                const basePriceAttr = u.getAttribute('data-base-price');
+                const basePrice = (basePriceAttr === null || basePriceAttr === 'null' || basePriceAttr === '') ? null : Number(basePriceAttr);
                 const options = Array.from(u.querySelectorAll('.unit-option')).map(o=>{
                     const priceAttr = o.getAttribute('data-price');
                     const price = (priceAttr === null || priceAttr === 'null' || priceAttr === '') ? null : Number(priceAttr);
                     return { optionId: String(o.getAttribute('data-option-id')), code: o.getAttribute('data-code'), name: o.getAttribute('data-name'), price: price };
                 });
-                unitOptionsMap[id] = options;
+                // дори units без опции трябва да имат basePrice
+                unitOptionsMap[id] = { basePrice: basePrice, options: options };
             });
             document.querySelectorAll('#server-data div[data-unit-idx]').forEach(u=>{
                 const idx = u.getAttribute('data-unit-idx');
@@ -150,11 +157,13 @@
                    required
                    placeholder="Бр."/>
 
-            <div class="inline-options" style="margin-left:1rem;">
+            <button type="button" class="remove-btn" onclick="removeUnitRow(this)">Премахни</button>
+
+            <div class="inline-options">
                 <div class="options-for-row"></div>
             </div>
 
-            <button type="button" class="remove-btn" onclick="removeUnitRow(this)">Премахни</button>
+            <span class="unit-price-display">—</span>
         </div>
     </div>
 
@@ -259,27 +268,157 @@
     const unitTemplate = document.getElementById('unitOptionsTemplate');
     const unitsContainer = document.getElementById('units-container');
 
+    // Изчислява и показва цената на един unit ред
+    function updateUnitPrice(rowElement) {
+        const priceDisplay = rowElement.querySelector('.unit-price-display');
+        if (!priceDisplay) return;
+
+        const select = rowElement.querySelector('.unit-select');
+        const qtyInput = rowElement.querySelector('input[type="number"]:not(.opt-qty)');
+
+        if (!select || !select.value) {
+            priceDisplay.textContent = '—';
+            return;
+        }
+
+        const unitId = select.value;
+        const unitData = unitOptionsMap[unitId];
+        const quantity = qtyInput ? Math.max(1, parseInt(qtyInput.value || '1', 10)) : 1;
+
+        if (!unitData) {
+            priceDisplay.textContent = '—';
+            return;
+        }
+
+        // basePrice от unitOptionsMap (изчислена цена с template опции × 1)
+        let unitPrice = unitData.basePrice || 0;
+
+        const isPersisted = rowElement.dataset.persisted === 'true';
+
+        if (isPersisted) {
+            // За PERSISTED rows: basePrice включва template опции × 1
+            // Checkbox-овете са disabled, трябва да четем от initialUnitSelections
+
+            // Намираме индекса на реда
+            const allRows = Array.from(document.querySelectorAll('#units-container .unit-row'));
+            const rowIndex = allRows.indexOf(rowElement);
+
+            if (rowIndex >= 0 && initialUnitSelections[rowIndex]) {
+                // Имаме запазени selections за този ред
+                const selections = initialUnitSelections[rowIndex];
+
+                // Извадаме template опциите × 1 от basePrice
+                let baseWithoutOptions = unitData.basePrice || 0;
+                if (unitData.options && unitData.options.length > 0) {
+                    unitData.options.forEach(opt => {
+                        if (opt.price != null) {
+                            baseWithoutOptions -= opt.price;
+                        }
+                    });
+                }
+
+                // Започваме от clean base
+                unitPrice = baseWithoutOptions;
+
+                // Добавяме опциите с реалните quantities от initialUnitSelections
+                selections.forEach(sel => {
+                    const option = unitData.options.find(o => o.optionId === sel.optionId);
+                    if (option && option.price != null) {
+                        unitPrice += (option.price * sel.quantity);
+                    }
+                });
+            } else {
+                // Няма initialUnitSelections - използваме basePrice както е
+                // (включва template опции × 1)
+            }
+        } else {
+            // За НОВИ rows: basePrice включва template опции × 1, добавяме избраните опции
+            const checkedOptions = Array.from(rowElement.querySelectorAll('.options-for-row .opt-cb')).filter(cb => cb.checked);
+
+            // Извадаме template опциите × 1 (ако има)
+            let baseWithoutOptions = unitData.basePrice || 0;
+            if (unitData.options && unitData.options.length > 0) {
+                unitData.options.forEach(opt => {
+                    if (opt.price != null) {
+                        baseWithoutOptions -= opt.price;
+                    }
+                });
+            }
+
+            // Започваме от clean base
+            unitPrice = baseWithoutOptions;
+
+            // Добавяме САМО избраните опции
+            checkedOptions.forEach(cb => {
+                const optionId = cb.dataset.optionId;
+                const option = unitData.options.find(o => o.optionId === optionId);
+                if (option && option.price != null) {
+                    const optQtyInput = rowElement.querySelector(`.opt-qty[data-option-id="${optionId}"]`);
+                    const optQty = optQtyInput ? Math.max(1, parseInt(optQtyInput.value || '1', 10)) : 1;
+                    unitPrice += (option.price * optQty);
+                }
+            });
+        }
+
+        // Умножи по quantity на unit-а
+        const totalPrice = unitPrice * quantity;
+        priceDisplay.textContent = totalPrice.toFixed(2) + ' EUR';
+    }
+
     function addUnit() {
-        const div = document.createElement('div'); div.className = 'unit-row';
-        const select = document.createElement('select'); select.className = 'unit-select'; select.required = true;
+        const div = document.createElement('div');
+        div.className = 'unit-row';
+
+        const select = document.createElement('select');
+        select.className = 'unit-select';
+        select.required = true;
         select.innerHTML = unitTemplate ? unitTemplate.innerHTML : '<option value="">Изберете unit</option>';
 
-        const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.required = true; qty.placeholder = 'Бр.';
+        const qty = document.createElement('input');
+        qty.type = 'number';
+        qty.min = '1';
+        qty.value = '1';
+        qty.required = true;
+        qty.placeholder = 'Бр.';
 
-        const optionsWrapper = document.createElement('div'); optionsWrapper.className = 'inline-options';
-        const optionsInner = document.createElement('div'); optionsInner.className = 'options-for-row'; optionsWrapper.appendChild(optionsInner);
+        const optionsWrapper = document.createElement('div');
+        optionsWrapper.className = 'inline-options';
+        const optionsInner = document.createElement('div');
+        optionsInner.className = 'options-for-row';
+        optionsWrapper.appendChild(optionsInner);
 
-        const addBtn = document.createElement('button'); addBtn.type = 'button'; addBtn.className = 'add-btn'; addBtn.textContent = 'Добави';
+        const priceDisplay = document.createElement('span');
+        priceDisplay.className = 'unit-price-display';
+        priceDisplay.textContent = '—';
+
+        const addBtn = document.createElement('button');
+        addBtn.type = 'button';
+        addBtn.className = 'add-btn';
+        addBtn.textContent = 'Добави';
         addBtn.addEventListener('click', () => persistRow(div));
 
-        const removeBtn = document.createElement('button'); removeBtn.type = 'button'; removeBtn.className = 'remove-btn'; removeBtn.textContent = 'Премахни';
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-btn';
+        removeBtn.textContent = 'Премахни';
         removeBtn.addEventListener('click', () => removeUnitRow(removeBtn));
 
-        div.appendChild(select); div.appendChild(qty); div.appendChild(optionsWrapper); div.appendChild(addBtn); div.appendChild(removeBtn);
+        // Структура: select, qty, buttons (в един ред), после опции, после цена
+        div.appendChild(select);
+        div.appendChild(qty);
+        div.appendChild(addBtn);
+        div.appendChild(removeBtn);
+        div.appendChild(optionsWrapper);
+        div.appendChild(priceDisplay);
 
-        select.addEventListener('change', () => renderOptionsForRow(div, select.value));
+        select.addEventListener('change', () => {
+            renderOptionsForRow(div, select.value);
+            updateUnitPrice(div);
+        });
+        qty.addEventListener('input', () => updateUnitPrice(div));
 
-        unitsContainer.appendChild(div); reindexUnits();
+        unitsContainer.appendChild(div);
+        reindexUnits();
         select.focus();
     }
 
@@ -293,13 +432,27 @@
 
         try {
             const select = row.querySelector('.unit-select');
+            const qtyInput = row.querySelector('input[type="number"]:not(.opt-qty)');
             const configurableUnitId = select ? select.value : null;
-            const qty = 1;
+            const currentQty = qtyInput ? Math.max(1, parseInt(qtyInput.value || '1', 10)) : 1;
+            const qty = 1; // винаги премахваме 1 брой
             const optionSelections = collectOptionSelections(row);
 
             const res = await ajaxRemoveUnit(configurationId, configurableUnitId, qty, optionSelections);
 
-            row.remove(); reindexUnits();
+            // Ако има още броеве, обновяваме quantity вместо да премахваме реда
+            const newQty = currentQty - qty;
+            if (newQty > 0) {
+                if (qtyInput) {
+                    qtyInput.value = newQty;
+                    // Обновяваме цената
+                    updateUnitPrice(row);
+                }
+            } else {
+                // Няма повече броеве - премахваме реда
+                row.remove();
+                reindexUnits();
+            }
 
             if (res && res.totalPrice !== undefined) {
                 const totalEl = document.getElementById('total-price');
@@ -320,12 +473,15 @@
     function renderOptionsForRow(rowElement, unitId) {
         const container = rowElement.querySelector('.options-for-row'); if (!container) return;
         container.innerHTML = '';
-        if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) return;
+        if (!unitId || !unitOptionsMap[unitId] || !unitOptionsMap[unitId].options || unitOptionsMap[unitId].options.length === 0) {
+            updateUnitPrice(rowElement);
+            return;
+        }
 
         // treat persisted rows as read-only
         const isPersisted = rowElement.dataset.persisted === 'true';
 
-        unitOptionsMap[unitId].forEach(opt => {
+        unitOptionsMap[unitId].options.forEach(opt => {
             const row = document.createElement('div');
             row.style.display = 'flex';
             row.style.alignItems = 'center';
@@ -346,12 +502,18 @@
             qty.value = '1';
             qty.className = 'opt-qty';
             qty.style.width = '70px';
-            qty.disabled = true;
             qty.dataset.optionId = String(opt.optionId);
 
-            // if row is not persisted, allow toggling qty via checkbox
             if (!isPersisted) {
-                cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
+                // За нови редове: template опциите са pre-checked и quantity е enabled
+                cb.checked = true;  // ✅ Pre-check всички template опции
+                qty.disabled = false;  // ✅ Quantity е винаги enabled за редактиране
+
+                cb.addEventListener('change', () => {
+                    qty.disabled = !cb.checked;
+                    updateUnitPrice(rowElement);
+                });
+                qty.addEventListener('input', () => updateUnitPrice(rowElement));
             } else {
                 // persisted: keep inputs disabled (read-only)
                 cb.disabled = true;
@@ -363,6 +525,8 @@
             row.appendChild(qty);
             container.appendChild(row);
         });
+
+        updateUnitPrice(rowElement);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -370,6 +534,8 @@
             // mark server-provided rows as persisted
             row.dataset.persisted = 'true';
             const select = row.querySelector('.unit-select');
+            const qtyInput = row.querySelector('input[type="number"]:not(.opt-qty)');
+
             if (select) {
                 renderOptionsForRow(row, select.value);
 
@@ -384,8 +550,18 @@
                     } catch (e) {}
                 });
 
-                select.addEventListener('change', () => renderOptionsForRow(row, select.value));
+                select.addEventListener('change', () => {
+                    renderOptionsForRow(row, select.value);
+                    updateUnitPrice(row);
+                });
             }
+
+            if (qtyInput) {
+                qtyInput.addEventListener('input', () => updateUnitPrice(row));
+            }
+
+            // изчисли началната цена
+            updateUnitPrice(row);
         });
         reindexUnits();
     });
@@ -472,15 +648,75 @@
 
             const data = await ajaxAddUnit(configurationId, configurableUnitId, qty, optionSelections);
 
-            row.dataset.persisted = 'true';
-            row.querySelectorAll('input, select').forEach(el => { el.disabled = true; });
-            const addBtn = row.querySelector('.add-btn'); if (addBtn) addBtn.remove();
+            // Проверяваме дали вече има съществуващ ред със същия unit и опции
+            const existingRow = findExistingPersistedRow(configurableUnitId, optionSelections);
+
+            if (existingRow && existingRow !== row) {
+                // Има съществуващ ред - обединяваме quantity
+                const existingQtyInput = existingRow.querySelector('input[type="number"]:not(.opt-qty)');
+                if (existingQtyInput) {
+                    const existingQty = Math.max(1, parseInt(existingQtyInput.value || '1', 10));
+                    existingQtyInput.value = existingQty + qty;
+                    // Преизчисляваме цената на съществуващия ред
+                    updateUnitPrice(existingRow);
+                }
+                // Премахваме новия ред (дублиращ се)
+                row.remove();
+            } else {
+                // Няма съществуващ ред - маркираме този като persisted
+                row.dataset.persisted = 'true';
+                row.querySelectorAll('input, select').forEach(el => { el.disabled = true; });
+                const addBtn = row.querySelector('.add-btn'); if (addBtn) addBtn.remove();
+            }
+
+            reindexUnits();
 
             const totalEl = document.getElementById('total-price'); if (totalEl && data.totalPrice !== undefined) totalEl.textContent = data.totalPrice;
             const dateEl = document.getElementById('price-update-date'); if (dateEl && data.priceUpdateDate) dateEl.textContent = data.priceUpdateDate;
         } catch (err) {
             console.error(err); alert('Грешка при добавяне: ' + (err.message || 'network'));
         }
+    }
+
+    // Намира съществуващ persisted ред със същия unit и опции
+    function findExistingPersistedRow(configurableUnitId, optionSelections) {
+        const allRows = Array.from(document.querySelectorAll('#units-container .unit-row'));
+
+        for (const row of allRows) {
+            if (row.dataset.persisted !== 'true') continue; // Само persisted редове
+
+            const rowSelect = row.querySelector('.unit-select');
+            if (!rowSelect || rowSelect.value !== configurableUnitId) continue; // Различен unit
+
+            // Сравняваме опциите
+            const rowOptions = collectOptionSelections(row);
+            if (optionsMatch(rowOptions, optionSelections)) {
+                return row; // Намерен съществуващ ред
+            }
+        }
+
+        return null; // Няма съществуващ ред
+    }
+
+    // Проверява дали две selections са идентични
+    function optionsMatch(options1, options2) {
+        // Ако и двете са null/undefined или празни
+        if ((!options1 || options1.length === 0) && (!options2 || options2.length === 0)) return true;
+
+        // Ако едното е празно, а другото не
+        if (!options1 || !options2) return false;
+        if (options1.length !== options2.length) return false;
+
+        // Сравняваме опциите (sort за да не зависи от реда)
+        const sorted1 = [...options1].sort((a, b) => a.optionId.localeCompare(b.optionId));
+        const sorted2 = [...options2].sort((a, b) => a.optionId.localeCompare(b.optionId));
+
+        for (let i = 0; i < sorted1.length; i++) {
+            if (sorted1[i].optionId !== sorted2[i].optionId) return false;
+            if (sorted1[i].quantity !== sorted2[i].quantity) return false;
+        }
+
+        return true;
     }
 
     // submitNewUnit: robust client-side refresh without controller change
@@ -516,6 +752,9 @@
             const newUnit = await res.json();
             const newId = String(newUnit.id);
 
+            // extract basePrice from newUnit response
+            const basePrice = (newUnit.unit && newUnit.unit.price != null) ? Number(newUnit.unit.price) : null;
+
             // build opts from modal selections (no controller change needed)
             const opts = selections.map(s => {
                 let code = null, name = null;
@@ -527,8 +766,8 @@
                 return { optionId: String(s.optionId), code: code, name: name, price: null };
             });
 
-            // update client map
-            unitOptionsMap[newId] = opts;
+            // update client map with basePrice
+            unitOptionsMap[newId] = { basePrice: basePrice, options: opts };
 
             // update hidden template
             const label = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
@@ -558,6 +797,7 @@
             if (serverData) {
                 const div = document.createElement('div');
                 div.setAttribute('data-unit-id', newId);
+                div.setAttribute('data-base-price', basePrice == null ? '' : String(basePrice));
                 opts.forEach(o => {
                     const io = document.createElement('div');
                     io.className = 'unit-option';
