@@ -8,10 +8,14 @@
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="/css/edit-configuration.css?v=1.0">
+    <link rel="stylesheet" href="/css/user-details.css">
 </head>
 <body>
 <div class="header-container">
     <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+</div>
+<div class="front-container">
+    <th:block th:insert="~{fragments/user-info :: userInfo}"></th:block>
 </div>
 
 <h1 class="page-title" th:text="|Редактиране на ${configuration.model} ${configuration.description}|">Редактиране на конфигурация</h1>

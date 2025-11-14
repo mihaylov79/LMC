@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/home.css">
     <link rel="stylesheet" href="/css/configuration-details2.css">
+    <link rel="stylesheet" href="/css/user-details.css">
 
 </head>
 <body>
@@ -15,9 +16,7 @@
 </div>
 
 <div class="front-container">
-    <div class="user-container">
-        <p th:text="'Активен потребител: ' + ${user.email}"></p>
-    </div>
+    <th:block th:insert="~{fragments/user-info :: userInfo}"></th:block>
 
     <div class="configuration-details">
         <div class="menu">

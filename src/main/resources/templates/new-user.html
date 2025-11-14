@@ -2,10 +2,11 @@
 <html lang="bg" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
 <head>
     <meta charset="UTF-8">
-    <title>Вход</title>
+    <title>Нов потребител</title>
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="/css/new-user.css">
+    <link rel="stylesheet" href="/css/user-details.css">
 
 </head>
 <body>
@@ -15,9 +16,7 @@
 
 </div>
 <div class="front-container">
-    <div class="user-container">
-        <p th:text="'Активен потребител: ' + ${user.email}"></p>
-    </div>
+    <th:block th:insert="~{fragments/user-info :: userInfo}"></th:block>
 </div>
 <!--<div class="tabs">-->
 <!--<div class="wrapper">-->
