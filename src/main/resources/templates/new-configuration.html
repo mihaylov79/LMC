@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="/css/new-configuration.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
 </head>
 <body>
 
@@ -94,6 +95,7 @@
         <script>
             var unitOptionsMap = {};
             var initialUnitSelections = {};
+            const choicesMap = new WeakMap();
 
             (function buildMaps() {
                 document.querySelectorAll('#server-data > div[data-unit-id]').forEach(u => {
@@ -108,7 +110,6 @@
                             price: price
                         };
                     });
-                    // normalize to object with basePrice (unknown here) and options array
                     unitOptionsMap[id] = { basePrice: null, options: options };
                 });
 
@@ -121,6 +122,22 @@
                     initialUnitSelections[idx] = sels;
                 });
             })();
+
+            function initChoices(selectEl) {
+                if (!selectEl) return null;
+                try {
+                    const inst = new Choices(selectEl, {
+                        searchEnabled: true,
+                        shouldSort: false,
+                        itemSelectText: '',
+                        noResultsText: 'Няма резултат',
+                        noChoicesText: 'Няма налични',
+                        searchPlaceholderValue: 'Търси...'
+                    });
+                    choicesMap.set(selectEl, inst);
+                    return inst;
+                } catch (e) { return null; }
+            }
         </script>
 
         <div id="units-container">
@@ -186,6 +203,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 <script>
     const unitTemplate = document.getElementById('unitOptionsTemplate');
     const unitsContainer = document.getElementById('units-container');
@@ -231,6 +249,8 @@
 
         unitsContainer.appendChild(div);
         reindexUnits();
+        // Initialize Choices on this select
+        initChoices(select);
     }
 
     function removeUnit(btn) {
@@ -335,7 +355,6 @@
             const select = row.querySelector('.unit-select');
             if (select) {
                 renderOptionsForRow(row, select.value);
-
                 const sel = initialUnitSelections && initialUnitSelections[index];
                 if (Array.isArray(sel)) {
                     sel.forEach(s => {
@@ -349,10 +368,12 @@
                         } catch (e) { }
                     });
                 }
-
                 select.addEventListener('change', () => renderOptionsForRow(row, select.value));
+                initChoices(select);
             }
         });
+        // also make the modal base select searchable
+        initChoices(document.getElementById('newUnitBase'));
         reindexUnits();
     });
 
@@ -384,7 +405,7 @@
             return cb && cb.checked ? {
                 optionId: cb.value,
                 quantity: Number(qtyInput.value) || 1,
-                label: row.querySelector('label')?.textContent.trim() || ''
+                label: row.querySelector('label') ? row.querySelector('label').textContent.trim() : ''
             } : null;
         }).filter(x => x !== null);
 
@@ -406,109 +427,52 @@
                 return response.json();
             })
             .then(newUnit => {
-                // Close modal
                 closeCreateUnitModal();
 
-                // Defensive extraction of id and label
                 const createdId = newUnit.id || newUnit.unit?.id || newUnit.configurableUnitId || null;
                 const unitName = newUnit.unit?.name || newUnit.unitName || (newUnit.unit && newUnit.unit.unit && newUnit.unit.unit.name) || '';
                 const unitCode = newUnit.code || newUnit.unit?.code || (newUnit.unit && newUnit.unit.code) || '';
                 const displayText = (unitCode ? unitCode + ' - ' : '') + unitName;
 
-                // 1) Insert option into unitOptionsTemplate and into all existing selects
+                // 1) Update template
                 try {
-                    // create option element
                     const optEl = document.createElement('option');
                     optEl.value = createdId;
                     optEl.textContent = displayText || (newUnit.name || 'Нов Unit');
+                    unitTemplate.innerHTML += optEl.outerHTML;
+                } catch (e) {}
 
-                    // append to template
-                    if (unitTemplate) {
-                        // unitTemplate contains innerHTML of <option> elements; append a new one
-                        // safer to append node to a hidden select inside template
-                        // find if template contains a <option> wrapper; append by string fallback
+                // 2) Add into existing selects via Choices API if present
+                document.querySelectorAll('select.unit-select').forEach(sel => {
+                    const inst = (typeof choicesMap !== 'undefined') ? choicesMap.get(sel) : null;
+                    if (inst && createdId) {
+                        inst.setChoices([{ value: createdId, label: displayText, selected: false, disabled: false }], 'value', 'label', false);
+                    } else {
+                        // fallback to native append
                         try {
-                            // try to append to a real select if present
-                            const tempSelect = unitTemplate.querySelector('select');
-                            if (tempSelect) tempSelect.appendChild(optEl.cloneNode(true));
-                            else unitTemplate.innerHTML += optEl.outerHTML;
-                        } catch (e) {
-                            unitTemplate.innerHTML += optEl.outerHTML;
-                        }
+                            const opt = document.createElement('option'); opt.value = createdId; opt.textContent = displayText;
+                            sel.appendChild(opt);
+                        } catch (e) {}
                     }
+                });
 
-                    // append to all visible selects (.unit-select)
-                    document.querySelectorAll('select.unit-select').forEach(sel => {
-                        try { sel.appendChild(optEl.cloneNode(true)); } catch (e) {}
-                    });
-                } catch (e) {
-                    console.warn('Не можа да добави option към шаблона:', e);
-                }
-
-                // 2) Update client-side maps so renderOptionsForRow can display options immediately
-                // Use returned newUnit.options OR use the selections we sent (which have optionId and quantity)
-                let optionsForMap = [];
-                if (Array.isArray(newUnit.options) && newUnit.options.length) {
-                    // expected shape: [{ option: { id, code, name, price }, basePrice: ... }]
-                    optionsForMap = newUnit.options.map(o => ({
-                        optionId: o.option?.id || o.id || o.optionId,
-                        code: o.option?.code || o.code || '',
-                        name: o.option?.name || o.name || '',
-                        price: (o.option && o.option.price != null) ? o.option.price : (o.price != null ? o.price : null)
-                    }));
-                } else if (Array.isArray(newUnit.optionSelections) && newUnit.optionSelections.length) {
-                    optionsForMap = newUnit.optionSelections.map(o => ({ optionId: o.optionId || o.id, code: '', name: '', price: o.price != null ? o.price : null }));
-                } else {
-                    // fallback from options chosen in modal (we at least have ids and quantities)
-                    optionsForMap = options.map(o => ({ optionId: o.optionId, code: '', name: o.label || '', price: null }));
-                }
-
-                // also try to set basePrice if server provided it
-                const basePrice = (newUnit.basePrice != null) ? newUnit.basePrice : (newUnit.unit?.basePrice != null ? newUnit.unit.basePrice : null);
-
-                if (createdId) {
-                    unitOptionsMap[createdId] = { basePrice: basePrice, options: optionsForMap };
-                }
-
-                // 3) Add a new row to the units list and pre-select the created unit and options
+                // 3) Add a new row preselected
                 try {
-                    const newRow = document.createElement('div');
-                    newRow.className = 'unit-row';
+                    const newRow = document.createElement('div'); newRow.className = 'unit-row';
+                    const select = document.createElement('select'); select.className = 'unit-select'; select.required = true; select.innerHTML = unitTemplate.innerHTML;
+                    const qty = document.createElement('input'); qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.required = true; qty.placeholder = 'Бр.';
+                    const optionsWrapper = document.createElement('div'); optionsWrapper.className = 'inline-options';
+                    const optionsInner = document.createElement('div'); optionsInner.className = 'options-for-row'; optionsWrapper.appendChild(optionsInner);
+                    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'remove-btn'; btn.textContent = 'Премахни'; btn.addEventListener('click', () => { newRow.remove(); reindexUnits(); });
+                    newRow.appendChild(select); newRow.appendChild(qty); newRow.appendChild(optionsWrapper); newRow.appendChild(btn);
+                    unitsContainer.appendChild(newRow); reindexUnits();
 
-                    const select = document.createElement('select');
-                    select.className = 'unit-select';
-                    select.required = true;
-                    // populate select options from template
-                    select.innerHTML = unitTemplate.innerHTML;
+                    // initialize Choices and preselect createdId
+                    const selInst = initChoices(select);
+                    if (selInst && createdId) selInst.setChoiceByValue(String(createdId)); else if (createdId) select.value = createdId;
 
-                    const qty = document.createElement('input');
-                    qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.required = true; qty.placeholder = 'Бр.';
-
-                    const optionsWrapper = document.createElement('div');
-                    optionsWrapper.className = 'inline-options';
-                    const optionsInner = document.createElement('div');
-                    optionsInner.className = 'options-for-row';
-                    optionsWrapper.appendChild(optionsInner);
-
-                    const btn = document.createElement('button');
-                    btn.type = 'button'; btn.className = 'remove-btn'; btn.textContent = 'Премахни';
-                    btn.addEventListener('click', () => { newRow.remove(); reindexUnits(); });
-
-                    newRow.appendChild(select);
-                    newRow.appendChild(qty);
-                    newRow.appendChild(optionsWrapper);
-                    newRow.appendChild(btn);
-
-                    unitsContainer.appendChild(newRow);
-                    reindexUnits();
-
-                    // set selected value
-                    if (createdId) select.value = createdId;
-
-                    // render options for this row from unitOptionsMap
                     renderOptionsForRow(newRow, select.value);
 
-                    // apply selections (checkboxes & quantities) from the modal 'options' or server response
                     const selections = Array.isArray(newUnit.optionSelections) && newUnit.optionSelections.length ? newUnit.optionSelections : options;
                     if (Array.isArray(selections)) {
                         selections.forEach((s) => {
@@ -519,21 +483,7 @@
                             } catch (e) {}
                         });
                     }
-
-                    // trigger a price update if there is a function or later on submit will calculate
-                    if (typeof updateUnitPrice === 'function') {
-                        try { updateUnitPrice(newRow); } catch (e) { /* best-effort */ }
-                    }
-
-                    // Inform user the unit was added
-                    alert('Unit създаден успешно и добавен в списъка (форма е непокътната).');
-
-                } catch (e) {
-                    console.warn('Неуспешно добавяне на нов ред след създаване на Unit:', e);
-                    // fallback: reload if something went badly
-                    window.location.reload();
-                }
-
+                } catch (e) { window.location.reload(); }
             })
             .catch(error => {
                 console.error('Error:', error);

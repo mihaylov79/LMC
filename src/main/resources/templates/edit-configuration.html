@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="/css/edit-configuration.css?v=1.0">
     <link rel="stylesheet" href="/css/user-details.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css"/>
 </head>
 <body>
 <div class="header-container">
@@ -271,6 +272,23 @@
     // Units JS
     const unitTemplate = document.getElementById('unitOptionsTemplate');
     const unitsContainer = document.getElementById('units-container');
+    const choicesMap = new WeakMap();
+
+    function initChoices(selectEl) {
+        if (!selectEl) return null;
+        try {
+            const inst = new Choices(selectEl, {
+                searchEnabled: true,
+                shouldSort: false,
+                itemSelectText: '',
+                noResultsText: 'Няма резултат',
+                noChoicesText: 'Няма налични',
+                searchPlaceholderValue: 'Търси...'
+            });
+            choicesMap.set(selectEl, inst);
+            return inst;
+        } catch (e) { return null; }
+    }
 
     // Изчислява и показва цената на един unit ред
     function updateUnitPrice(rowElement) {
@@ -424,6 +442,7 @@
         unitsContainer.appendChild(div);
         reindexUnits();
         select.focus();
+        initChoices(select);
     }
 
     async function removeUnitRow(btn) {
@@ -558,6 +577,7 @@
                     renderOptionsForRow(row, select.value);
                     updateUnitPrice(row);
                 });
+                initChoices(select);
             }
 
             if (qtyInput) {
@@ -568,6 +588,10 @@
             updateUnitPrice(row);
         });
         reindexUnits();
+        // make modal base select searchable as well
+        if (typeof initChoices === 'function') {
+            initChoices(document.getElementById('newUnitBase'));
+        }
     });
 
 
@@ -801,11 +825,12 @@
                     } catch (e) {}
                 });
                 select.addEventListener('change', () => renderOptionsForRow(row, select.value));
+                initChoices(select);
             }
         });
         reindexUnits();
     });
 </script>
-
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>
 </html>

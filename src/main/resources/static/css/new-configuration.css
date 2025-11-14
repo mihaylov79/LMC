@@ -1,25 +1,4 @@
-.unit-row {
-    margin-bottom: 1rem;
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.unit-row select {
-    flex: 2;
-}
-
-.unit-row input[type="number"] {
-    width: 80px;
-}
-
-.unit-row button {
-    white-space: nowrap;
-}
-
+/* Modal styles */
 #createUnitModal {
     display: none;
     position: fixed;
@@ -99,43 +78,69 @@
     color: white;
 }
 
-/* make each unit row responsive and prevent button overflow */
+/* make each unit row with grid layout - select on first row, quantity on second row right */
 .unit-row {
     margin-bottom: 1rem;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
-    display: flex;
-    flex-wrap: wrap;           /* allow items to wrap on small widths */
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
     gap: 0.5rem;
-    align-items: center;
     width: 100%;
     box-sizing: border-box;
 }
 
-/* select should take remaining space but not shrink too small */
-.unit-row select {
-    flex: 1 1 220px;           /* grow, can shrink, preferred basis */
-    min-width: 160px;
-    max-width: 70%;
-    box-sizing: border-box;
+/* Select (Choices) takes full width on first row */
+.unit-row select,
+.unit-row .choices {
+    grid-column: 1 / -1;
+    grid-row: 1;
 }
 
-/* number input fixed-ish width so it doesn't push layout */
-.unit-row input[type="number"] {
-    flex: 0 0 80px;            /* don't grow, fixed basis */
-    min-width: 60px;
-    box-sizing: border-box;
+/* Quantity input on second row, right side */
+.unit-row input[type="number"]:not(.opt-qty) {
+    grid-column: 2 / 3;
+    grid-row: 2;
+    justify-self: end;
+    width: 100px !important;
+    height: 42px !important;
+    box-sizing: border-box !important;
+    display: inline-block !important;
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    padding: 0.6rem !important;
+    background: white !important;
+    font-size: 1rem !important;
 }
 
-/* remove button stays its intrinsic size and won't overflow */
+/* Remove button on second row, left side */
 .unit-row .remove-btn,
 .unit-row button {
-    flex: 0 0 auto;
+    grid-column: 1 / 2;
+    grid-row: 2;
+    justify-self: start;
     white-space: nowrap;
     padding: 0.4rem 0.6rem;
     border-radius: 4px;
     cursor: pointer;
+}
+
+/* Action buttons at bottom of form - let them be wide */
+form button[type="button"],
+form button[type="submit"] {
+    padding: 0.5rem 1rem !important;
+    white-space: nowrap !important;
+}
+
+/* Center and arrange bottom action buttons vertically (stacked) */
+form > div:last-of-type {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
+    margin-top: 1.5rem !important;
 }
 
 /* improve spacing when items wrap onto new line */
@@ -153,4 +158,71 @@
     .unit-row .remove-btn {
         align-self: flex-end;  /* keep button on the right */
     }
+}
+
+/* Form at 50ch width - balanced and spacious */
+.form form:not(.logout-form),
+form:not(.logout-form) {
+    width: 50ch;
+    margin: 0 auto;
+}
+
+/* Ensure all unit rows and controls have proper spacing */
+.form {
+    width: auto;
+    margin: 0 auto;
+}
+
+/* Override login.css select styles that break flex layout */
+.unit-row select,
+.unit-row input[type="number"] {
+    display: inline-block !important;  /* override display: block from login.css */
+    width: auto !important;             /* override width: 100% from login.css */
+    border: 1px solid #ddd !important;
+    border-radius: 4px !important;
+    padding: 0.5rem !important;
+    background: white !important;
+}
+
+/* Choices.js width fixes for searchable selects - full width on its own row */
+.unit-row .choices {
+    width: 100% !important;          /* full width on first row */
+    min-width: 42ch !important;      /* ensure dropdown is wide enough for 50ch form */
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    display: inline-flex !important;
+}
+
+/* Ensure inner area looks consistent and matches quantity height */
+.unit-row .choices__inner {
+    min-height: 42px !important;
+    height: 42px !important;          /* match quantity input height */
+    padding: 0.6rem 0.8rem !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* Dropdown should span the trigger width and be above other elements */
+.unit-row .choices__list--dropdown {
+    width: 100% !important;
+    max-width: 100% !important;
+    z-index: 100 !important;         /* ensure dropdown is above other elements */
+    box-sizing: border-box !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+
+/* Make dropdown items more readable */
+.unit-row .choices__list--dropdown .choices__item {
+    padding: 0.75rem 1rem !important;
+}
+
+/* Modal base select (create unit) should be full width */
+#createUnitModal .choices {
+    width: 100%;
+    min-width: 280px;
+}
+#createUnitModal .choices__list--dropdown {
+    width: 100%;
 }
