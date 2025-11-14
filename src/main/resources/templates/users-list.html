@@ -90,8 +90,8 @@
                                 </button>
                             </form>
 
-                            <form th:action="@{/users/{id}/reset-password(id=${listUser.id})}"
-                                  th:method="post"
+                            <form th:action="@{/users/reset-password/{id}(id=${listUser.id})}"
+                                  th:method="PUT"
                                   style="display:inline;"
                                   onsubmit="return confirm('Ще бъде генерирана нова парола за потребителя. Продължавате ли?');">
                                 <button type="submit" class="action-btn">Нулиране на парола</button>

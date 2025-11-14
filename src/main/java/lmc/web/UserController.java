@@ -103,6 +103,35 @@ public class UserController {
         return new ModelAndView("redirect:/home");
     }
 
+//    @GetMapping("/reset-password/{userId}")
+//    public ModelAndView getResetPasswordPage(@PathVariable UUID userId){
+//
+//        User user = userService.getUserById(userId);
+//
+//        ModelAndView modelAndView = new ModelAndView("password-reset");
+//        modelAndView.addObject("user", user);
+//        modelAndView.addObject("newPasswordRequest", new NewPasswordRequest());
+//
+//        return modelAndView;
+//    }
+
+    @PutMapping("/reset-password/{userId}")
+    public ModelAndView resetPassword(@PathVariable UUID userId){
+
+        User user = userService.getUserById(userId);
+
+        String password =  passwordGenerator.generate();
+        userService.resetUserPassword(userId,password);
+
+        ModelAndView modelAndView = new ModelAndView("create-success");
+        modelAndView.addObject("user", user);
+        modelAndView.addObject("password", password);
+        modelAndView.addObject("email", user.getEmail());
+
+        return modelAndView;
+    }
+
+
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/change-status/{userId}")
     public String changeStatus(@PathVariable UUID userId){

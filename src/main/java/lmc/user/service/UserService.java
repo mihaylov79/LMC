@@ -89,15 +89,11 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public User resetUserPassword(UUID userId, NewPasswordRequest request){
+    public User resetUserPassword(UUID userId, String password){
         User user = getUserById(userId);
 
-        if (!request.getPassword().equals(request.getConfirmPassword())){
-            throw new WrongPasswordException("Потвърждението на паролата не съвпада!");
-        }
-
         user = user.toBuilder()
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(passwordEncoder.encode(password))
                 .build();
 
         return userRepository.save(user);
