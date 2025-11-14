@@ -753,69 +753,10 @@
                 return;
             }
 
-            const newUnit = await res.json();
-            const newId = String(newUnit.id);
-
-            // extract basePrice from newUnit response
-            const basePrice = (newUnit.unit && newUnit.unit.price != null) ? Number(newUnit.unit.price) : null;
-
-            // build opts from modal selections (no controller change needed)
-            const opts = selections.map(s => {
-                let code = null, name = null;
-                if (s.label) {
-                    const parts = s.label.split(' - ');
-                    code = parts.length ? parts[0].trim() : null;
-                    name = parts.length > 1 ? parts.slice(1).join(' - ').trim() : null;
-                }
-                return { optionId: String(s.optionId), code: code, name: name, price: null };
-            });
-
-            // update client map with basePrice
-            unitOptionsMap[newId] = { basePrice: basePrice, options: opts };
-
-            // update hidden template
-            const label = (newUnit.unit && newUnit.unit.code ? newUnit.unit.code : '') + ' - ' + (newUnit.unit && newUnit.unit.name ? newUnit.unit.name : '');
-            if (unitTemplate) {
-                const optTemplateNode = document.createElement('option');
-                optTemplateNode.value = newId;
-                optTemplateNode.textContent = label;
-                unitTemplate.appendChild(optTemplateNode);
-            }
-
-            // append fresh option nodes to every select (clone per-select)
-            document.querySelectorAll('#units-container select').forEach(select => {
-                const opt = document.createElement('option');
-                opt.value = newId;
-                opt.textContent = label;
-                select.appendChild(opt);
-
-                // if a select already has this value selected, render options immediately
-                if (String(select.value) === newId) {
-                    const row = select.closest('.unit-row');
-                    if (row) renderOptionsForRow(row, newId);
-                }
-            });
-
-            // add server-data stub for future rebuilds
-            const serverData = document.getElementById('server-data');
-            if (serverData) {
-                const div = document.createElement('div');
-                div.setAttribute('data-unit-id', newId);
-                div.setAttribute('data-base-price', basePrice == null ? '' : String(basePrice));
-                opts.forEach(o => {
-                    const io = document.createElement('div');
-                    io.className = 'unit-option';
-                    io.setAttribute('data-option-id', String(o.optionId));
-                    io.setAttribute('data-code', o.code || '');
-                    io.setAttribute('data-name', o.name || '');
-                    io.setAttribute('data-price', o.price == null ? '' : String(o.price));
-                    div.appendChild(io);
-                });
-                serverData.appendChild(div);
-            }
-
+            // Unit създаден успешно - презареждаме страницата за да се обновят всички данни
             closeCreateUnitModal();
-            alert('Unit създаден успешно!');
+            alert('Unit създаден успешно! Страницата ще се презареди.');
+            window.location.reload();
         } catch (err) {
             console.error('submitNewUnit error:', err);
             alert('Грешка при създаване: ' + (err.message || 'network'));

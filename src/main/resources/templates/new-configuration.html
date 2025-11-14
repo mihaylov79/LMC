@@ -108,7 +108,8 @@
                             price: price
                         };
                     });
-                    unitOptionsMap[id] = options;
+                    // normalize to object with basePrice (unknown here) and options array
+                    unitOptionsMap[id] = { basePrice: null, options: options };
                 });
 
                 document.querySelectorAll('#server-data div[data-unit-idx]').forEach(u => {
@@ -240,41 +241,46 @@
     function renderOptionsForRow(rowElement, unitId) {
         const container = rowElement.querySelector('.options-for-row');
         container.innerHTML = '';
-        if (!unitId || !unitOptionsMap[unitId] || unitOptionsMap[unitId].length === 0) {
+        if (!unitId || !unitOptionsMap[unitId]) {
             return;
         }
-        unitOptionsMap[unitId].forEach(opt => {
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.gap = '0.4rem';
-            row.style.marginBottom = '0.25rem';
+        // support both shapes: array (legacy) or { basePrice, options }
+        const unitData = unitOptionsMap[unitId];
+        const optionsList = Array.isArray(unitData) ? unitData : (unitData && Array.isArray(unitData.options) ? unitData.options : []);
+        if (optionsList.length === 0) return;
 
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.className = 'opt-cb';
-            cb.dataset.optionId = opt.optionId;
+        optionsList.forEach(opt => {
+             const row = document.createElement('div');
+             row.style.display = 'flex';
+             row.style.alignItems = 'center';
+             row.style.gap = '0.4rem';
+             row.style.marginBottom = '0.25rem';
 
-            const label = document.createElement('label');
-            label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
+             const cb = document.createElement('input');
+             cb.type = 'checkbox';
+             cb.className = 'opt-cb';
+             cb.dataset.optionId = opt.optionId;
 
-            const qty = document.createElement('input');
-            qty.type = 'number';
-            qty.min = '1';
-            qty.value = '1';
-            qty.className = 'opt-qty';
-            qty.style.width = '70px';
-            qty.disabled = true;
-            qty.dataset.optionId = opt.optionId;
+             const label = document.createElement('label');
+             label.textContent = (opt.code ? opt.code + ' - ' : '') + (opt.name || '') + (opt.price != null ? ' (' + opt.price + ' EUR)' : '');
 
-            cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
+             const qty = document.createElement('input');
+             qty.type = 'number';
+             qty.min = '1';
+             qty.value = '1';
+             qty.className = 'opt-qty';
+             qty.style.width = '70px';
+             qty.disabled = true;
+             qty.dataset.optionId = opt.optionId;
 
-            row.appendChild(cb);
-            row.appendChild(label);
-            row.appendChild(qty);
-            container.appendChild(row);
-        });
-    }
+             cb.addEventListener('change', () => { qty.disabled = !cb.checked; });
+
+             row.appendChild(cb);
+             row.appendChild(label);
+             row.appendChild(qty);
+             container.appendChild(row);
+         });
+     }
 
     function reindexUnits() {
         const rows = Array.from(document.querySelectorAll('#units-container .unit-row'));
@@ -400,53 +406,134 @@
                 return response.json();
             })
             .then(newUnit => {
-                const newId = String(newUnit.id);
-                const label = (newUnit.unit?.code || '') + ' - ' + (newUnit.unit?.name || '');
-
-                const opts = options.map(s => {
-                    let code = null, name = null;
-                    if (s.label) {
-                        const parts = s.label.split(' - ');
-                        code = parts.length ? parts[0].trim() : null;
-                        name = parts.length > 1 ? parts.slice(1).join(' - ').trim() : null;
-                    }
-                    return { optionId: String(s.optionId), code: code, name: name, price: null };
-                });
-
-                unitOptionsMap[newId] = opts;
-
-                if (unitTemplate) {
-                    const opt = document.createElement('option');
-                    opt.value = newId;
-                    opt.textContent = label;
-                    unitTemplate.appendChild(opt);
-                }
-
-                document.querySelectorAll('#units-container select').forEach(select => {
-                    const opt = document.createElement('option');
-                    opt.value = newId;
-                    opt.textContent = label;
-                    select.appendChild(opt);
-                });
-
-                const serverData = document.getElementById('server-data');
-                if (serverData) {
-                    const div = document.createElement('div');
-                    div.setAttribute('data-unit-id', newId);
-                    opts.forEach(o => {
-                        const io = document.createElement('div');
-                        io.className = 'unit-option';
-                        io.setAttribute('data-option-id', String(o.optionId));
-                        io.setAttribute('data-code', o.code || '');
-                        io.setAttribute('data-name', o.name || '');
-                        io.setAttribute('data-price', o.price == null ? '' : String(o.price));
-                        div.appendChild(io);
-                    });
-                    serverData.appendChild(div);
-                }
-
+                // Close modal
                 closeCreateUnitModal();
-                alert('Unit създаден успешно!');
+
+                // Defensive extraction of id and label
+                const createdId = newUnit.id || newUnit.unit?.id || newUnit.configurableUnitId || null;
+                const unitName = newUnit.unit?.name || newUnit.unitName || (newUnit.unit && newUnit.unit.unit && newUnit.unit.unit.name) || '';
+                const unitCode = newUnit.code || newUnit.unit?.code || (newUnit.unit && newUnit.unit.code) || '';
+                const displayText = (unitCode ? unitCode + ' - ' : '') + unitName;
+
+                // 1) Insert option into unitOptionsTemplate and into all existing selects
+                try {
+                    // create option element
+                    const optEl = document.createElement('option');
+                    optEl.value = createdId;
+                    optEl.textContent = displayText || (newUnit.name || 'Нов Unit');
+
+                    // append to template
+                    if (unitTemplate) {
+                        // unitTemplate contains innerHTML of <option> elements; append a new one
+                        // safer to append node to a hidden select inside template
+                        // find if template contains a <option> wrapper; append by string fallback
+                        try {
+                            // try to append to a real select if present
+                            const tempSelect = unitTemplate.querySelector('select');
+                            if (tempSelect) tempSelect.appendChild(optEl.cloneNode(true));
+                            else unitTemplate.innerHTML += optEl.outerHTML;
+                        } catch (e) {
+                            unitTemplate.innerHTML += optEl.outerHTML;
+                        }
+                    }
+
+                    // append to all visible selects (.unit-select)
+                    document.querySelectorAll('select.unit-select').forEach(sel => {
+                        try { sel.appendChild(optEl.cloneNode(true)); } catch (e) {}
+                    });
+                } catch (e) {
+                    console.warn('Не можа да добави option към шаблона:', e);
+                }
+
+                // 2) Update client-side maps so renderOptionsForRow can display options immediately
+                // Use returned newUnit.options OR use the selections we sent (which have optionId and quantity)
+                let optionsForMap = [];
+                if (Array.isArray(newUnit.options) && newUnit.options.length) {
+                    // expected shape: [{ option: { id, code, name, price }, basePrice: ... }]
+                    optionsForMap = newUnit.options.map(o => ({
+                        optionId: o.option?.id || o.id || o.optionId,
+                        code: o.option?.code || o.code || '',
+                        name: o.option?.name || o.name || '',
+                        price: (o.option && o.option.price != null) ? o.option.price : (o.price != null ? o.price : null)
+                    }));
+                } else if (Array.isArray(newUnit.optionSelections) && newUnit.optionSelections.length) {
+                    optionsForMap = newUnit.optionSelections.map(o => ({ optionId: o.optionId || o.id, code: '', name: '', price: o.price != null ? o.price : null }));
+                } else {
+                    // fallback from options chosen in modal (we at least have ids and quantities)
+                    optionsForMap = options.map(o => ({ optionId: o.optionId, code: '', name: o.label || '', price: null }));
+                }
+
+                // also try to set basePrice if server provided it
+                const basePrice = (newUnit.basePrice != null) ? newUnit.basePrice : (newUnit.unit?.basePrice != null ? newUnit.unit.basePrice : null);
+
+                if (createdId) {
+                    unitOptionsMap[createdId] = { basePrice: basePrice, options: optionsForMap };
+                }
+
+                // 3) Add a new row to the units list and pre-select the created unit and options
+                try {
+                    const newRow = document.createElement('div');
+                    newRow.className = 'unit-row';
+
+                    const select = document.createElement('select');
+                    select.className = 'unit-select';
+                    select.required = true;
+                    // populate select options from template
+                    select.innerHTML = unitTemplate.innerHTML;
+
+                    const qty = document.createElement('input');
+                    qty.type = 'number'; qty.min = '1'; qty.value = '1'; qty.required = true; qty.placeholder = 'Бр.';
+
+                    const optionsWrapper = document.createElement('div');
+                    optionsWrapper.className = 'inline-options';
+                    const optionsInner = document.createElement('div');
+                    optionsInner.className = 'options-for-row';
+                    optionsWrapper.appendChild(optionsInner);
+
+                    const btn = document.createElement('button');
+                    btn.type = 'button'; btn.className = 'remove-btn'; btn.textContent = 'Премахни';
+                    btn.addEventListener('click', () => { newRow.remove(); reindexUnits(); });
+
+                    newRow.appendChild(select);
+                    newRow.appendChild(qty);
+                    newRow.appendChild(optionsWrapper);
+                    newRow.appendChild(btn);
+
+                    unitsContainer.appendChild(newRow);
+                    reindexUnits();
+
+                    // set selected value
+                    if (createdId) select.value = createdId;
+
+                    // render options for this row from unitOptionsMap
+                    renderOptionsForRow(newRow, select.value);
+
+                    // apply selections (checkboxes & quantities) from the modal 'options' or server response
+                    const selections = Array.isArray(newUnit.optionSelections) && newUnit.optionSelections.length ? newUnit.optionSelections : options;
+                    if (Array.isArray(selections)) {
+                        selections.forEach((s) => {
+                            try {
+                                const cb = newRow.querySelector(`.options-for-row .opt-cb[data-option-id="${s.optionId}"]`);
+                                const q = newRow.querySelector(`.options-for-row .opt-qty[data-option-id="${s.optionId}"]`);
+                                if (cb) { cb.checked = true; if (q) { q.disabled = false; q.value = Math.max(1, Number(s.quantity) || 1); } }
+                            } catch (e) {}
+                        });
+                    }
+
+                    // trigger a price update if there is a function or later on submit will calculate
+                    if (typeof updateUnitPrice === 'function') {
+                        try { updateUnitPrice(newRow); } catch (e) { /* best-effort */ }
+                    }
+
+                    // Inform user the unit was added
+                    alert('Unit създаден успешно и добавен в списъка (форма е непокътната).');
+
+                } catch (e) {
+                    console.warn('Неуспешно добавяне на нов ред след създаване на Unit:', e);
+                    // fallback: reload if something went badly
+                    window.location.reload();
+                }
+
             })
             .catch(error => {
                 console.error('Error:', error);
