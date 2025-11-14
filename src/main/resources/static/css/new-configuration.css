@@ -86,7 +86,7 @@
     border-radius: 4px;
     display: grid;
     grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
     gap: 0.5rem;
     width: 100%;
     box-sizing: border-box;
@@ -125,6 +125,13 @@
     padding: 0.4rem 0.6rem;
     border-radius: 4px;
     cursor: pointer;
+}
+
+/* Options on third row, spanning both columns */
+.unit-row .inline-options {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin-top: 0.5rem;
 }
 
 /* Action buttons at bottom of form - let them be wide */
@@ -225,4 +232,31 @@ form:not(.logout-form) {
 }
 #createUnitModal .choices__list--dropdown {
     width: 100%;
+}
+
+/* Options display improvements - smaller font and narrower quantity field */
+
+.unit-row .options-for-row > div {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem !important;  /* smaller font for better fit */
+}
+
+.unit-row .options-for-row label {
+    font-size: 0.85rem !important;  /* smaller font for option labels */
+    flex: 1;
+    min-width: 0;
+}
+
+.unit-row .options-for-row input.opt-qty {
+    width: 50px !important;         /* narrower quantity field for options */
+    max-width: 50px !important;
+    font-size: 0.85rem !important;  /* match label font size */
+    padding: 0.3rem !important;
+}
+
+.unit-row .options-for-row input.opt-cb {
+    flex-shrink: 0;                 /* checkbox stays same size */
 }
