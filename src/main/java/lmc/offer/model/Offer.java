@@ -24,7 +24,7 @@ public class Offer {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false, name = "offer_number")
     private String offerNumber;
 
 
@@ -37,13 +37,22 @@ public class Offer {
     @JoinColumn(name = "configuration_id")
     private Configuration configuration;
 
+    @Column(name = "installation_fee")
+    private BigDecimal installationFee;
+
+    @Column(name = "delivery_fee")
+    private BigDecimal deliveryFee;
+
+    @Column(name = "transport_costs")
+    private BigDecimal transportCosts;
+
     @Column
     private CurrencyType currency;
 
     @Column
     private BigDecimal discount;
 
-    @Column
+    @Column(name = "final_price")
     private BigDecimal finalPrice;
 
     @Column
@@ -57,7 +66,7 @@ public class Offer {
     private User createdBy;
 
     @Column
-    private boolean accepted;
+    private OfferStatus status;
 
 
 }
