@@ -29,7 +29,7 @@ public class Offer {
 
 
     @ManyToOne
-    @JoinColumn(name = "company_id")
+    @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
 
