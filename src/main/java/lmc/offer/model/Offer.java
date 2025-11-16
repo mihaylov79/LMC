@@ -6,6 +6,7 @@ import lmc.configuration.model.Configuration;
 import lmc.unit.model.CurrencyType;
 import lmc.user.model.User;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -66,6 +68,7 @@ public class Offer {
     private User createdBy;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private OfferStatus status;
 
 

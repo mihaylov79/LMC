@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -16,4 +17,6 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
     Long countByCreated_Year(@Param("createdYear") int createdYear);
 
     boolean existsByOfferNumber(String offerNumber);
+
+    Optional<Offer> findByOfferNumber(String offerNumber);
 }

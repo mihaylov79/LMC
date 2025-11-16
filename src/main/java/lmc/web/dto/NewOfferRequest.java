@@ -5,9 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import lmc.company.model.Company;
 import lmc.configuration.model.Configuration;
 import lmc.unit.model.CurrencyType;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
+@Data
 public class NewOfferRequest {
 
     @NotBlank(message = "Това поле не може да бъде празно!")
