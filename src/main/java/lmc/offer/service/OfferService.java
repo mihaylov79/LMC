@@ -75,6 +75,7 @@ public class OfferService {
                 .createdBy(currentUser)
                 .status(OfferStatus.PENDING)
                 .expires(LocalDate.now().plusMonths(1))
+                .deleted(false)
                 .finalPrice(calculateOfferFinalPrice(request).setScale(2, RoundingMode.HALF_UP))
                 .build();
 
@@ -93,5 +94,11 @@ public class OfferService {
         BigDecimal transportCosts = request.getTransportCosts() == null ? BigDecimal.ZERO : request.getTransportCosts();
 
         return discountedPrice.add(deliveryFee).add(installationFee).add(transportCosts);
+    }
+
+    @Transactional(readOnly = true)
+    public Offer getOfferWithConfiguration(UUID offerId){
+        return offerRepository.findByIdWithConfiguration(offerId)
+                .orElseThrow(() -> new IllegalArgumentException("Оферта ис идентификация: %s не съществува!".formatted(offerId)));
     }
 }

@@ -19,4 +19,11 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
     boolean existsByOfferNumber(String offerNumber);
 
     Optional<Offer> findByOfferNumber(String offerNumber);
+
+    @Query("SELECT o FROM Offer o " +
+           "LEFT JOIN FETCH o.configuration c " +
+           "LEFT JOIN FETCH c.includedUnits cu " +
+           "LEFT JOIN FETCH cu.configurableUnit " +
+           "WHERE o.id = :offerId")
+    Optional<Offer> findByIdWithConfiguration(@Param("offerId") UUID offerId);
 }

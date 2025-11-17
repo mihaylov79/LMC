@@ -71,5 +71,8 @@ public class Offer {
     @Enumerated(EnumType.STRING)
     private OfferStatus status;
 
+    @Column
+    private boolean deleted;
+
 
 }
