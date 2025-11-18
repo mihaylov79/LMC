@@ -62,7 +62,7 @@
 
         <!-- Такса монтаж -->
         <div class="field">
-            <label for="field-installationFee">Такса монтаж</label>
+            <label for="field-installationFee">Такса монтаж (EUR)</label>
             <input type="number" step="0.01" min="0" id="field-installationFee" name="installationFee" placeholder="0.00"
                    th:value="${newOfferRequest.installationFee}">
             <span th:if="${#fields.hasErrors('installationFee')}" th:errors="*{installationFee}" class="errors"></span>
@@ -70,7 +70,7 @@
 
         <!-- Такса доставка -->
         <div class="field">
-            <label for="field-deliveryFee">Такса доставка</label>
+            <label for="field-deliveryFee">Такса доставка (EUR)</label>
             <input type="number" step="0.01" min="0" id="field-deliveryFee" name="deliveryFee" placeholder="0.00"
                    th:value="${newOfferRequest.deliveryFee}">
             <span th:if="${#fields.hasErrors('deliveryFee')}" th:errors="*{deliveryFee}" class="errors"></span>
@@ -78,7 +78,7 @@
 
         <!-- Транспортни разходи -->
         <div class="field">
-            <label for="field-transportCosts">Транспортни разходи</label>
+            <label for="field-transportCosts">Транспортни разходи (EUR)</label>
             <input type="number" step="0.01" min="0" id="field-transportCosts" name="transportCosts" placeholder="0.00"
                    th:value="${newOfferRequest.transportCosts}">
             <span th:if="${#fields.hasErrors('transportCosts')}" th:errors="*{transportCosts}" class="errors"></span>

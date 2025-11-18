@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -182,5 +183,20 @@ public class OfferService {
      */
     public ConfigurationSnapshotDTO getConfigurationSnapshot(Offer offer) {
         return offerMapper.parseConfigurationSnapshot(offer.getConfigurationSnapshot());
+    }
+
+    /**
+     * Връща всички активни оферти със съответните snapshots на конфигурациите.
+     * Използва се за визуализация в home страницата.
+     *
+     * @return Map с UUID на офертата като ключ и ConfigurationSnapshotDTO като стойност
+     */
+    public Map<UUID, ConfigurationSnapshotDTO> getAllOffersWithSnapshots() {
+        List<Offer> offers = getAllOffersWithoutDeleted();
+        return offers.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        Offer::getId,
+                        this::getConfigurationSnapshot
+                ));
     }
 }

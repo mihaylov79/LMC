@@ -1,16 +1,22 @@
 package lmc.web;
 
 import lmc.configuration.service.ConfigurationService;
+import lmc.offer.model.Offer;
 import lmc.offer.service.OfferService;
 import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
+import lmc.web.dto.ConfigurationSnapshotDTO;
 import lmc.web.dto.LoginRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Controller
 public class IndexController {
@@ -48,11 +54,15 @@ public class IndexController {
     public ModelAndView getHomePage(@AuthenticationPrincipal CustomUserDetails details){
         User user = userService.getUserById(details.getId());
 
+        List<Offer> offers = offerService.getAllOffersWithoutDeleted();
+        Map<UUID, ConfigurationSnapshotDTO> offerSnapshots = offerService.getAllOffersWithSnapshots();
+
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("home");
         modelAndView.addObject("user", user);
         modelAndView.addObject("configurations", configurationService.getAllConfigurations());
-        modelAndView.addObject("offers", offerService.getAllOffersWithoutDeleted());
+        modelAndView.addObject("offers", offers);
+        modelAndView.addObject("offerSnapshots", offerSnapshots);
 
         return modelAndView;
 

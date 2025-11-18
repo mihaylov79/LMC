@@ -38,18 +38,32 @@ public class OfferController {
     }
 
     @GetMapping("/details/{offerId}")
-    public ModelAndView showOfferDetails(@PathVariable UUID offerId){
+    public ModelAndView showOfferDetails(@PathVariable UUID offerId, @AuthenticationPrincipal CustomUserDetails details){
         Offer offer = offerService.getOfferWithConfiguration(offerId);
+        User user = userService.getUserById(details.getId());
 
         // Извличаме snapshot-а на конфигурацията към момента на създаване на офертата
         ConfigurationSnapshotDTO configurationSnapshot = offerService.getConfigurationSnapshot(offer);
 
-        ModelAndView modelAndView = new ModelAndView("offer-detalis");
+        ModelAndView modelAndView = new ModelAndView("offer-details");
+        modelAndView.addObject("user", user);
         modelAndView.addObject("offer", offer);
         modelAndView.addObject("configurationSnapshot", configurationSnapshot);
 
         return modelAndView;
 
+    }
+
+    @PostMapping("/{offerId}/cancel")
+    public ModelAndView cancelOffer(@PathVariable UUID offerId) {
+        offerService.cancelOffer(offerId, null);
+        return new ModelAndView("redirect:/home");
+    }
+
+    @PostMapping("/{offerId}/delete")
+    public ModelAndView deleteOffer(@PathVariable UUID offerId) {
+        offerService.deleteOffer(offerId);
+        return new ModelAndView("redirect:/home");
     }
 
     @GetMapping("/create/new")

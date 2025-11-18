@@ -48,24 +48,24 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="offer : ${offers}">
+                    <tr th:each="offer : ${offers}" th:with="snapshot=${offerSnapshots[offer.id]}">
                         <td>
-                            <a th:href="@{/offers/{id}/details(id=${offer.id})}" th:text="${offer.offerNumber}">2025-00001</a>
+                            <a th:href="@{/offers/details/{id}(id=${offer.id})}" th:text="${offer.offerNumber}">2025-00001</a>
                         </td>
                         <td th:text="${offer.company.companyName}">Company Name</td>
                         <td>
                             <div>
-                                <strong th:text="${offer.configuration.code}">CONFIG-001</strong>
+                                <strong th:text="${snapshot.code}">CONFIG-001</strong>
                             </div>
-                            <div class="desc" th:text="${offer.configuration.description}">Configuration description</div>
+                            <div class="desc" th:text="${snapshot.description}">Configuration description</div>
                             <div class="desc">
-                                <span th:text="'модел: ' + ${offer.configuration.model}">Model</span>,
-                                <span th:text="'линия: ' + ${offer.configuration.line}">Line</span>
+                                <span th:text="'модел: ' + ${snapshot.model}">Model</span>,
+                                <span th:text="'линия: ' + ${snapshot.line}">Line</span>
                             </div>
                         </td>
                         <td th:text="${#temporals.format(offer.expires, 'dd.MM.yyyy')}">31.12.2025</td>
                         <td>
-                            <span th:text="${offer.status}"
+                            <span th:text="${offer.status.description}"
                                   th:classappend="${offer.status.name() == 'PENDING' ? 'status-pending' : (offer.status.name() == 'ACCEPTED' ? 'status-accepted' : (offer.status.name() == 'REJECTED' ? 'status-rejected' : 'status-canceled'))}">
                                 PENDING
                             </span>

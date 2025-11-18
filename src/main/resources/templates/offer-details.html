@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Оферта ' + ${offer.offerNumber}">Оферта</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/configuration-details2.css">
+    <link rel="stylesheet" href="/css/user-details.css">
+</head>
+<body>
+
+<div class="header-container">
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+</div>
+
+<div class="front-container">
+    <th:block th:insert="~{fragments/user-info :: userInfo}"></th:block>
+
+    <div class="configuration-details">
+        <div class="menu">
+            <ul>
+                <li><a th:href="@{/home}">Назад</a></li>
+                <li>
+                    <form th:action="@{/offers/{id}/cancel(id=${offer.id})}" th:method="POST" style="display: inline;">
+                        <button type="submit"
+                                th:disabled="${offer.status.name() == 'ACCEPTED' || offer.status.name() == 'CANCELED'}"
+                                onclick="return confirm('Сигурни ли сте, че искате да анулирате тази оферта?');">
+                            Анулирай
+                        </button>
+                    </form>
+                </li>
+                <li>
+                    <form th:action="@{/offers/{id}/delete(id=${offer.id})}" th:method="POST" style="display: inline;">
+                        <button type="submit"
+                                onclick="return confirm('Сигурни ли сте, че искате да изтриете тази оферта? Тя ще бъде скрита от списъка.');">
+                            Изтрий
+                        </button>
+                    </form>
+                </li>
+                <!-- Бъдещ бутон за клониране -->
+                <!--
+                <li><a th:href="@{/offers/create-from/{offerId}(offerId=${offer.id})}">Създай нова от тази</a></li>
+                -->
+            </ul>
+        </div>
+
+        <!-- Оферта Header Info -->
+        <div class="info-row" role="group" aria-label="offer header info">
+            <dl class="info-item">
+                <dt>Номер Оферта</dt>
+                <dd th:text="${offer.offerNumber}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Клиент</dt>
+                <dd>
+                    <strong th:text="${offer.company.companyName}">Company Name</strong>
+                    <div style="font-size: 0.9em; color: #666;" th:text="${offer.company.email}">email@example.com</div>
+                </dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Създадена</dt>
+                <dd th:text="${#temporals.format(offer.created, 'dd.MM.yyyy')}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Валидна до</dt>
+                <dd th:text="${#temporals.format(offer.expires, 'dd.MM.yyyy')}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Статус</dt>
+                <dd>
+                    <span th:text="${offer.status.description}"
+                          th:classappend="${offer.status.name() == 'PENDING' ? 'status-pending' : (offer.status.name() == 'ACCEPTED' ? 'status-accepted' : (offer.status.name() == 'REJECTED' ? 'status-rejected' : 'status-canceled'))}">
+                        PENDING
+                    </span>
+                </dd>
+            </dl>
+        </div>
+
+        <!-- Configuration Snapshot Image -->
+        <div class="image-wrapper">
+            <img th:src="${#strings.isEmpty(configurationSnapshot.imageUrl) ? 'https://cdn.bitrix24.eu/b12564567/landing/95a/95a628046550a872c8a37ea86768862a/instelma_header_image_home_page_2_1750kh950_1x_jpg' : configurationSnapshot.imageUrl}"
+                 th:alt="${configurationSnapshot.code}" />
+        </div>
+
+        <!-- Configuration Info from Snapshot -->
+        <div class="info-row" role="group" aria-label="configuration basic info">
+            <dl class="info-item">
+                <dt>Код Конфигурация</dt>
+                <dd th:text="${configurationSnapshot.code}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Модел</dt>
+                <dd th:text="${configurationSnapshot.model}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Линия</dt>
+                <dd th:text="${configurationSnapshot.line}">-</dd>
+            </dl>
+            <dl class="info-item">
+                <dt>Описание</dt>
+                <dd th:text="${configurationSnapshot.description}">-</dd>
+            </dl>
+        </div>
+
+        <!-- Included Modules from Snapshot -->
+        <div class="modules-section">
+            <div class="modules-right-wrapper">
+                <div class="modules-right">
+                    <dt>Включени модули</dt>
+                    <table class="modules-mini-table" role="presentation">
+                        <thead>
+                        <tr>
+                            <th>Код</th>
+                            <th>Име</th>
+                            <th>бр</th>
+                            <th style="text-align:right">цена</th>
+                            <th style="text-align:right">общо</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="unit : ${configurationSnapshot.includedUnits}">
+                            <td th:text="${unit.configurableUnitCode}">CODE</td>
+                            <td th:text="${unit.unitName}">Name</td>
+                            <td th:text="${unit.quantity}">1</td>
+                            <td class="numeric" th:text="${unit.unitPrice} + ' ' + ${offer.currency}">0.00 EUR</td>
+                            <td class="numeric" th:text="${unit.unitPrice * unit.quantity} + ' ' + ${offer.currency}">0.00 EUR</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Offer Pricing Breakdown -->
+            <div class="bottom-right">
+                <div class="price-date">Цена конфигурация: <strong th:text="${offer.configurationPrice} + ' ' + ${offer.currency}">0.00 EUR</strong></div>
+                <div class="price-date" th:if="${offer.deliveryFee != null && offer.deliveryFee > 0}">
+                    Доставка: <strong th:text="${offer.deliveryFee} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                </div>
+                <div class="price-date" th:if="${offer.installationFee != null && offer.installationFee > 0}">
+                    Монтаж: <strong th:text="${offer.installationFee} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                </div>
+                <div class="price-date" th:if="${offer.transportCosts != null && offer.transportCosts > 0}">
+                    Транспорт: <strong th:text="${offer.transportCosts} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                </div>
+                <div class="price-date" th:if="${offer.discount != null && offer.discount > 0}">
+                    Отстъпка: <strong th:text="${offer.discount} + '%'">0%</strong>
+                </div>
+                <hr style="width: 100%; margin: 0.5rem 0; border: 1px solid #ddd;">
+                <div class="price" th:text="'КРАЙНА ЦЕНА: ' + ${offer.finalPrice} + ' ' + ${offer.currency}">- EUR</div>
+                <div class="price-date" th:if="${offer.createdBy != null}">
+                    Създадена от: <strong th:text="${offer.createdBy.firstName} + ' ' + ${offer.createdBy.lastName}">User</strong>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
+
