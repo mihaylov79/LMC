@@ -2,21 +2,20 @@ package lmc.web.dto;
 
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
-import lmc.company.model.Company;
-import lmc.configuration.model.Configuration;
 import lmc.unit.model.CurrencyType;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 @Data
 public class NewOfferRequest {
 
     @NotNull(message = "Клиентът е задължителен!")
-    private Company company;
+    private UUID companyId;
 
     @NotNull(message = "Конфигурацията е задължителна!")
-    private Configuration configuration;
+    private UUID configurationId;
 
     @Digits(integer = 7, fraction = 2, message = "Невалиден формат за цена!")
     private BigDecimal installationFee;

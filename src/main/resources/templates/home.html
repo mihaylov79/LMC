@@ -52,7 +52,7 @@
                         <td>
                             <a th:href="@{/offers/{id}/details(id=${offer.id})}" th:text="${offer.offerNumber}">2025-00001</a>
                         </td>
-                        <td th:text="${offer.company.name}">Company Name</td>
+                        <td th:text="${offer.company.companyName}">Company Name</td>
                         <td>
                             <div>
                                 <strong th:text="${offer.configuration.code}">CONFIG-001</strong>

@@ -52,7 +52,7 @@ public class IndexController {
         modelAndView.setViewName("home");
         modelAndView.addObject("user", user);
         modelAndView.addObject("configurations", configurationService.getAllConfigurations());
-        modelAndView.addObject("offers", offerService.getAllOffers());
+        modelAndView.addObject("offers", offerService.getAllOffersWithoutDeleted());
 
         return modelAndView;
 

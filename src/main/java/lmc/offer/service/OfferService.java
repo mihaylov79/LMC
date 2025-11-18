@@ -1,6 +1,9 @@
 package lmc.offer.service;
 
+import lmc.company.model.Company;
+import lmc.company.service.CompanyService;
 import lmc.configuration.model.Configuration;
+import lmc.configuration.service.ConfigurationService;
 import lmc.offer.mapper.OfferMapper;
 import lmc.offer.model.Offer;
 import lmc.offer.model.OfferStatus;
@@ -23,25 +26,23 @@ public class OfferService {
 
     private final OfferRepository offerRepository;
     private final OfferMapper offerMapper;
+    private final CompanyService companyService;
+    private final ConfigurationService configurationService;
 
-    public OfferService(OfferRepository offerRepository, OfferMapper offerMapper) {
+    public OfferService(OfferRepository offerRepository, OfferMapper offerMapper,
+                        CompanyService companyService, ConfigurationService configurationService) {
         this.offerRepository = offerRepository;
         this.offerMapper = offerMapper;
+        this.companyService = companyService;
+        this.configurationService = configurationService;
     }
 
-    /**
-     * Връща всички активни оферти (без изтритите).
-     * Филтрира директно в базата данни за по-добра производителност.
-     * За да видиш и изтритите, използвай getAllOffersIncludingDeleted().
-     */
-    public List<Offer> getAllOffers() {
+
+    public List<Offer> getAllOffersWithoutDeleted() {
         return offerRepository.findByDeletedFalse();
     }
 
-    /**
-     * Връща всички оферти, включително изтритите (deleted=true).
-     * Сортирани по: deleted (false първи), после по име на клиента.
-     */
+
     public List<Offer> getAllOffersIncludingDeleted() {
         return offerRepository.findAllByOrderByDeletedAscCompanyCompanyNameAsc();
     }
@@ -75,7 +76,10 @@ public class OfferService {
     @Transactional
     public Offer createNewOffer(NewOfferRequest request, User currentUser) {
 
-        Configuration configuration = request.getConfiguration();
+        // Зареждаме ентитетите от UUID-тата в request
+        Company company = companyService.getCompanyById(request.getCompanyId());
+        Configuration configuration = configurationService.findConfigurationById(request.getConfigurationId());
+
         BigDecimal configurationPrice = configuration.getTotalPrice();
         if (configurationPrice == null) configurationPrice = BigDecimal.ZERO;
 
@@ -84,7 +88,7 @@ public class OfferService {
 
         Offer offer = Offer.builder()
                 .offerNumber(generateOfferNumber())
-                .company(request.getCompany())
+                .company(company)
                 .configuration(configuration)
                 .configurationPrice(configurationPrice)
                 .configurationSnapshot(configurationSnapshot)
