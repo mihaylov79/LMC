@@ -21,7 +21,65 @@
 
     <div class="tabs">
         <div class="offers">
-            <p>Offers HERE!</p>
+            <div th:if="${offerMessage != null}" class="alert alert-success" th:text="${offerMessage}"></div>
+
+            <div class="menu">
+                <ul>
+                    <li><a th:href="@{/offers/create/new}" class="create-offer-btn">Създай Оферта</a></li>
+                </ul>
+            </div>
+
+            <div class="configurations-table">
+                <div class="table-header">
+                    <div class="search-box">
+                        <input type="text" id="searchOffers" placeholder="Търси оферта...">
+                    </div>
+                    <h3 class="table-title">Оферти</h3>
+                </div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Номер Оферта</th>
+                        <th>Клиент</th>
+                        <th>Конфигурация</th>
+                        <th>Валидна до</th>
+                        <th>Статус</th>
+                        <th>Крайна цена</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="offer : ${offers}">
+                        <td>
+                            <a th:href="@{/offers/{id}/details(id=${offer.id})}" th:text="${offer.offerNumber}">2025-00001</a>
+                        </td>
+                        <td th:text="${offer.company.name}">Company Name</td>
+                        <td>
+                            <div>
+                                <strong th:text="${offer.configuration.code}">CONFIG-001</strong>
+                            </div>
+                            <div class="desc" th:text="${offer.configuration.description}">Configuration description</div>
+                            <div class="desc">
+                                <span th:text="'модел: ' + ${offer.configuration.model}">Model</span>,
+                                <span th:text="'линия: ' + ${offer.configuration.line}">Line</span>
+                            </div>
+                        </td>
+                        <td th:text="${#temporals.format(offer.expires, 'dd.MM.yyyy')}">31.12.2025</td>
+                        <td>
+                            <span th:text="${offer.status}"
+                                  th:classappend="${offer.status.name() == 'PENDING' ? 'status-pending' : (offer.status.name() == 'ACCEPTED' ? 'status-accepted' : (offer.status.name() == 'REJECTED' ? 'status-rejected' : 'status-canceled'))}">
+                                PENDING
+                            </span>
+                        </td>
+                        <td>
+                            <strong th:text="${offer.finalPrice} + ' ' + ${offer.currency}">10000 EUR</strong>
+                            <div class="desc" style="font-size: 0.85em;">
+                                <span th:text="'конфигурация: ' + ${offer.configurationPrice} + ' ' + ${offer.currency}">config: 9500 EUR</span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="configurations">
@@ -92,6 +150,30 @@
 </div>
 
 <script>
+    // Търсачка за оферти
+    document.getElementById('searchOffers').addEventListener('keyup', function() {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.offers .configurations-table tbody tr');
+
+        rows.forEach(row => {
+            const offerNumber = row.cells[0].textContent.toLowerCase();
+            const clientName = row.cells[1].textContent.toLowerCase();
+            const configDescription = row.cells[2].textContent.toLowerCase();
+            const status = row.cells[4].textContent.toLowerCase();
+            const price = row.cells[5].textContent.toLowerCase();
+
+            if (offerNumber.includes(searchValue) ||
+                clientName.includes(searchValue) ||
+                configDescription.includes(searchValue) ||
+                status.includes(searchValue) ||
+                price.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
     // Търсачка за конфигурации
     document.getElementById('searchConfigurations').addEventListener('keyup', function() {
         const searchValue = this.value.toLowerCase();

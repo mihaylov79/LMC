@@ -9,13 +9,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -38,6 +39,14 @@ public class Offer {
     @ManyToOne
     @JoinColumn(name = "configuration_id")
     private Configuration configuration;
+
+    @Column(name = "configuration_price")
+    private BigDecimal configurationPrice;
+
+    // JSON snapshot на конфигурацията към момента на създаване на офертата
+    // Запазва код, описание, модел, единици, опции и цени
+    @Column(name = "configuration_snapshot", columnDefinition = "TEXT")
+    private String configurationSnapshot;
 
     @Column(name = "installation_fee")
     private BigDecimal installationFee;
@@ -69,9 +78,11 @@ public class Offer {
 
     @Column
     @Enumerated(EnumType.STRING)
+    @Setter
     private OfferStatus status;
 
     @Column
+    @Setter
     private boolean deleted;
 
 

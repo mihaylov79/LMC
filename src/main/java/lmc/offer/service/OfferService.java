@@ -1,10 +1,14 @@
 package lmc.offer.service;
 
+import lmc.configuration.model.Configuration;
+import lmc.offer.mapper.OfferMapper;
 import lmc.offer.model.Offer;
 import lmc.offer.model.OfferStatus;
 import lmc.offer.repository.OfferRepository;
 import lmc.user.model.User;
+import lmc.web.dto.ConfigurationSnapshotDTO;
 import lmc.web.dto.NewOfferRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,87 +22,161 @@ import java.util.UUID;
 public class OfferService {
 
     private final OfferRepository offerRepository;
+    private final OfferMapper offerMapper;
 
-    public OfferService(OfferRepository offerRepository) {
+    public OfferService(OfferRepository offerRepository, OfferMapper offerMapper) {
         this.offerRepository = offerRepository;
+        this.offerMapper = offerMapper;
     }
 
-    public Offer getOfferById(UUID offerId){
-         return offerRepository.findById(offerId)
-                 .orElseThrow(() -> new IllegalArgumentException("Оферта с идентификация: %s не съществува!"
-                         .formatted(offerId)));
+    /**
+     * Връща всички активни оферти (без изтритите).
+     * Филтрира директно в базата данни за по-добра производителност.
+     * За да видиш и изтритите, използвай getAllOffersIncludingDeleted().
+     */
+    public List<Offer> getAllOffers() {
+        return offerRepository.findByDeletedFalse();
     }
 
-    public String generateOfferNumber(){
+    /**
+     * Връща всички оферти, включително изтритите (deleted=true).
+     * Сортирани по: deleted (false първи), после по име на клиента.
+     */
+    public List<Offer> getAllOffersIncludingDeleted() {
+        return offerRepository.findAllByOrderByDeletedAscCompanyCompanyNameAsc();
+    }
 
+    public Offer getOfferById(UUID offerId) {
+        return offerRepository.findById(offerId)
+                .orElseThrow(() -> new IllegalArgumentException("Оферта с идентификация: %s не съществува!".formatted(offerId)));
+    }
+
+    public long countOffersByYear() {
         int year = LocalDate.now().getYear();
-        long size = countOffersByYear() + 1;
+        Long count = offerRepository.countByCreated_Year(year);
+        return count == null ? 0L : count;
+    }
 
-        String offerNumber = year + "-" + String.format("%05d", size);
+    public boolean existsByOfferNumber(String offerNumber) {
+        return offerRepository.existsByOfferNumber(offerNumber);
+    }
 
-        while (existsByOfferNumber(offerNumber)){
-            size++;
-            offerNumber = year + "-" + String.format("%05d", size);
+    public String generateOfferNumber() {
+        int year = LocalDate.now().getYear();
+        long seq = countOffersByYear() + 1;
+        String candidate = year + "-" + String.format("%05d", seq);
+        while (existsByOfferNumber(candidate)) {
+            seq++;
+            candidate = year + "-" + String.format("%05d", seq);
         }
-
-        return offerNumber;
-
-    }
-
-    public List<Offer> getAllOffers(){
-        return offerRepository.findAll();
-    }
-
-    public long countOffersByYear(){
-        int  year = LocalDate.now().getYear();
-       return offerRepository.countByCreated_Year(year);
-    }
-
-    public boolean existsByOfferNumber(String offerNumber){
-      return offerRepository.existsByOfferNumber(offerNumber);
+        return candidate;
     }
 
     @Transactional
-    public Offer createNewOffer(NewOfferRequest request, User currentUser){
+    public Offer createNewOffer(NewOfferRequest request, User currentUser) {
 
+        Configuration configuration = request.getConfiguration();
+        BigDecimal configurationPrice = configuration.getTotalPrice();
+        if (configurationPrice == null) configurationPrice = BigDecimal.ZERO;
 
-        Offer newOffer = Offer.builder()
+        // Snapshot на конфигурацията към момента на създаване
+        String configurationSnapshot = offerMapper.createConfigurationSnapshot(configuration);
+
+        Offer offer = Offer.builder()
                 .offerNumber(generateOfferNumber())
-                .configuration(request.getConfiguration())
                 .company(request.getCompany())
-                .installationFee(request.getInstallationFee())
-                .deliveryFee(request.getDeliveryFee())
-                .transportCosts(request.getTransportCosts())
+                .configuration(configuration)
+                .configurationPrice(configurationPrice)
+                .configurationSnapshot(configurationSnapshot)
+                .installationFee(nvl(request.getInstallationFee()))
+                .deliveryFee(nvl(request.getDeliveryFee()))
+                .transportCosts(nvl(request.getTransportCosts()))
                 .currency(request.getCurrency())
-                .discount(request.getDiscount())
+                .discount(nvl(request.getDiscount()))
+                .finalPrice(calculateFinalPrice(configurationPrice, request).setScale(2, RoundingMode.HALF_UP))
                 .created(LocalDate.now())
+                .expires(LocalDate.now().plusMonths(1))
                 .createdBy(currentUser)
                 .status(OfferStatus.PENDING)
-                .expires(LocalDate.now().plusMonths(1))
                 .deleted(false)
-                .finalPrice(calculateOfferFinalPrice(request).setScale(2, RoundingMode.HALF_UP))
                 .build();
 
-        return offerRepository.save(newOffer);
+        // Retry-on-conflict за уникален offer_number
+        int attempts = 0;
+        while (true) {
+            try {
+                return offerRepository.save(offer);
+            } catch (DataIntegrityViolationException ex) {
+                if (++attempts > 3) throw ex;
+                offer = offer.toBuilder()
+                        .offerNumber(generateOfferNumber())
+                        .build();
+            }
+        }
     }
 
-    private BigDecimal calculateOfferFinalPrice(NewOfferRequest request){
+    private BigDecimal nvl(BigDecimal v) { return v == null ? BigDecimal.ZERO : v; }
 
-        BigDecimal configurationPrice = request.getConfiguration().getTotalPrice();
-
-        BigDecimal discountPercent = request.getDiscount() == null ? BigDecimal.ZERO : request.getDiscount();
-        BigDecimal discountRate = discountPercent.movePointLeft(2);
-        BigDecimal discountedPrice = configurationPrice.subtract(configurationPrice.multiply(discountRate));
-        BigDecimal deliveryFee = request.getDeliveryFee() == null ? BigDecimal.ZERO : request.getDeliveryFee();
-        BigDecimal installationFee = request.getInstallationFee() == null ? BigDecimal.ZERO : request.getInstallationFee();
-        BigDecimal transportCosts = request.getTransportCosts() == null ? BigDecimal.ZERO : request.getTransportCosts();
-
-        return discountedPrice.add(deliveryFee).add(installationFee).add(transportCosts);
+    private BigDecimal calculateFinalPrice(BigDecimal configurationPrice, NewOfferRequest request) {
+        BigDecimal discountPercent = nvl(request.getDiscount());
+        BigDecimal discountRate = discountPercent.movePointLeft(2); // безопасно вместо divide(100)
+        BigDecimal discounted = configurationPrice.subtract(configurationPrice.multiply(discountRate));
+        return discounted
+                .add(nvl(request.getDeliveryFee()))
+                .add(nvl(request.getInstallationFee()))
+                .add(nvl(request.getTransportCosts()));
     }
 
     @Transactional(readOnly = true)
-    public Offer getOfferWithConfiguration(UUID offerId){
+    public Offer getOfferWithConfiguration(UUID offerId) {
         return offerRepository.findByIdWithConfiguration(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("Оферта ис идентификация: %s не съществува!".formatted(offerId)));
+                .orElseThrow(() -> new IllegalArgumentException("Оферта с идентификация: %s не съществува!".formatted(offerId)));
+    }
+
+    /**
+     * Анулира оферта (променя статус на CANCELED).
+     * Офертата остава видима в списъка, но е маркирана като анулирана.
+     *
+     * @param offerId ID на офертата
+     * @param reason причина за анулиране (опционално)
+     * @return анулираната оферта
+     */
+    @Transactional
+    public Offer cancelOffer(UUID offerId, String reason) {
+        Offer offer = getOfferById(offerId);
+        if (offer.getStatus() == OfferStatus.ACCEPTED) {
+            throw new IllegalStateException("Не можете да анулирате приета оферта!");
+        }
+        Offer cancelled = offer.toBuilder()
+                .status(OfferStatus.CANCELED)
+                .build();
+        return offerRepository.save(cancelled);
+    }
+
+    /**
+     * Изтрива оферта (soft delete - маркира като deleted=true).
+     * Офертата се крие от списъка, но остава в базата данни.
+     *
+     * @param offerId ID на офертата
+     * @return изтритата оферта
+     */
+    @Transactional
+    public Offer deleteOffer(UUID offerId) {
+        Offer offer = getOfferById(offerId);
+        Offer deleted = offer.toBuilder()
+                .deleted(true)
+                .build();
+        return offerRepository.save(deleted);
+    }
+
+    /**
+     * Извлича snapshot данните на конфигурацията от JSON.
+     * Използва OfferMapper за десериализация.
+     *
+     * @param offer офертата
+     * @return snapshot на конфигурацията или null ако няма snapshot
+     */
+    public ConfigurationSnapshotDTO getConfigurationSnapshot(Offer offer) {
+        return offerMapper.parseConfigurationSnapshot(offer.getConfigurationSnapshot());
     }
 }

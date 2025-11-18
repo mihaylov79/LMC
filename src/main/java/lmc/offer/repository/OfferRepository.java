@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,10 +21,17 @@ public interface OfferRepository extends JpaRepository<Offer, UUID> {
 
     Optional<Offer> findByOfferNumber(String offerNumber);
 
+    // Намира само активните оферти (без изтритите)
+    List<Offer> findByDeletedFalse();
+
+    // Намира всички оферти сортирани по deleted (false първи) и по име на компанията
+    List<Offer> findAllByOrderByDeletedAscCompanyCompanyNameAsc();
+
     @Query("SELECT o FROM Offer o " +
            "LEFT JOIN FETCH o.configuration c " +
            "LEFT JOIN FETCH c.includedUnits cu " +
-           "LEFT JOIN FETCH cu.configurableUnit " +
+           "LEFT JOIN FETCH cu.configurableUnit cfu " +
+            "LEFT JOIN FETCH cfu.unit " +
            "WHERE o.id = :offerId")
     Optional<Offer> findByIdWithConfiguration(@Param("offerId") UUID offerId);
 }

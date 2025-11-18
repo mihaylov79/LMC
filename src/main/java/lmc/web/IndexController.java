@@ -1,6 +1,7 @@
 package lmc.web;
 
 import lmc.configuration.service.ConfigurationService;
+import lmc.offer.service.OfferService;
 import lmc.security.CustomUserDetails;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
@@ -16,10 +17,12 @@ public class IndexController {
 
     private final UserService userService;
     private final ConfigurationService configurationService;
+    private final OfferService offerService;
 
-    public IndexController(UserService userService, ConfigurationService configurationService) {
+    public IndexController(UserService userService, ConfigurationService configurationService, OfferService offerService) {
         this.userService = userService;
         this.configurationService = configurationService;
+        this.offerService = offerService;
     }
 
 
@@ -49,6 +52,7 @@ public class IndexController {
         modelAndView.setViewName("home");
         modelAndView.addObject("user", user);
         modelAndView.addObject("configurations", configurationService.getAllConfigurations());
+        modelAndView.addObject("offers", offerService.getAllOffers());
 
         return modelAndView;
 
