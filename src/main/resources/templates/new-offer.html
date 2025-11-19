@@ -7,6 +7,135 @@
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="/css/new-user.css">
     <link rel="stylesheet" href="/css/user-details.css">
+    <!-- Choices.js CSS to ensure the search field is rendered inside the dropdown and styled correctly -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <style>
+        /* Стилизация на Choices.js полетата да изглеждат като стандартните полета */
+        .choices {
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        .choices__inner {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #cccccc;
+            border-radius: 0;
+            padding: 0.3em 0;
+            min-height: auto;
+            line-height: 2;
+            font-size: 1em;
+            font-family: 'Raleway', sans-serif;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .choices__inner:focus,
+        .choices.is-focused .choices__inner,
+        .choices.is-open .choices__inner {
+            border-color: #3771c8ff;
+            outline: none;
+        }
+
+        .choices__list--single {
+            padding: 0;
+        }
+
+        .choices[data-type*="select-one"] .choices__inner {
+            padding-bottom: 0.3em;
+        }
+
+        .choices__placeholder {
+            color: #999;
+            opacity: 0.7;
+        }
+
+        /* Махаме текста "Натиснете за избор" */
+        .choices__item--selectable::after {
+            display: none !important;
+        }
+
+        /* Стрелка за dropdown */
+        .choices[data-type*="select-one"]::after {
+            border-color: #3771c8ff transparent transparent;
+            border-style: solid;
+            border-width: 5px 5px 0;
+            content: "";
+            height: 0;
+            pointer-events: none;
+            position: absolute;
+            right: 11.5px;
+            top: 50%;
+            margin-top: -2.5px;
+            width: 0;
+        }
+
+        .choices[data-type*="select-one"].is-open::after {
+            border-color: transparent transparent #3771c8ff;
+            border-width: 0 5px 5px;
+            margin-top: -7.5px;
+        }
+
+        /* Dropdown menu стилове */
+        .choices__list--dropdown {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
+        .choices__list--dropdown .choices__item--selectable {
+            padding: 10px;
+            font-family: 'Raleway', sans-serif;
+        }
+
+
+        /* Search input вътре в dropdown */
+        .choices__input {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 5px;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        .choices__input:focus {
+            border-color: #3771c8ff;
+            outline: none;
+        }
+
+        /* Избран елемент стил */
+        .choices__item--choice {
+            font-family: 'Raleway', sans-serif;
+            color: #000;
+        }
+
+        /* Добавяме padding-top на field контейнерите с Choices.js за да има място за label-а */
+        .field:has(#field-company),
+        .field:has(#field-configuration) {
+            padding-top: 1.5em;
+        }
+
+        /* Задаваме label-ите на field div с Choices.js да са винаги вдигнати и абсолютно позиционирани */
+        .field label[for="field-company"],
+        .field label[for="field-configuration"] {
+            position: absolute;
+            top: -1em;
+            left: 0;
+            opacity: 1;
+            color: #3771c8ff;
+            font-size: 0.9em;
+        }
+
+        /* Маркираният елемент в dropdown - черни букви, светъл фон */
+        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: #e8f0fe;
+            color: #000;
+        }
+    </style>
 </head>
 <body>
 <div class="header-container">
@@ -62,7 +191,7 @@
 
         <!-- Такса монтаж -->
         <div class="field">
-            <label for="field-installationFee">Такса монтаж (EUR)</label>
+            <label for="field-installationFee">Монтаж (EUR)</label>
             <input type="number" step="0.01" min="0" id="field-installationFee" name="installationFee" placeholder="0.00"
                    th:value="${newOfferRequest.installationFee}">
             <span th:if="${#fields.hasErrors('installationFee')}" th:errors="*{installationFee}" class="errors"></span>
@@ -70,7 +199,7 @@
 
         <!-- Такса доставка -->
         <div class="field">
-            <label for="field-deliveryFee">Такса доставка (EUR)</label>
+            <label for="field-deliveryFee">Доставка (EUR)</label>
             <input type="number" step="0.01" min="0" id="field-deliveryFee" name="deliveryFee" placeholder="0.00"
                    th:value="${newOfferRequest.deliveryFee}">
             <span th:if="${#fields.hasErrors('deliveryFee')}" th:errors="*{deliveryFee}" class="errors"></span>
@@ -101,8 +230,36 @@
     </form>
 </div>
 
+<!-- Choices.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация на Choices.js за клиент – търсенето е вътре в падащото меню
+        const companySelect = document.getElementById('field-company');
+        if (companySelect) {
+            new Choices(companySelect, {
+                searchEnabled: true,
+                searchPlaceholderValue: 'Търси клиент...',
+                noResultsText: 'Няма намерени резултати',
+                itemSelectText: '',
+                shouldSort: false
+            });
+        }
+
+        // Инициализация на Choices.js за конфигурация – търсенето е вътре в падащото меню
+        const configurationSelect = document.getElementById('field-configuration');
+        if (configurationSelect) {
+            new Choices(configurationSelect, {
+                searchEnabled: true,
+                searchPlaceholderValue: 'Търси конфигурация...',
+                noResultsText: 'Няма намерени резултати',
+                itemSelectText: '',
+                shouldSort: false
+            });
+        }
+
+        // Loading message при submit
         const form = document.querySelector('form.login');
         const loadingMsg = document.getElementById('loading-message');
         const submitBtn = form.querySelector('input[type="submit"]');
