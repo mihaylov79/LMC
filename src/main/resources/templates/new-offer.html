@@ -205,12 +205,12 @@
             <span th:if="${#fields.hasErrors('deliveryFee')}" th:errors="*{deliveryFee}" class="errors"></span>
         </div>
 
-        <!-- Транспортни разходи -->
+        <!-- Окомплектовка -->
         <div class="field">
-            <label for="field-transportCosts">Транспортни разходи (EUR)</label>
-            <input type="number" step="0.01" min="0" id="field-transportCosts" name="transportCosts" placeholder="0.00"
-                   th:value="${newOfferRequest.transportCosts}">
-            <span th:if="${#fields.hasErrors('transportCosts')}" th:errors="*{transportCosts}" class="errors"></span>
+            <label for="field-installationMaterials">Окомплектовка (EUR)</label>
+            <input type="number" step="0.01" min="0" id="field-installationMaterials" name="installationMaterials" placeholder="0.00"
+                   th:value="${newOfferRequest.installationMaterials}">
+            <span th:if="${#fields.hasErrors('installationMaterials')}" th:errors="*{installationMaterials}" class="errors"></span>
         </div>
 
         <!-- Отстъпка -->

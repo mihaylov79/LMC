@@ -140,8 +140,8 @@
                 <div class="price-date" th:if="${offer.installationFee != null && offer.installationFee > 0}">
                     Монтаж: <strong th:text="${offer.installationFee} + ' ' + ${offer.currency}">0.00 EUR</strong>
                 </div>
-                <div class="price-date" th:if="${offer.transportCosts != null && offer.transportCosts > 0}">
-                    Транспорт: <strong th:text="${offer.transportCosts} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                <div class="price-date" th:if="${offer.installationMaterials != null && offer.installationMaterials > 0}">
+                    Окомплектовка: <strong th:text="${offer.installationMaterials} + ' ' + ${offer.currency}">0.00 EUR</strong>
                 </div>
                 <div class="price-date" th:if="${offer.discount != null && offer.discount > 0}">
                     Отстъпка: <strong th:text="${offer.discount} + '%'">0%</strong>

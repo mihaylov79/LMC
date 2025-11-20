@@ -24,7 +24,7 @@ public class NewOfferRequest {
     private BigDecimal deliveryFee;
 
     @Digits(integer = 7, fraction = 2, message = "Невалиден формат за цена!")
-    private BigDecimal transportCosts;
+    private BigDecimal installationMaterials;
 
     @NotNull(message = "Валутата е задължителна!")
     private CurrencyType currency;

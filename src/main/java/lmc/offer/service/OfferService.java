@@ -95,7 +95,7 @@ public class OfferService {
                 .configurationSnapshot(configurationSnapshot)
                 .installationFee(nvl(request.getInstallationFee()))
                 .deliveryFee(nvl(request.getDeliveryFee()))
-                .transportCosts(nvl(request.getTransportCosts()))
+                .installationMaterials(nvl(request.getInstallationMaterials()))
                 .currency(request.getCurrency())
                 .discount(nvl(request.getDiscount()))
                 .finalPrice(calculateFinalPrice(configurationPrice, request).setScale(2, RoundingMode.HALF_UP))
@@ -129,7 +129,7 @@ public class OfferService {
         return discounted
                 .add(nvl(request.getDeliveryFee()))
                 .add(nvl(request.getInstallationFee()))
-                .add(nvl(request.getTransportCosts()));
+                .add(nvl(request.getInstallationMaterials()));
     }
 
     @Transactional(readOnly = true)

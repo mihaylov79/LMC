@@ -54,8 +54,8 @@ public class Offer {
     @Column(name = "delivery_fee")
     private BigDecimal deliveryFee;
 
-    @Column(name = "transport_costs")
-    private BigDecimal transportCosts;
+    @Column(name = "installation_Materials")
+    private BigDecimal installationMaterials;
 
     @Column
     private CurrencyType currency;
