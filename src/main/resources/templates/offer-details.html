@@ -38,6 +38,28 @@
                         </button>
                     </form>
                 </li>
+                <!-- Валутна конвертация -->
+                <li style="margin-left: auto; display: flex; gap: 0.5rem; align-items: center;">
+                    <form th:action="@{/offers/{id}/set-currency(id=${offer.id})}" th:method="POST"
+                          style="display: flex; gap: 0.5rem; align-items: center;">
+                        <label for="currency-select" style="font-size: 0.9em; color: #666;">Валута:</label>
+                        <select id="currency-select" name="currency" class="currency-dropdown">
+                            <option value="EUR"
+                                    th:selected="${offer.currency == null || offer.currency.name() == 'EUR'}">
+                                EUR (€)
+                            </option>
+                            <option value="USD"
+                                    th:selected="${offer.currency != null && offer.currency.name() == 'USD'}">
+                                USD ($)
+                            </option>
+                            <option value="GBP"
+                                    th:selected="${offer.currency != null && offer.currency.name() == 'GBP'}">
+                                GBP (£)
+                            </option>
+                        </select>
+                        <button type="submit" class="apply-currency-btn">Приложи</button>
+                    </form>
+                </li>
                 <!-- Бъдещ бутон за клониране -->
                 <!--
                 <li><a th:href="@{/offers/create-from/{offerId}(offerId=${offer.id})}">Създай нова от тази</a></li>
@@ -73,6 +95,14 @@
                           th:classappend="${offer.status.name() == 'PENDING' ? 'status-pending' : (offer.status.name() == 'ACCEPTED' ? 'status-accepted' : (offer.status.name() == 'REJECTED' ? 'status-rejected' : 'status-canceled'))}">
                         PENDING
                     </span>
+                </dd>
+            </dl>
+            <!-- Exchange Rate Info -->
+            <dl class="info-item" th:if="${offer.exchangeRate != null}">
+                <dt>Обменен курс</dt>
+                <dd>
+                    <span th:text="${#numbers.formatDecimal(offer.exchangeRate, 1, 4)}">1.0000</span>
+                    <div style="font-size: 0.8em; color: #888;" th:text="'към ' + ${#temporals.format(offer.exchangeRateDate, 'dd.MM.yyyy')}">към дата</div>
                 </dd>
             </dl>
         </div>

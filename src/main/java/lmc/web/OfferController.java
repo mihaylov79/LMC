@@ -8,6 +8,7 @@ import lmc.configuration.service.ConfigurationService;
 import lmc.offer.model.Offer;
 import lmc.offer.service.OfferService;
 import lmc.security.CustomUserDetails;
+import lmc.unit.model.CurrencyType;
 import lmc.user.model.User;
 import lmc.user.service.UserService;
 import lmc.web.dto.ConfigurationSnapshotDTO;
@@ -42,8 +43,8 @@ public class OfferController {
         Offer offer = offerService.getOfferWithConfiguration(offerId);
         User user = userService.getUserById(details.getId());
 
-        // Извличаме snapshot-а на конфигурацията към момента на създаване на офертата
-        ConfigurationSnapshotDTO configurationSnapshot = offerService.getConfigurationSnapshot(offer);
+        // Извличаме snapshot-а на конфигурацията с конвертирани цени според валутата на офертата
+        ConfigurationSnapshotDTO configurationSnapshot = offerService.getConfigurationSnapshotInDisplayCurrency(offer);
 
         ModelAndView modelAndView = new ModelAndView("offer-details");
         modelAndView.addObject("user", user);
@@ -97,5 +98,20 @@ public class OfferController {
 
         offerService.createNewOffer(req, user);
         return new ModelAndView("redirect:/home");
+    }
+
+    /**
+     * Сменя валутата на офертата за визуализация.
+     * Записва exchangeRate към момента на смяната.
+     *
+     * @param offerId ID на офертата
+     * @param currency целева валута (EUR, USD, GBP)
+     * @return redirect към offer-details
+     */
+    @PostMapping("/{offerId}/set-currency")
+    public ModelAndView setOfferCurrency(@PathVariable UUID offerId,
+                                        @RequestParam("currency") CurrencyType currency) {
+        offerService.setOfferCurrency(offerId, currency);
+        return new ModelAndView("redirect:/offers/details/" + offerId);
     }
 }

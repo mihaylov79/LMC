@@ -245,3 +245,66 @@ html,body{
 /* minor polish */
 .configuration-details dt{margin:0}
 .configuration-details dd{margin:0 0 0.6rem 0}
+
+/* Currency dropdown styling */
+.currency-dropdown {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    color: #333;
+    font-size: 0.95rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.currency-dropdown:hover {
+    border-color: var(--accent);
+}
+
+.currency-dropdown:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(55, 113, 200, 0.1);
+}
+
+.apply-currency-btn {
+    padding: 0.4rem 1rem;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.apply-currency-btn:hover {
+    background-color: #2e5ca0;
+}
+
+.apply-currency-btn:active {
+    transform: translateY(1px);
+}
+
+/* Status styling */
+.status-pending {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.status-accepted {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.status-rejected {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.status-canceled {
+    color: #6b7280;
+    font-weight: 600;
+}

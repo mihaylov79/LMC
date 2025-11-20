@@ -4,10 +4,14 @@ import lmc.company.model.Company;
 import lmc.company.service.CompanyService;
 import lmc.configuration.model.Configuration;
 import lmc.configuration.service.ConfigurationService;
+import lmc.currencyFixing.model.CurrencyFixing;
+import lmc.currencyFixing.service.CurrencyConversionService;
+import lmc.currencyFixing.service.CurrencyFixingService;
 import lmc.offer.mapper.OfferMapper;
 import lmc.offer.model.Offer;
 import lmc.offer.model.OfferStatus;
 import lmc.offer.repository.OfferRepository;
+import lmc.unit.model.CurrencyType;
 import lmc.user.model.User;
 import lmc.web.dto.ConfigurationSnapshotDTO;
 import lmc.web.dto.NewOfferRequest;
@@ -25,17 +29,26 @@ import java.util.UUID;
 @Service
 public class OfferService {
 
+    // Базова валута за всички цени в системата
+    private static final CurrencyType DEFAULT_CURRENCY = CurrencyType.EUR;
+
     private final OfferRepository offerRepository;
     private final OfferMapper offerMapper;
     private final CompanyService companyService;
     private final ConfigurationService configurationService;
+    private final CurrencyFixingService currencyFixingService;
+    private final CurrencyConversionService currencyConversionService;
 
     public OfferService(OfferRepository offerRepository, OfferMapper offerMapper,
-                        CompanyService companyService, ConfigurationService configurationService) {
+                        CompanyService companyService, ConfigurationService configurationService,
+                        CurrencyFixingService currencyFixingService,
+                        CurrencyConversionService currencyConversionService) {
         this.offerRepository = offerRepository;
         this.offerMapper = offerMapper;
         this.companyService = companyService;
         this.configurationService = configurationService;
+        this.currencyFixingService = currencyFixingService;
+        this.currencyConversionService = currencyConversionService;
     }
 
 
@@ -186,7 +199,19 @@ public class OfferService {
     }
 
     /**
+     * Извлича snapshot на конфигурацията и конвертира цените в displayCurrency на офертата.
+     * Делегира към CurrencyConversionService.
+     *
+     * @param offer офертата
+     * @return snapshot с конвертирани цени според валутата на офертата
+     */
+    public ConfigurationSnapshotDTO getConfigurationSnapshotInDisplayCurrency(Offer offer) {
+        return currencyConversionService.getOfferSnapshotInDisplayCurrency(offer);
+    }
+
+    /**
      * Връща всички активни оферти със съответните snapshots на конфигурациите.
+     * Цените в snapshot-ите са конвертирани според валутата на всяка оферта.
      * Използва се за визуализация в home страницата.
      *
      * @return Map с UUID на офертата като ключ и ConfigurationSnapshotDTO като стойност
@@ -196,7 +221,41 @@ public class OfferService {
         return offers.stream()
                 .collect(java.util.stream.Collectors.toMap(
                         Offer::getId,
-                        this::getConfigurationSnapshot
+                        this::getConfigurationSnapshotInDisplayCurrency
                 ));
+    }
+
+    // ===== Валутна конвертация =====
+
+    /**
+     * Задава валута за визуализация на оферта.
+     * Записва exchangeRate към момента на смяна на валутата.
+     * Цените в базата остават в EUR.
+     *
+     * @param offerId ID на офертата
+     * @param targetCurrency целева валута за визуализация
+     * @return актуализираната оферта
+     */
+    @Transactional
+    public Offer setOfferCurrency(UUID offerId, CurrencyType targetCurrency) {
+        Offer offer = getOfferById(offerId);
+
+        // Ако искаме да върнем към EUR, махаме exchangeRate
+        if (targetCurrency == null || targetCurrency == DEFAULT_CURRENCY) {
+            return offerRepository.save(offer.toBuilder()
+                    .currency(DEFAULT_CURRENCY)
+                    .exchangeRate(null)
+                    .exchangeRateDate(null)
+                    .build());
+        }
+
+        // Зареждаме текущ фиксинг за целевата валута
+        CurrencyFixing fixing = currencyFixingService.getLatestFixing(targetCurrency);
+
+        return offerRepository.save(offer.toBuilder()
+                .currency(targetCurrency)
+                .exchangeRate(fixing.getRate())
+                .exchangeRateDate(LocalDate.now())
+                .build());
     }
 }

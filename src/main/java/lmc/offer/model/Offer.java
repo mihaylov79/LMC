@@ -60,6 +60,14 @@ public class Offer {
     @Column
     private CurrencyType currency;
 
+    // Обменен курс към момента на създаване/конвертиране на офертата (null ако е EUR)
+    @Column(name = "exchange_rate", precision = 10, scale = 6)
+    private BigDecimal exchangeRate;
+
+    // Дата на фиксиране на курса
+    @Column(name = "exchange_rate_date")
+    private LocalDate exchangeRateDate;
+
     @Column
     private BigDecimal discount;
 

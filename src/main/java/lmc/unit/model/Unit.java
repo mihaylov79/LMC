@@ -41,6 +41,7 @@ public class Unit {
     private BigDecimal price;
 
     @Column
+    @Enumerated(EnumType.STRING)
     private CurrencyType currency;
 
     @Column

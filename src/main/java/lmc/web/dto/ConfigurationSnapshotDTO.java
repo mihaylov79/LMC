@@ -17,7 +17,7 @@ import java.util.List;
  * Запазва всички данни за да не се губи информация при промени в оригиналната конфигурация.
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConfigurationSnapshotDTO {
@@ -38,7 +38,7 @@ public class ConfigurationSnapshotDTO {
      * Snapshot на конфигурационна единица (ConfigurationUnit)
      */
     @Data
-    @Builder
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ConfigurationUnitSnapshotDTO {
@@ -56,7 +56,7 @@ public class ConfigurationSnapshotDTO {
      * Snapshot на опция (ConfigurationUnitOption)
      */
     @Data
-    @Builder
+    @Builder(toBuilder = true)
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OptionSnapshotDTO {
