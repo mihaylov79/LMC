@@ -58,6 +58,7 @@ public class OfferMapper {
                 .totalPrice(configuration.getTotalPrice())
                 .priceUpdateDate(configuration.getPriceUpdateDate())
                 .includedUnits(configuration.getIncludedUnits().stream()
+                        .filter(unit -> unit != null && unit.getConfigurableUnit() != null) // Филтрираме null units
                         .map(this::mapConfigurationUnitToSnapshot)
                         .collect(Collectors.toList()))
                 .build();
@@ -91,6 +92,7 @@ public class OfferMapper {
                 .unitPrice(cu.getConfigurableUnit().getUnit().getPrice())
                 .quantity(cu.getQuantity())
                 .options(cu.getOptions().stream()
+                        .filter(opt -> opt != null && opt.getOption() != null) // Филтрираме null options
                         .map(this::mapOptionToSnapshot)
                         .collect(Collectors.toList()))
                 .build();

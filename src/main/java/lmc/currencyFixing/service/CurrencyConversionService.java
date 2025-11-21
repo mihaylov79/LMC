@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Сървис за валутна конвертация на цени и snapshots.
@@ -114,6 +115,7 @@ public class CurrencyConversionService {
         // Конвертираме цените на всички units и options
         List<ConfigurationSnapshotDTO.ConfigurationUnitSnapshotDTO> convertedUnits =
                 snapshot.getIncludedUnits().stream()
+                        .filter(Objects::nonNull) // Филтрираме null units
                         .map(unit -> convertUnitSnapshot(unit, exchangeRate))
                         .toList();
 
@@ -133,6 +135,7 @@ public class CurrencyConversionService {
 
         List<ConfigurationSnapshotDTO.OptionSnapshotDTO> convertedOptions =
                 unit.getOptions().stream()
+                        .filter(Objects::nonNull) // Филтрираме null options
                         .map(opt -> convertOptionSnapshot(opt, exchangeRate))
                         .toList();
 

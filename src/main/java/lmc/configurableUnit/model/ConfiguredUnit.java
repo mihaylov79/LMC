@@ -23,8 +23,7 @@ public class ConfiguredUnit extends ConfigurableUnit {
     @Builder.Default
     @OneToMany(mappedBy = "configuredUnit", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderColumn(name = "option_order")
-
-        private List<ConfiguredUnitOption> options = new ArrayList<>();
+    private List<ConfiguredUnitOption> options = new ArrayList<>();
 
     public void addOption(ConfiguredUnitOption cuo){
         if (cuo == null) {

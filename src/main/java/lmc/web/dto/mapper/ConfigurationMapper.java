@@ -26,7 +26,10 @@ public class ConfigurationMapper {
 
     public ConfigurationDetailsDTO toDto(Configuration configuration){
         List<ConfigurationIncludedUnitsDTO> includedUnits = configuration.getIncludedUnits()
-                .stream().map(this::mapIncludedUnit).toList();
+                .stream()
+                .filter(unit -> unit != null && unit.getConfigurableUnit() != null) // Филтрираме null units
+                .map(this::mapIncludedUnit)
+                .toList();
 
         return ConfigurationDetailsDTO.builder()
                 .id(configuration.getId())
@@ -64,7 +67,9 @@ public class ConfigurationMapper {
 
     public CreateNewConfigurationRequest toEditRequest(Configuration configuration){
 
-        List<ConfigurationUnitRequest> units = configuration.getIncludedUnits().stream().map(u -> {
+        List<ConfigurationUnitRequest> units = configuration.getIncludedUnits().stream()
+                .filter(u -> u != null && u.getConfigurableUnit() != null) // Филтрираме null units
+                .map(u -> {
             ConfigurationUnitRequest cu = new ConfigurationUnitRequest();
             cu.setConfigurableUnitId(u.getConfigurableUnit().getId());
             cu.setQuantity(u.getQuantity());

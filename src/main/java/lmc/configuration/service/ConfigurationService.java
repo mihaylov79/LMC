@@ -105,6 +105,7 @@ public class ConfigurationService {
             if (bySig.isPresent()) return bySig;
             // fallback to in-memory matching if not found
             return configuration.getIncludedUnits().stream()
+                    .filter(u -> u != null) // Филтрираме null units
                     .filter(u -> u.getConfigurableUnit() != null && configurableUnitId.equals(u.getConfigurableUnit().getId()))
                     .filter(u -> OptionUtils.toMapFromConfigurationUnitOptions(u.getOptions()).equals(req))
                     .findFirst();
@@ -122,6 +123,7 @@ public class ConfigurationService {
                     if (byTplSig.isPresent()) return byTplSig;
 
                     Optional<ConfigurationUnit> m = configuration.getIncludedUnits().stream()
+                            .filter(u -> u != null) // Филтрираме null units
                             .filter(u -> u.getConfigurableUnit() != null && configurableUnitId.equals(u.getConfigurableUnit().getId()))
                             .filter(u -> OptionUtils.toMapFromConfigurationUnitOptions(u.getOptions()).equals(templateMap))
                             .findFirst();

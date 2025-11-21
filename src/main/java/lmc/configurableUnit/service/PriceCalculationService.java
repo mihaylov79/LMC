@@ -58,8 +58,14 @@ public class PriceCalculationService {
     }
 
     public BigDecimal calculateConfigurationUnitPrice(ConfigurationUnit configurationUnit) {
+        // Защита срещу null - може да се появи заради @OrderColumn gaps
+        if (configurationUnit == null || configurationUnit.getConfigurableUnit() == null) {
+            return BigDecimal.ZERO;
+        }
+
         BigDecimal basePrice = configurationUnit.getConfigurableUnit().getUnit().getPrice();
         BigDecimal optionsPrice = configurationUnit.getOptions().stream()
+                .filter(cuo -> cuo != null && cuo.getOption() != null) // Филтрираме null options
                 .map((ConfigurationUnitOption cuo) ->
                         cuo.getOption().getPrice().multiply(BigDecimal.valueOf(Math.max(1, cuo.getQuantity())))
                 )
@@ -69,6 +75,7 @@ public class PriceCalculationService {
 
     public BigDecimal calculateConfigurationTotalPrice(Configuration configuration){
         return configuration.getIncludedUnits().stream()
+                .filter(cu -> cu != null && cu.getConfigurableUnit() != null) // Филтрираме null units
                 .map(cu -> calculateConfigurationUnitPrice(cu)
                         .multiply(new BigDecimal(cu.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

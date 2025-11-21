@@ -130,7 +130,7 @@
                             </div>
                             <div class="included-modules">
                                 <ul class="modules-list">
-                                    <li th:each="unit : ${configuration.includedUnits}">
+                                    <li th:each="unit : ${configuration.includedUnits}" th:if="${unit != null and unit.configurableUnit != null}">
                                         <!-- navigate entity: ConfigurationUnit -> configurableUnit -> code / unit.name -->
                                         <span th:text="${unit.configurableUnit.code}">CODE</span>
                                         <span th:text="' (' + ${unit.configurableUnit.unit.name} + ')'"> (base)</span>
