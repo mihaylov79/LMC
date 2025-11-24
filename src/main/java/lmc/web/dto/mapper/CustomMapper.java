@@ -1,10 +1,12 @@
 package lmc.web.dto.mapper;
 
 import lmc.company.model.Company;
+import lmc.currencyFixing.model.CurrencyFixing;
 import lmc.unit.model.Unit;
 import lmc.user.model.User;
 import lmc.web.dto.CreateCompanyRequest;
 import lmc.web.dto.CreateNewUnitRequest;
+import lmc.web.dto.CurrencyFixingRequest;
 import lmc.web.dto.UpdateUserDetailsRequest;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +46,14 @@ public class CustomMapper {
         return UpdateUserDetailsRequest.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .build();
+    }
+
+    public CurrencyFixingRequest fromFixing(CurrencyFixing fixing){
+
+        return CurrencyFixingRequest.builder()
+                .currency(fixing.getCurrency())
+                .rate(fixing.getRate())
                 .build();
     }
 

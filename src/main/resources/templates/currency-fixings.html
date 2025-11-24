@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="bg" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ВАЛУТНИ ФИКСИНГИ</title>
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/units.css">
+    <link rel="stylesheet" href="/css/users-list.css">
+    <link rel="stylesheet" href="/css/user-details.css">
+</head>
+<body>
+<div class="header-container">
+    <th:block th:insert="~{fragments/nav :: nav}"></th:block>
+</div>
+
+<div class="front-container">
+
+    <th:block th:insert="~{fragments/user-info :: userInfo}"></th:block>
+
+    <div class="tabs">
+        <div class="configurations">
+            <div class="menu">
+                <ul>
+                    <li><a th:href="@{/currency-fixings/create}">Добави нова валута</a></li>
+                    <li><a href="https://www.bnb.bg/Statistics/StExternalSector/StExchangeRates/StERForeignCurrencies/index.htm" target="_blank" rel="noopener noreferrer">Курсове БНБ ↗</a></li>
+                    <li><a href="https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html" target="_blank" rel="noopener noreferrer">Курсове ЕЦБ ↗</a></li>
+                </ul>
+            </div>
+
+            <div class="configurations-table">
+                <!-- Flash messages -->
+                <div th:if="${success}" class="alert alert-success" style="padding: 1em; margin: 1em 0; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
+                    <strong>✓</strong> <span th:text="${success}"></span>
+                </div>
+                <div th:if="${error}" class="alert alert-error" style="padding: 1em; margin: 1em 0; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
+                    <strong>✗</strong> <span th:text="${error}"></span>
+                </div>
+
+                <div class="table-header" style="justify-content: flex-end;">
+                    <h3 class="table-title">Валутни фиксинги (обменни курсове спрямо EUR)</h3>
+                </div>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Валута</th>
+                        <th>Обменен курс (1 EUR = X)</th>
+                        <th>Активен от</th>
+                        <th>Последна промяна</th>
+                        <th>Действие</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(fixings)}">
+                        <td colspan="5" style="text-align: center; padding: 2em; color: #666;">
+                            Няма налични валутни фиксинги.
+                        </td>
+                    </tr>
+                    <tr th:each="fixing : ${fixings}" class="fixing-row">
+                        <td>
+                            <strong th:text="${fixing.currency}">USD</strong>
+                        </td>
+                        <td th:text="${#numbers.formatDecimal(fixing.rate, 1, 6)}">1.100000</td>
+                        <td th:text="${#temporals.format(fixing.validFrom, 'dd.MM.yyyy')}">24.11.2025</td>
+                        <td th:text="${#temporals.format(fixing.lastUpdated, 'dd.MM.yyyy')}">24.11.2025</td>
+                        <td>
+                            <form th:action="@{/currency-fixings/edit/{id}(id=${fixing.id})}"
+                                  method="GET"
+                                  style="display:inline;">
+                                <button type="submit" class="action-btn">Промени</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div style="margin-top: 1.5em; padding: 1em; background: rgba(55, 113, 200, 0.05); border-left: 3px solid #3771c8; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 0.95rem; color: #4a5568;">
+                        <strong>ℹ️ Важно:</strong> Курсовете се използват за визуализация на оферти в различни валути.
+                        Всяка оферта запазва курса към момента на създаване, така че промяната на фиксинг не засяга съществуващи оферти.
+                    </p>
+                    <p style="margin: 0.5em 0 0 0; font-size: 0.9rem; color: #666;">
+                        <strong>Активен от:</strong> Дата на първоначално създаване на фиксинга.<br>
+                        <strong>Последна промяна:</strong> Дата на последното обновяване на курса.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Може да добавиш confirmation за промяна
+    document.querySelectorAll('form button.action-btn').forEach(btn => {
+        btn.closest('form').addEventListener('submit', function(e) {
+            if (!confirm('Искате ли да промените този курс?')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+
