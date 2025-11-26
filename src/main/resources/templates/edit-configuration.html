@@ -109,6 +109,7 @@
             <!-- Ако unit-ът е ConfiguredUnit, показваме опциите -->
             <th:block th:if="${#strings.contains(u.getClass().getName(), 'ConfiguredUnit')}">
                 <div th:each="co : ${u.options}"
+                     th:if="${co != null and co.option != null}"
                      class="unit-option"
                      th:attr="data-option-id=${co.option.id},data-code=${co.option.code},data-name=${co.option.name},data-price=${co.option.price}">
                 </div>

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class ConfiguredUnit extends ConfigurableUnit {
 
 
     @Builder.Default
+    @Setter  // Необходимо за @OrderColumn - Hibernate управлява позициите в списъка
     @OneToMany(mappedBy = "configuredUnit", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @OrderColumn(name = "option_order")
     private List<ConfiguredUnitOption> options = new ArrayList<>();

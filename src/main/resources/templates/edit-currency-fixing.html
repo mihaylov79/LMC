@@ -18,7 +18,7 @@
 </div>
 
 <div class="form">
-    <form class="login" th:action="@{/currency-fixings/edit/{id}(id=${fixing.id})}" method="POST" th:object="${currencyFixingRequest}">
+    <form class="login" th:action="@{/currency-fixings/edit/{id}(id=${fixing.id})}" th:method="PUT" th:object="${currencyFixingRequest}">
 
         <h2>Редактиране на валутен фиксинг</h2>
         <span class="separator"></span>

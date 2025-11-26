@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -55,6 +56,7 @@ public class Configuration {
 
 
     @Builder.Default
+    @Setter  // Необходимо за @OrderColumn - Hibernate управлява позициите в списъка
     @OneToMany(mappedBy = "configuration", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "unit_index")
     private List<ConfigurationUnit> includedUnits = new ArrayList<>();

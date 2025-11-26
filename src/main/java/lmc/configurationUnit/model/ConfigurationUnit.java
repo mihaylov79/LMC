@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class ConfigurationUnit {
     private int quantity = 1;
 
     @Builder.Default
+    @Setter  // Необходимо за @OrderColumn - Hibernate управлява позициите в списъка
     @OneToMany(mappedBy = "configurationUnit", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderColumn(name = "option_index")
     private List<ConfigurationUnitOption> options = new ArrayList<>();

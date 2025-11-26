@@ -11,11 +11,7 @@ import lmc.web.dto.mapper.CustomMapper;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -62,9 +58,9 @@ public class CurrencyFixingController {
         return modelAndView;
     }
 
-    @PostMapping("/edit/{fixingId}")
+    @PutMapping("/edit/{fixingId}")
     public ModelAndView updateExistingFixing(@PathVariable UUID fixingId,
-                                             @Valid @ModelAttribute("currencyFixingRequest") CurrencyFixingRequest request,
+                                             @Valid CurrencyFixingRequest request,
                                              BindingResult result,
                                              RedirectAttributes redirectAttributes,
                                              @AuthenticationPrincipal CustomUserDetails details) {
@@ -76,6 +72,7 @@ public class CurrencyFixingController {
             ModelAndView modelAndView = new ModelAndView("edit-currency-fixing");
             modelAndView.addObject("user", user);
             modelAndView.addObject("fixing", fixing);
+            modelAndView.addObject("currencyFixingRequest", request);
             return modelAndView;
         }
 
