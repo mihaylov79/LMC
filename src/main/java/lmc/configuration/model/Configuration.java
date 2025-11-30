@@ -54,6 +54,10 @@ public class Configuration {
     @Column(name = "price_update_date")
     private LocalDate priceUpdateDate;
 
+    // Optimistic locking version
+    @Version
+    private Long version;
+
 
     @Builder.Default
     @Setter  // Необходимо за @OrderColumn - Hibernate управлява позициите в списъка

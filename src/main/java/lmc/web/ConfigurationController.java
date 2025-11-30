@@ -134,7 +134,8 @@ public class ConfigurationController {
         Configuration updated = configurationService.addConfigurableUnit(configurationId, cuId, qty, optionSelections);
 
         return Map.of("totalPrice", updated.getTotalPrice(),
-                      "priceUpdateDate", updated.getPriceUpdateDate());
+                      "priceUpdateDate", updated.getPriceUpdateDate(),
+                      "version", updated.getVersion());
     }
 
     @PostMapping("/{configurationId}/units/remove")
@@ -149,7 +150,8 @@ public class ConfigurationController {
         Configuration updated = configurationService.removeConfigurableUnit(configurationId, cuId, qty, optionSelections);
 
         return Map.of("totalPrice", updated.getTotalPrice(),
-                "priceUpdateDate", updated.getPriceUpdateDate());
+                "priceUpdateDate", updated.getPriceUpdateDate(),
+                "version", updated.getVersion());
     }
 
     @GetMapping("/create-from/{configurationId}")

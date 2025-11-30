@@ -30,5 +30,8 @@ public class CreateNewConfigurationRequest {
 
     private String model;
 
+    // version for optimistic locking binding
+    private Long version;
+
     private List<ConfigurationUnitRequest> units = new ArrayList<>();
 }

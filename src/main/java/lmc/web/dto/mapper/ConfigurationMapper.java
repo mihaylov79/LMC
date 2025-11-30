@@ -101,6 +101,7 @@ public class ConfigurationMapper {
                 .type(configuration.getType())
                 .model(configuration.getModel())
                 .description(configuration.getDescription())
+                .version(configuration.getVersion())
                 .units(units)
                 .build();
 

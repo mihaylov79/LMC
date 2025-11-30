@@ -18,6 +18,11 @@
 
     <th:block th:insert="~{fragments/user-info :: userInfo}"></th:block>
 
+    <!-- Flash error message from ExceptionAdvice -->
+    <div th:if="${errorMessage != null}" class="alert alert-error" style="padding: 1em; margin: 1em 0; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
+        <strong>✗</strong> <span th:text="${errorMessage}"></span>
+    </div>
+
 
     <div class="tabs">
         <div class="offers">

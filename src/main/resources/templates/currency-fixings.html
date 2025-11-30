@@ -32,9 +32,12 @@
                 <div th:if="${success}" class="alert alert-success" style="padding: 1em; margin: 1em 0; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724;">
                     <strong>✓</strong> <span th:text="${success}"></span>
                 </div>
-                <div th:if="${error}" class="alert alert-error" style="padding: 1em; margin: 1em 0; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
-                    <strong>✗</strong> <span th:text="${error}"></span>
+                <div th:if="${errorMessage}" class="alert alert-error" style="padding: 1em; margin: 1em 0; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">
+                    <strong>✗</strong> <span th:text="${errorMessage}"></span>
                 </div>
+<!--                <div th:if="${error}" class="alert alert-error" style="padding: 1em; margin: 1em 0; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; color: #721c24;">-->
+<!--                    <strong>✗</strong> <span th:text="${error}"></span>-->
+<!--                </div>-->
 
                 <div class="table-header" style="justify-content: flex-end;">
                     <h3 class="table-title">Валутни фиксинги (обменни курсове спрямо EUR)</h3>
@@ -102,4 +105,3 @@
 
 </body>
 </html>
-

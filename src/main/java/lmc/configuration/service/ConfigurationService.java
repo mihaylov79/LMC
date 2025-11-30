@@ -105,7 +105,7 @@ public class ConfigurationService {
             if (bySig.isPresent()) return bySig;
             // fallback to in-memory matching if not found
             return configuration.getIncludedUnits().stream()
-                    .filter(u -> u != null) // Филтрираме null units
+                    .filter(Objects::nonNull) // Филтрираме null units
                     .filter(u -> u.getConfigurableUnit() != null && configurableUnitId.equals(u.getConfigurableUnit().getId()))
                     .filter(u -> OptionUtils.toMapFromConfigurationUnitOptions(u.getOptions()).equals(req))
                     .findFirst();
@@ -123,7 +123,7 @@ public class ConfigurationService {
                     if (byTplSig.isPresent()) return byTplSig;
 
                     Optional<ConfigurationUnit> m = configuration.getIncludedUnits().stream()
-                            .filter(u -> u != null) // Филтрираме null units
+                            .filter(Objects::nonNull) // Филтрираме null units
                             .filter(u -> u.getConfigurableUnit() != null && configurableUnitId.equals(u.getConfigurableUnit().getId()))
                             .filter(u -> OptionUtils.toMapFromConfigurationUnitOptions(u.getOptions()).equals(templateMap))
                             .findFirst();
@@ -241,6 +241,16 @@ public class ConfigurationService {
     @Transactional
     public Configuration updateConfiguration(UUID configurationId, CreateNewConfigurationRequest request){
         Configuration configuration = findConfigurationById(configurationId);
+
+        // проверка за наличието на client-side версия
+        if (request.getVersion() == null) {
+            throw new IllegalArgumentException("Липсва версия за optimistic locking");
+        }
+
+        // сравнение client-version vs current-version
+        if (!Objects.equals(request.getVersion(), configuration.getVersion())) {
+            throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Configuration.class, configuration.getId());
+        }
 
         configuration = configuration.toBuilder()
                 .imageUrl(request.getImgUrl())
