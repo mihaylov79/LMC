@@ -225,6 +225,42 @@ public class OfferService {
                 ));
     }
 
+    /**
+     * Изчислява крайна цена за визуализация, като използва конфигурационния snapshot (ако е наличен)
+     * за базова цена, прилага отстъпка и такси и конвертира според exchangeRate на офертата.
+     *
+     * @param offer офертата
+     * @return цена за показване в display валутата
+     */
+    public BigDecimal getOfferDisplayFinalPriceUsingSnapshot(Offer offer) {
+        if (offer == null) return BigDecimal.ZERO;
+
+        // Вземаме snapshot вече конвертиран в display валута (ако валутата е EUR или rate==null, ще върне оригиналния EUR snapshot)
+        ConfigurationSnapshotDTO snapshot = currencyConversionService.getOfferSnapshotInDisplayCurrency(offer);
+
+        BigDecimal baseDisplayPrice = BigDecimal.ZERO;
+        if (snapshot != null && snapshot.getTotalPrice() != null) {
+            baseDisplayPrice = snapshot.getTotalPrice(); // вече в display валута
+        } else if (offer.getConfigurationPrice() != null) {
+            // Ако няма snapshot, конвертираме конфигурационната цена в display валута
+            baseDisplayPrice = currencyConversionService.convertWithExchangeRate(offer.getConfigurationPrice(), offer.getExchangeRate());
+        }
+
+        // Конвертираме таксите в display валута
+        BigDecimal delivery = currencyConversionService.convertWithExchangeRate(nvl(offer.getDeliveryFee()), offer.getExchangeRate());
+        BigDecimal installation = currencyConversionService.convertWithExchangeRate(nvl(offer.getInstallationFee()), offer.getExchangeRate());
+        BigDecimal materials = currencyConversionService.convertWithExchangeRate(nvl(offer.getInstallationMaterials()), offer.getExchangeRate());
+
+        // Прилагаме отстъпката върху базовата display цена
+        BigDecimal discountPercent = nvl(offer.getDiscount());
+        BigDecimal discountRate = discountPercent.movePointLeft(2);
+        BigDecimal discounted = baseDisplayPrice.subtract(baseDisplayPrice.multiply(discountRate));
+
+        BigDecimal total = discounted.add(delivery).add(installation).add(materials);
+
+        return total.setScale(2, RoundingMode.HALF_UP);
+    }
+
     // ===== Валутна конвертация =====
 
     /**

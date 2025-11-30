@@ -13,6 +13,7 @@ import lmc.user.model.User;
 import lmc.user.service.UserService;
 import lmc.web.dto.ConfigurationSnapshotDTO;
 import lmc.web.dto.NewOfferRequest;
+import lmc.currencyFixing.service.CurrencyConversionService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 @Controller
 @RequestMapping("/offers")
@@ -30,12 +32,15 @@ public class OfferController {
     private final CompanyService companyService;
     private final ConfigurationService configurationService;
     private final UserService userService;
+    private final CurrencyConversionService currencyConversionService;
 
-    public OfferController(OfferService offerService, CompanyService companyService, ConfigurationService configurationService, UserService userService) {
+    public OfferController(OfferService offerService, CompanyService companyService, ConfigurationService configurationService, UserService userService,
+                           CurrencyConversionService currencyConversionService) {
         this.offerService = offerService;
         this.companyService = companyService;
         this.configurationService = configurationService;
         this.userService = userService;
+        this.currencyConversionService = currencyConversionService;
     }
 
     @GetMapping("/details/{offerId}")
@@ -46,10 +51,20 @@ public class OfferController {
         // Извличаме snapshot-а на конфигурацията с конвертирани цени според валутата на офертата
         ConfigurationSnapshotDTO configurationSnapshot = offerService.getConfigurationSnapshotInDisplayCurrency(offer);
 
+        // Малки, целеви допълнения: изчисляваме display стойности за полетата, които са съхранени в Offer
+        BigDecimal displayFinalPrice = offerService.getOfferDisplayFinalPriceUsingSnapshot(offer);
+        BigDecimal displayInstallationFee = currencyConversionService.convertWithExchangeRate(offer.getInstallationFee(), offer.getExchangeRate());
+        BigDecimal displayDeliveryFee = currencyConversionService.convertWithExchangeRate(offer.getDeliveryFee(), offer.getExchangeRate());
+        BigDecimal displayInstallationMaterials = currencyConversionService.convertWithExchangeRate(offer.getInstallationMaterials(), offer.getExchangeRate());
+
         ModelAndView modelAndView = new ModelAndView("offer-details");
         modelAndView.addObject("user", user);
         modelAndView.addObject("offer", offer);
         modelAndView.addObject("configurationSnapshot", configurationSnapshot);
+        modelAndView.addObject("displayFinalPrice", displayFinalPrice);
+        modelAndView.addObject("displayInstallationFee", displayInstallationFee);
+        modelAndView.addObject("displayDeliveryFee", displayDeliveryFee);
+        modelAndView.addObject("displayInstallationMaterials", displayInstallationMaterials);
 
         return modelAndView;
 

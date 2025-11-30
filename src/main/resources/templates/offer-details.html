@@ -153,8 +153,8 @@
                             <td th:text="${unit.configurableUnitCode}">CODE</td>
                             <td th:text="${unit.unitName}">Name</td>
                             <td th:text="${unit.quantity}">1</td>
-                            <td class="numeric" th:text="${unit.unitPrice} + ' ' + ${offer.currency}">0.00 EUR</td>
-                            <td class="numeric" th:text="${unit.unitPrice * unit.quantity} + ' ' + ${offer.currency}">0.00 EUR</td>
+                            <td class="numeric" th:text="${#numbers.formatDecimal(unit.unitPrice, 1, 2)} + ' ' + ${offer.currency}">0.00 EUR</td>
+                            <td class="numeric" th:text="${#numbers.formatDecimal(unit.unitPrice * unit.quantity, 1, 2)} + ' ' + ${offer.currency}">0.00 EUR</td>
                         </tr>
                         </tbody>
                     </table>
@@ -163,21 +163,27 @@
 
             <!-- Offer Pricing Breakdown -->
             <div class="bottom-right">
-                <div class="price-date">Цена конфигурация: <strong th:text="${offer.configurationPrice} + ' ' + ${offer.currency}">0.00 EUR</strong></div>
+                <div class="price-date">
+                    Цена конфигурация:
+                    <strong th:if="${configurationSnapshot != null && configurationSnapshot.totalPrice != null}"
+                            th:text="${#numbers.formatDecimal(configurationSnapshot.totalPrice, 1, 2)} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                    <strong th:if="${configurationSnapshot == null || configurationSnapshot.totalPrice == null}"
+                            th:text="${#numbers.formatDecimal(offer.configurationPrice, 1, 2)} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                </div>
                 <div class="price-date" th:if="${offer.deliveryFee != null && offer.deliveryFee > 0}">
-                    Доставка: <strong th:text="${offer.deliveryFee} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                    Доставка: <strong th:text="${#numbers.formatDecimal(displayDeliveryFee, 1, 2)} + ' ' + ${offer.currency}">0.00 EUR</strong>
                 </div>
                 <div class="price-date" th:if="${offer.installationFee != null && offer.installationFee > 0}">
-                    Монтаж: <strong th:text="${offer.installationFee} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                    Монтаж: <strong th:text="${#numbers.formatDecimal(displayInstallationFee, 1, 2)} + ' ' + ${offer.currency}">0.00 EUR</strong>
                 </div>
                 <div class="price-date" th:if="${offer.installationMaterials != null && offer.installationMaterials > 0}">
-                    Окомплектовка: <strong th:text="${offer.installationMaterials} + ' ' + ${offer.currency}">0.00 EUR</strong>
+                    Окомплектовка: <strong th:text="${#numbers.formatDecimal(displayInstallationMaterials, 1, 2)} + ' ' + ${offer.currency}">0.00 EUR</strong>
                 </div>
                 <div class="price-date" th:if="${offer.discount != null && offer.discount > 0}">
                     Отстъпка: <strong th:text="${offer.discount} + '%'">0%</strong>
                 </div>
                 <hr style="width: 100%; margin: 0.5rem 0; border: 1px solid #ddd;">
-                <div class="price" th:text="'КРАЙНА ЦЕНА: ' + ${offer.finalPrice} + ' ' + ${offer.currency}">- EUR</div>
+                <div class="price" th:text="'КРАЙНА ЦЕНА: ' + ${#numbers.formatDecimal(displayFinalPrice, 1, 2)} + ' ' + ${offer.currency}">- EUR</div>
                 <div class="price-date" th:if="${offer.createdBy != null}">
                     Създадена от: <strong th:text="${offer.createdBy.firstName} + ' ' + ${offer.createdBy.lastName}">User</strong>
                 </div>
@@ -190,4 +196,3 @@
 
 </body>
 </html>
-
