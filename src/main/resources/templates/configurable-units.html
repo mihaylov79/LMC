@@ -61,11 +61,11 @@
                         <div th:text="${cUnit.unit.name}"></div>
 
 
-                        <div class="included-modules" th:if="${optionsByCuId[cUnit.id] != null}">
+                        <div class="included-modules" th:if="${optionsByCuId[cUnit.id] != null and !#lists.isEmpty(optionsByCuId[cUnit.id])}">
                             <ul class="modules-list">
                                 <li th:each="opt : ${optionsByCuId[cUnit.id]}">
-                                    <span th:text="${opt.option != null ? opt.option.code : '—'}">OPT_CODE</span>
-                                    <span th:text="${opt.option != null ? opt.option.name : ''}">OPT_NAME</span>
+                                    <span th:text="${opt != null and opt.option != null ? opt.option.code : '—'}">OPT_CODE</span>
+                                    <span th:text="${opt != null and opt.option != null ? opt.option.name : ''}">OPT_NAME</span>
                                 </li>
                                 <li th:if="${#lists.isEmpty(optionsByCuId[cUnit.id])}">
                                     <span>Стандартен модул</span>
