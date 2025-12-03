@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -46,7 +47,7 @@ public class CurrencyFixingService {
      *
      * @return списък с всички фиксинги
      */
-    public java.util.List<CurrencyFixing> getAllFixings() {
+    public List<CurrencyFixing> getAllFixings() {
         return currencyFixingRepository.findAll();
     }
 
