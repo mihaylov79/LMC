@@ -1,5 +1,7 @@
 package lmc.offer.service;
 
+import com.openhtmltopdf.outputdevice.helper.BaseRendererBuilder;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import lmc.company.model.Company;
 import lmc.company.service.CompanyService;
 import lmc.configuration.model.Configuration;
@@ -15,18 +17,25 @@ import lmc.unit.model.CurrencyType;
 import lmc.user.model.User;
 import lmc.web.dto.ConfigurationSnapshotDTO;
 import lmc.web.dto.NewOfferRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class OfferService {
 
     // Базова валута за всички цени в системата
@@ -38,17 +47,19 @@ public class OfferService {
     private final ConfigurationService configurationService;
     private final CurrencyFixingService currencyFixingService;
     private final CurrencyConversionService currencyConversionService;
+    private final SpringTemplateEngine templateEngine;
 
     public OfferService(OfferRepository offerRepository, OfferMapper offerMapper,
                         CompanyService companyService, ConfigurationService configurationService,
                         CurrencyFixingService currencyFixingService,
-                        CurrencyConversionService currencyConversionService) {
+                        CurrencyConversionService currencyConversionService, SpringTemplateEngine templateEngine) {
         this.offerRepository = offerRepository;
         this.offerMapper = offerMapper;
         this.companyService = companyService;
         this.configurationService = configurationService;
         this.currencyFixingService = currencyFixingService;
         this.currencyConversionService = currencyConversionService;
+        this.templateEngine = templateEngine;
     }
 
 
@@ -293,5 +304,49 @@ public class OfferService {
                 .exchangeRate(fixing.getRate())
                 .exchangeRateDate(LocalDate.now())
                 .build());
+    }
+
+    public byte[] generateOfferPdf(UUID offerId){
+
+        try {
+            Offer offer = getOfferWithConfiguration(offerId);
+            ConfigurationSnapshotDTO snapshot = getConfigurationSnapshot(offer);
+            BigDecimal finalPrice = getOfferDisplayFinalPriceUsingSnapshot(offer);
+
+            String html = renderOfferHtmlForPdf(offer, snapshot, finalPrice);
+            return convertHtmlToPdf(html);
+        } catch (Exception e) {
+            log.error("Грешка при генериране на PDF за оферта {}: {}", offerId, e.getMessage(),e);
+            throw new RuntimeException("Не може да се генерира PDF за офертата", e);
+        }
+    }
+
+    public String renderOfferHtmlForPdf(Offer offer, ConfigurationSnapshotDTO snapshot,
+                                        BigDecimal finalPrice){
+
+        Context context = new Context();
+        context.setVariable("offer", offer);
+        context.setVariable("snapshot", snapshot);
+        context.setVariable("finalPrice", finalPrice);
+        context.setLocale(Locale.forLanguageTag("bg-BG"));
+
+        return templateEngine.process("offer-pdf", context);
+    }
+
+    private byte[] convertHtmlToPdf(String html) throws IOException {
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        PdfRendererBuilder builder = new PdfRendererBuilder();
+        // Explicitly register a Cyrillic-capable font from classpath
+        builder.useFont(() -> getClass().getResourceAsStream("/fonts/DejaVuSans.ttf"),
+                "DejaVu Sans", 400, BaseRendererBuilder.FontStyle.NORMAL, true);
+        builder.useFont(() -> getClass().getResourceAsStream("/fonts/DejaVuSans-Bold.ttf"),
+                "DejaVu Sans", 700, BaseRendererBuilder.FontStyle.NORMAL, true);
+        builder.withHtmlContent(html, "");
+        builder.toStream(outputStream);
+        builder.run();
+
+        return outputStream.toByteArray();
     }
 }

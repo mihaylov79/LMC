@@ -14,6 +14,7 @@ import lmc.user.service.UserService;
 import lmc.web.dto.ConfigurationSnapshotDTO;
 import lmc.web.dto.NewOfferRequest;
 import lmc.currencyFixing.service.CurrencyConversionService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -128,5 +129,19 @@ public class OfferController {
                                         @RequestParam("currency") CurrencyType currency) {
         offerService.setOfferCurrency(offerId, currency);
         return new ModelAndView("redirect:/offers/details/" + offerId);
+    }
+
+    @GetMapping("/{offerId}/pdf")
+    public ResponseEntity<byte[]>getOfferPdf(@PathVariable UUID offerId) {
+
+        byte[] pdf = offerService.generateOfferPdf(offerId);
+
+        Offer offer = offerService.getOfferById(offerId);
+        String filename = "Offer-" + offer.getOfferNumber().replaceAll("[^a-zA-Z0-9-]", "_") + ".pdf";
+
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "inline; filename=\"" + filename + "\"")
+                .body(pdf);
     }
 }

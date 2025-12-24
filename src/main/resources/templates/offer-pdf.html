@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="'Оферта ' + ${offer.offerNumber}">Оферта</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 15mm 10mm;
+        }
+
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            font-size: 10pt;
+            color: #000;
+            line-height: 1.4;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 18pt;
+            margin: 10px 0;
+        }
+
+        h2 {
+            font-size: 12pt;
+            margin: 15px 0 5px 0;
+            border-bottom: 1px solid #999;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 5px 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+
+        .totals-table {
+            width: 60%;
+            margin-left: auto;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .totals-table td {
+            padding: 5px 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .total-row {
+            font-size: 12pt;
+            border-top: 2px solid #333 !important;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 9pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <h1>ОФЕРТА</h1>
+    <p><strong>№:</strong> <span th:text="${offer.offerNumber}"></span></p>
+    <p><strong>Дата:</strong> <span th:text="${#temporals.format(offer.created, 'dd.MM.yyyy')}"></span></p>
+</div>
+
+<!-- Клиент информация -->
+<div class="client-info">
+    <h2>Клиент</h2>
+    <p th:text="${offer.company.companyName}"></p>
+    <p th:if="${offer.company.address}" th:text="${offer.company.address}"></p>
+</div>
+
+<!-- Конфигурация детайли -->
+<div class="configuration">
+    <h2>Конфигурация</h2>
+    <p><strong>Име:</strong> <span th:text="${snapshot.description}"></span></p>
+
+    <h3>Компоненти</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>№</th>
+            <th>Компонент</th>
+            <th>Опция</th>
+            <th>Цена</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="unit, stat : ${snapshot.includedUnits}">
+            <td th:text="${stat.count}"></td>
+            <td th:text="${unit.unitName}"></td>
+            <td th:text="${#lists.isEmpty(unit.options) ? '-' : unit.options.get(0).optionName}"></td>
+            <td th:text="${#numbers.formatDecimal(unit.unitPrice, 1, 2)}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Ценови детайли -->
+<div class="pricing">
+    <table class="totals-table">
+        <tr>
+            <td>Конфигурация:</td>
+            <td th:text="${#numbers.formatDecimal(snapshot.totalPrice, 1, 2)} + ' ' + ${offer.currency}"></td>
+        </tr>
+        <tr th:if="${offer.deliveryFee > 0}">
+            <td>Доставка:</td>
+            <td th:text="${#numbers.formatDecimal(offer.deliveryFee, 1, 2)} + ' ' + ${offer.currency}"></td>
+        </tr>
+        <tr th:if="${offer.installationFee > 0}">
+            <td>Монтаж:</td>
+            <td th:text="${#numbers.formatDecimal(offer.installationFee, 1, 2)} + ' ' + ${offer.currency}"></td>
+        </tr>
+        <tr th:if="${offer.installationMaterials > 0}">
+            <td>Материали:</td>
+            <td th:text="${#numbers.formatDecimal(offer.installationMaterials, 1, 2)} + ' ' + ${offer.currency}"></td>
+        </tr>
+        <tr th:if="${offer.discount > 0}">
+            <td>Отстъпка (%):</td>
+            <td th:text="${offer.discount} + '%'"></td>
+        </tr>
+        <tr class="total-row">
+            <td><strong>ОБЩО:</strong></td>
+            <td><strong th:text="${#numbers.formatDecimal(finalPrice, 1, 2)} + ' ' + ${offer.currency}"></strong></td>
+        </tr>
+    </table>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+    <p>Валидна до: <span th:text="${#temporals.format(offer.expires, 'dd.MM.yyyy')}"></span></p>
+    <p>Подготвил: <span th:text="${offer.createdBy.firstName} + ' ' + ${offer.createdBy.lastName}"></span></p>
+</div>
+</body>
+</html>
