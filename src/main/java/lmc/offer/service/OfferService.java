@@ -330,26 +330,16 @@ public class OfferService {
         context.setVariable("finalPrice", finalPrice);
         context.setLocale(Locale.forLanguageTag("bg-BG"));
 
+
         // Добавяме лого като Base64
         String logoBase64 = encodeImageToBase64("/static/images/logo.png");
         if (logoBase64 != null) {
             context.setVariable("logoBase64", logoBase64);
         }
 
-        // Добавяме картинка на конфигурацията, ако има
+        // Добавяме картинка на конфигурацията, ако има (винаги външен URL)
         if (snapshot != null && snapshot.getImageUrl() != null && !snapshot.getImageUrl().isEmpty()) {
-            String imageUrl = snapshot.getImageUrl();
-
-            // Ако е външен URL, добавяме директно в контекста
-            if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-                context.setVariable("configImageUrl", imageUrl);
-            } else {
-                // Ако е локален път, encode-ваме в Base64
-                String configImageBase64 = encodeImageToBase64(imageUrl);
-                if (configImageBase64 != null) {
-                    context.setVariable("configImageBase64", configImageBase64);
-                }
-            }
+            context.setVariable("configImageUrl", snapshot.getImageUrl());
         }
 
         return templateEngine.process("offer-pdf", context);

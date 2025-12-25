@@ -58,6 +58,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 10px 0;
+            font-size: 9pt;
         }
 
         th, td {
@@ -124,10 +125,6 @@
     <p><strong th:text="${snapshot.description}"></strong></p>
 
     <!-- Картинка на конфигурацията -->
-    <img th:if="${configImageBase64}"
-         th:src="'data:image/png;base64,' + ${configImageBase64}"
-         alt="Конфигурация"
-         class="config-image" />
     <img th:if="${configImageUrl}"
          th:src="${configImageUrl}"
          alt="Конфигурация"
@@ -152,7 +149,10 @@
                 <td th:text="${unit.configurableUnitCode}"></td>
                 <td th:text="${unit.unitName}"></td>
                 <td style="text-align:center" th:text="${unit.quantity}"></td>
-                <td style="text-align:right" th:text="${#numbers.formatDecimal(unit.unitPrice, 1, 2)} + ' ' + ${offer.currency}"></td>
+                <td style="text-align:right">
+                    <span th:text="${#numbers.formatDecimal(unit.unitPrice, 1, 2)}"></span>
+                    <span th:text="' ' + ${offer.currency}"></span>
+                </td>
             </tr>
 
             <!-- Подредове с опции -->
@@ -181,19 +181,31 @@
     <table class="totals-table">
         <tr>
             <td>Конфигурация:</td>
-            <td th:text="${#numbers.formatDecimal(snapshot.totalPrice, 1, 2)} + ' ' + ${offer.currency}"></td>
+            <td>
+                <span th:text="${#numbers.formatDecimal(snapshot.totalPrice, 1, 2)}"></span>
+                <span th:text="' ' + ${offer.currency}"></span>
+            </td>
         </tr>
         <tr th:if="${offer.deliveryFee > 0}">
             <td>Доставка:</td>
-            <td th:text="${#numbers.formatDecimal(offer.deliveryFee, 1, 2)} + ' ' + ${offer.currency}"></td>
+            <td>
+                <span th:text="${#numbers.formatDecimal(offer.deliveryFee, 1, 2)}"></span>
+                <span th:text="' ' + ${offer.currency}"></span>
+            </td>
         </tr>
         <tr th:if="${offer.installationFee > 0}">
             <td>Монтаж:</td>
-            <td th:text="${#numbers.formatDecimal(offer.installationFee, 1, 2)} + ' ' + ${offer.currency}"></td>
+            <td>
+                <span th:text="${#numbers.formatDecimal(offer.installationFee, 1, 2)}"></span>
+                <span th:text="' ' + ${offer.currency}"></span>
+            </td>
         </tr>
         <tr th:if="${offer.installationMaterials > 0}">
             <td>Материали:</td>
-            <td th:text="${#numbers.formatDecimal(offer.installationMaterials, 1, 2)} + ' ' + ${offer.currency}"></td>
+            <td>
+                <span th:text="${#numbers.formatDecimal(offer.installationMaterials, 1, 2)}"></span>
+                <span th:text="' ' + ${offer.currency}"></span>
+            </td>
         </tr>
         <tr th:if="${offer.discount > 0}">
             <td>Отстъпка (%):</td>
@@ -201,7 +213,12 @@
         </tr>
         <tr class="total-row">
             <td><strong>ОБЩО:</strong></td>
-            <td><strong th:text="${#numbers.formatDecimal(finalPrice, 1, 2)} + ' ' + ${offer.currency}"></strong></td>
+            <td>
+                <strong>
+                    <span th:text="${#numbers.formatDecimal(finalPrice, 1, 2)}"></span>
+                    <span th:text="' ' + ${offer.currency}"></span>
+                </strong>
+            </td>
         </tr>
     </table>
 </div>
