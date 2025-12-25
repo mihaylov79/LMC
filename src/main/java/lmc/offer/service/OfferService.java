@@ -330,7 +330,49 @@ public class OfferService {
         context.setVariable("finalPrice", finalPrice);
         context.setLocale(Locale.forLanguageTag("bg-BG"));
 
+        // Добавяме лого като Base64
+        String logoBase64 = encodeImageToBase64("/static/images/logo.png");
+        if (logoBase64 != null) {
+            context.setVariable("logoBase64", logoBase64);
+        }
+
+        // Добавяме картинка на конфигурацията, ако има
+        if (snapshot != null && snapshot.getImageUrl() != null && !snapshot.getImageUrl().isEmpty()) {
+            String imageUrl = snapshot.getImageUrl();
+
+            // Ако е външен URL, добавяме директно в контекста
+            if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+                context.setVariable("configImageUrl", imageUrl);
+            } else {
+                // Ако е локален път, encode-ваме в Base64
+                String configImageBase64 = encodeImageToBase64(imageUrl);
+                if (configImageBase64 != null) {
+                    context.setVariable("configImageBase64", configImageBase64);
+                }
+            }
+        }
+
         return templateEngine.process("offer-pdf", context);
+    }
+
+    /**
+     * Encode-ва картинка от classpath в Base64 за вграждане в PDF.
+     *
+     * @param resourcePath път към ресурса (напр. "/static/images/logo.png")
+     * @return Base64 string или null ако файлът не съществува
+     */
+    private String encodeImageToBase64(String resourcePath) {
+        try (var inputStream = getClass().getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                log.warn("Изображение не е намерено: {}", resourcePath);
+                return null;
+            }
+            byte[] imageBytes = inputStream.readAllBytes();
+            return java.util.Base64.getEncoder().encodeToString(imageBytes);
+        } catch (IOException e) {
+            log.error("Грешка при четене на изображение {}: {}", resourcePath, e.getMessage());
+            return null;
+        }
     }
 
     private byte[] convertHtmlToPdf(String html) throws IOException {

@@ -17,10 +17,30 @@
         }
 
         .header {
-            text-align: center;
             border-bottom: 2px solid #333;
             padding-bottom: 10px;
             margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .logo {
+            max-width: 150px;
+            max-height: 80px;
+            float: left;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        .config-image {
+            max-width: 300px;
+            max-height: 300px;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ddd;
         }
 
         h1 {
@@ -63,6 +83,10 @@
             border-bottom: 1px solid #ddd;
         }
 
+        .totals-table td:last-child {
+            text-align: right;
+        }
+
         .total-row {
             font-size: 12pt;
             border-top: 2px solid #333 !important;
@@ -80,9 +104,11 @@
 <body>
 <!-- Header -->
 <div class="header">
-    <h1>ОФЕРТА</h1>
-    <p><strong>№:</strong> <span th:text="${offer.offerNumber}"></span></p>
-    <p><strong>Дата:</strong> <span th:text="${#temporals.format(offer.created, 'dd.MM.yyyy')}"></span></p>
+    <img th:if="${logoBase64}" th:src="'data:image/png;base64,' + ${logoBase64}" alt="Logo" class="logo" />
+    <div class="header-content">
+        <h1>ОФЕРТА</h1>
+        <p><strong>№:</strong> <span th:text="${offer.offerNumber}"></span> <span style="display:inline-block; width:30px;"></span> <strong>Дата:</strong> <span th:text="${#temporals.format(offer.created, 'dd.MM.yyyy')}"></span></p>
+    </div>
 </div>
 
 <!-- Клиент информация -->
@@ -95,25 +121,57 @@
 <!-- Конфигурация детайли -->
 <div class="configuration">
     <h2>Конфигурация</h2>
-    <p><strong>Име:</strong> <span th:text="${snapshot.description}"></span></p>
+    <p><strong th:text="${snapshot.description}"></strong></p>
+
+    <!-- Картинка на конфигурацията -->
+    <img th:if="${configImageBase64}"
+         th:src="'data:image/png;base64,' + ${configImageBase64}"
+         alt="Конфигурация"
+         class="config-image" />
+    <img th:if="${configImageUrl}"
+         th:src="${configImageUrl}"
+         alt="Конфигурация"
+         class="config-image" />
 
     <h3>Компоненти</h3>
     <table>
         <thead>
         <tr>
             <th>№</th>
+            <th>Код</th>
             <th>Компонент</th>
-            <th>Опция</th>
-            <th>Цена</th>
+            <th style="text-align:center">бр</th>
+            <th style="text-align:right">Цена</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="unit, stat : ${snapshot.includedUnits}">
-            <td th:text="${stat.count}"></td>
-            <td th:text="${unit.unitName}"></td>
-            <td th:text="${#lists.isEmpty(unit.options) ? '-' : unit.options.get(0).optionName}"></td>
-            <td th:text="${#numbers.formatDecimal(unit.unitPrice, 1, 2)}"></td>
-        </tr>
+        <th:block th:each="unit, stat : ${snapshot.includedUnits}">
+            <!-- Главен ред с компонента -->
+            <tr style="font-weight: bold;">
+                <td th:text="${stat.count}"></td>
+                <td th:text="${unit.configurableUnitCode}"></td>
+                <td th:text="${unit.unitName}"></td>
+                <td style="text-align:center" th:text="${unit.quantity}"></td>
+                <td style="text-align:right" th:text="${#numbers.formatDecimal(unit.unitPrice, 1, 2)} + ' ' + ${offer.currency}"></td>
+            </tr>
+
+            <!-- Подредове с опции -->
+            <th:block th:if="${!#lists.isEmpty(unit.options)}">
+                <tr th:each="option : ${unit.options}" style="background-color: #f9f9f9;">
+                    <td></td>
+                    <td></td>
+                    <td style="padding-left: 25px; font-size: 0.9em;">
+                        <span style="color: #888;">├─</span>
+                        <span th:text="${option.optionName}"></span>
+                        <span style="color: #999;" th:if="${option.quantity}">
+                            [qty: <span th:text="${option.quantity}"></span>]
+                        </span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </th:block>
+        </th:block>
         </tbody>
     </table>
 </div>
