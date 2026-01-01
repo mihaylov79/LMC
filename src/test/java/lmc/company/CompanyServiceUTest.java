@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,15 +30,7 @@ public class CompanyServiceUTest {
     void given_ExistingCompany_should_Throw_CompanyAlreadyExistException(){
 
 
-        Company existing = Company.builder()
-                .companyName("TestCompany")
-                .companyEIK("1234567890")
-                .VAT("BG1234567890")
-                .country("Bulgaria")
-                .town("Plovdiv")
-                .address("Test str")
-                .manager("Test Manager")
-                .build();
+        Company existing = getExistingCompany();
 
         CreateCompanyRequest createCompanyDTO = CreateCompanyRequest.builder()
                 .companyName("TestCompany")
@@ -53,6 +46,7 @@ public class CompanyServiceUTest {
         assertThrows(CompanyAlreadyExistException.class, () -> companyService.createNewCompany(createCompanyDTO));
         verify(companyRepository, never()).save(any(Company.class));
     }
+
 
     @Test
     void given_NoExistingCompany_ShouldCreateNewCompany(){
@@ -87,6 +81,71 @@ public class CompanyServiceUTest {
         assertTrue(result.isActive());
        verify(companyRepository, times(1)).save(any(Company.class));
 
+    }
+
+    @Test
+    void given_EditExistingCompany_should_Return_EditedCompany(){
+
+        Company existing = getExistingCompany();
+
+        UUID existingId = existing.getId();
+
+        CreateCompanyRequest editedDTO = CreateCompanyRequest.builder()
+                .companyName("New TestCompany")
+                .companyEIK("0987654321")
+                .VAT("BG0987654321")
+                .country("Bulgaria")
+                .town("Sofia")
+                .address("New Test str")
+                .manager("New Test Manager")
+                .build();
+
+        when(companyRepository.findById(existingId)).thenReturn(Optional.of(existing));
+        when(companyRepository.save(any(Company.class))).thenAnswer(saveResult -> saveResult.getArgument(0));
+
+        Company edited = companyService.editCompanyDetails(editedDTO,existingId);
+
+        assertEquals("New TestCompany", edited.getCompanyName());
+        assertEquals("0987654321", edited.getCompanyEIK());
+        assertEquals("BG0987654321", edited.getVAT());
+        assertEquals("Sofia", edited.getTown());
+        assertEquals("New Test str" , edited.getAddress());
+        assertEquals("New Test Manager", edited.getManager());
+        verify(companyRepository,times(1)).save(any(Company.class));
+    }
+
+    @Test
+    void given_nonExistingCompany_Should_Throw_IllegalArgumentException_when_use_getCompanyByEIK(){
+
+        String EIK = "1234567980";
+
+        when(companyRepository.findByCompanyEIK(EIK)).thenReturn(Optional.empty());
+
+
+        assertThrows(IllegalArgumentException.class, () -> companyService.getCompanyByEIK(EIK));
+    }
+
+    @Test
+    void given_nonExistingCompany_Should_Throw_IllegalArgumentException_when_use_getCompanyById(){
+
+        UUID companyId = UUID.randomUUID();
+
+        when(companyRepository.findById(companyId)).thenReturn(Optional.empty());
+
+
+        assertThrows(IllegalArgumentException.class, () -> companyService.getCompanyById(companyId));
+    }
+
+    private static Company getExistingCompany() {
+        return Company.builder()
+                .companyName("TestCompany")
+                .companyEIK("1234567890")
+                .VAT("BG1234567890")
+                .country("Bulgaria")
+                .town("Plovdiv")
+                .address("Test str")
+                .manager("Test Manager")
+                .build();
     }
 
 }
