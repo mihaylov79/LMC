@@ -101,6 +101,19 @@
                 <button type="button" class="change-btn" onclick="submitField('description')">Промени</button>
             </div>
         </div>
+
+        <!-- Image URL -->
+        <div class="detail-field">
+            <label>Линк към картинка</label>
+            <div class="detail-row">
+                <span class="detail-value" id="imgUrl-value" th:text="*{imgUrl} ?: '(няма)'">--</span>
+                <button type="button" class="edit-field-btn" onclick="toggleInline('imgUrl')">Редактирай</button>
+            </div>
+            <div class="inline-field-form" id="inline-imgUrl">
+                <input id="inline-imgUrl-input" class="inline-input" type="text" placeholder="https://example.com/image.jpg" />
+                <button type="button" class="change-btn" onclick="submitField('imgUrl')">Промени</button>
+            </div>
+        </div>
     </div>
 
     <h3 class="section-title section-spaced">Елементи на конфигурацията:</h3>
