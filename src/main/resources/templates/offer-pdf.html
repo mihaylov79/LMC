@@ -6,7 +6,13 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 15mm 10mm;
+            margin: 10mm 10mm 20mm 10mm;
+            @bottom-center {
+                content: counter(page) " / " counter(pages);
+                font-size: 10pt;
+                font-weight: bold;
+                color: #000;
+            }
         }
 
         body {
@@ -18,17 +24,17 @@
 
         .header {
             border-bottom: 2px solid #333;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
             overflow: hidden;
         }
 
         .logo {
-            max-width: 150px;
-            max-height: 80px;
+            max-width: 120px;
+            max-height: 60px;
             float: left;
             margin-right: 20px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .header-content {
@@ -36,27 +42,32 @@
         }
 
         .config-image {
-            max-width: 300px;
-            max-height: 300px;
-            display: block;
-            margin: 10px auto;
+            max-width: 200px;
+            max-height: 200px;
+            display: inline-block;
             border: 1px solid #ddd;
+        }
+
+        .image-container {
+            text-align: center;
+            width: 100%;
+            margin: 15px 0;
         }
 
         h1 {
             font-size: 18pt;
-            margin: 10px 0;
+            margin: 5px 0;
         }
 
         h2 {
             font-size: 12pt;
-            margin: 15px 0 5px 0;
+            margin: 10px 0 5px 0;
             border-bottom: 1px solid #999;
         }
 
         .client-info {
             text-align: right;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .client-info h2 {
@@ -70,7 +81,7 @@
 
         .intro-text {
             font-size: 11pt;
-            margin-top: 50px;
+            margin-top: 30px;
             margin-bottom: 15px;
             font-style: italic;
             color: #333;
@@ -108,6 +119,19 @@
         th {
             background-color: #f0f0f0;
             font-weight: bold;
+        }
+
+        tr {
+            page-break-inside: avoid;
+            page-break-after: auto;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tbody tr {
+            page-break-inside: avoid;
         }
 
         .totals-table {
@@ -163,10 +187,11 @@
     <p class="system-name" th:text="${snapshot.description}"></p>
 
     <!-- Картинка на конфигурацията -->
-    <img th:if="${configImageUrl}"
-         th:src="${configImageUrl}"
-         alt="Конфигурация"
-         class="config-image" />
+    <div class="image-container" th:if="${configImageUrl}">
+        <img th:src="${configImageUrl}"
+             alt="Конфигурация"
+             class="config-image" />
+    </div>
 
     <h3>Компоненти на системата:</h3>
     <table>
