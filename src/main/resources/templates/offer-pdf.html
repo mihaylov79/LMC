@@ -54,6 +54,44 @@
             border-bottom: 1px solid #999;
         }
 
+        .client-info {
+            text-align: right;
+            margin-bottom: 40px;
+        }
+
+        .client-info h2 {
+            border-bottom: none;
+            margin: 0 0 10px 0;
+        }
+
+        .client-info p {
+            margin: 3px 0;
+        }
+
+        .intro-text {
+            font-size: 11pt;
+            margin-top: 50px;
+            margin-bottom: 15px;
+            font-style: italic;
+            color: #333;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .system-name {
+            font-size: 14pt;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            color: #000;
+        }
+
+        h3 {
+            font-size: 10pt;
+            margin: 20px 0 10px 0;
+            color: #555;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -114,15 +152,15 @@
 
 <!-- Клиент информация -->
 <div class="client-info">
-    <h2>Клиент</h2>
+    <h2>До</h2>
     <p th:text="${offer.company.companyName}"></p>
     <p th:if="${offer.company.address}" th:text="${offer.company.address}"></p>
 </div>
 
 <!-- Конфигурация детайли -->
 <div class="configuration">
-    <h2>Конфигурация</h2>
-    <p><strong th:text="${snapshot.description}"></strong></p>
+    <p class="intro-text">Имаме удоволствието да представим на Вашето внимание:</p>
+    <p class="system-name" th:text="${snapshot.description}"></p>
 
     <!-- Картинка на конфигурацията -->
     <img th:if="${configImageUrl}"
@@ -130,7 +168,7 @@
          alt="Конфигурация"
          class="config-image" />
 
-    <h3>Компоненти</h3>
+    <h3>Компоненти на системата:</h3>
     <table>
         <thead>
         <tr>
@@ -216,6 +254,11 @@
                     <span th:text="${#numbers.formatDecimal(finalPrice, 1, 2)}"></span>
                     <span th:text="' ' + ${offer.currency}"></span>
                 </strong>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: right; font-style: italic; color: #666; border: none; padding-top: 5px;">
+                *Посочените цени са без ДДС
             </td>
         </tr>
     </table>

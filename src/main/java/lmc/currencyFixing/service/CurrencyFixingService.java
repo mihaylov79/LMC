@@ -6,6 +6,7 @@ import lmc.currencyFixing.repository.CurrencyFixingRepository;
 import lmc.exceptions.CurrencyFixingCanNotBeCreated;
 import lmc.unit.model.CurrencyType;
 import lmc.web.dto.CurrencyFixingRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +20,15 @@ import java.util.UUID;
 public class CurrencyFixingService {
 
     private final CurrencyFixingRepository currencyFixingRepository;
+    private final BigDecimal usdRate;
+    private final BigDecimal gbpRate;
 
-    public CurrencyFixingService(CurrencyFixingRepository currencyFixingRepository) {
+    public CurrencyFixingService(CurrencyFixingRepository currencyFixingRepository,
+                                 @Value("${currency.fixings.usd.rate}") BigDecimal usdRate,
+                                 @Value("${currency.fixings.gbp.rate}") BigDecimal gbpRate) {
         this.currencyFixingRepository = currencyFixingRepository;
+        this.usdRate = usdRate;
+        this.gbpRate = gbpRate;
     }
 
     /**
@@ -98,8 +105,8 @@ public class CurrencyFixingService {
     @PostConstruct
     public void initializeDefaultFixings() {
         // Всяка валута се проверява и създава независимо
-        createInitialFixing(CurrencyType.USD, new BigDecimal("1.10"));   // 1 EUR = 1.10 USD
-        createInitialFixing(CurrencyType.GBP, new BigDecimal("0.86"));   // 1 EUR = 0.86 GBP
+        createInitialFixing(CurrencyType.USD, usdRate);   // 1 EUR = 1.10 USD
+        createInitialFixing(CurrencyType.GBP, gbpRate);   // 1 EUR = 0.86 GBP
 
         System.out.println("✅ Проверени валутни фиксинги (USD, GBP)");
     }
