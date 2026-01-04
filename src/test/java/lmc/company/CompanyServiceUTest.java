@@ -136,8 +136,22 @@ public class CompanyServiceUTest {
         assertThrows(IllegalArgumentException.class, () -> companyService.getCompanyById(companyId));
     }
 
+    @Test
+    void given_ExistingCompany_with_Status_Active_Should_SetStatus_To_Inactive(){
+
+        Company existing = getExistingCompany();
+
+        companyService.changeCompanyActiveStatus(existing);
+
+        verify(companyRepository, times(1)).save(argThat(company ->
+                !company.isActive() &&
+                        company.getId().equals(existing.getId())));
+    }
+
+
     private static Company getExistingCompany() {
         return Company.builder()
+                .id(UUID.randomUUID())
                 .companyName("TestCompany")
                 .companyEIK("1234567890")
                 .VAT("BG1234567890")
@@ -145,6 +159,7 @@ public class CompanyServiceUTest {
                 .town("Plovdiv")
                 .address("Test str")
                 .manager("Test Manager")
+                .active(true)
                 .build();
     }
 
