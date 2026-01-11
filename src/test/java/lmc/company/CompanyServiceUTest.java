@@ -10,7 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -148,11 +150,59 @@ public class CompanyServiceUTest {
                         company.getId().equals(existing.getId())));
     }
 
+    @Test
+    void given_ExistingCompany_with_Status_Inactive_Should_SetStatus_To_Active(){
+
+        Company existing = getExistingCompany();
+        existing = existing.toBuilder().active(false).build();
+
+        companyService.changeCompanyActiveStatus(existing);
+
+        Company finalExisting = existing;
+        verify(companyRepository, times(1)).save(argThat(company ->
+                company.isActive() &&
+                        company.getId().equals(finalExisting.getId())));
+    }
+
+    @Test
+    void given_List_with_3_companies_getAllCompanies_ShouldReturn_3_companies(){
+        Company existing1 = getExistingCompany("Alfa");
+        Company existing2 = getExistingCompany("Beta");
+        Company existing3 = getExistingCompany("Gama");
+
+        List<Company>companies = List.of(existing1,existing2,existing3);
+
+        when(companyRepository.findAll(any(Sort.class))).thenReturn(companies);
+
+        List<Company>result = companyService.getAllCompanies();
+
+        assertEquals(3,result.size());
+        assertEquals("Alfa", result.get(0).getCompanyName());
+        assertEquals("Beta", result.get(1).getCompanyName());
+        assertEquals("Gama", result.get(2).getCompanyName());
+
+        verify(companyRepository, times(1)).findAll(any(Sort.class));
+    }
+
 
     private static Company getExistingCompany() {
         return Company.builder()
                 .id(UUID.randomUUID())
                 .companyName("TestCompany")
+                .companyEIK("1234567890")
+                .VAT("BG1234567890")
+                .country("Bulgaria")
+                .town("Plovdiv")
+                .address("Test str")
+                .manager("Test Manager")
+                .active(true)
+                .build();
+    }
+
+    private static Company getExistingCompany(String companyName) {
+        return Company.builder()
+                .id(UUID.randomUUID())
+                .companyName(companyName)
                 .companyEIK("1234567890")
                 .VAT("BG1234567890")
                 .country("Bulgaria")
